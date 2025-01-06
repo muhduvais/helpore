@@ -5,7 +5,11 @@ import { useNavigate } from 'react-router-dom'
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../assets/bg-darkGreen-1.jpeg';
 import logo from '../assets/Logo.png';
+import { login } from '../redux/slices/authSlice'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { authController } from '../controllers/authController';
+import { useDispatch } from 'react-redux';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 interface SignupResponse {
   registeredMail: string;
@@ -22,16 +26,42 @@ const SignupPage: React.FC = () => {
   const [passwordMessage, setPasswordMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleGoogleLogin = async () => {
+      try {
+          const user = await authController.handleGoogleLogin();
+          console.log('User:', user);
+  
+          const { accessToken, refreshToken, user: userData } = user;
+  
+          dispatch(login({ email: userData.email, accessToken, refreshToken, isAdmin: userData.isAdmin }));
+          navigate('/users/dashboard');
+      } catch (error) {
+          console.error('Google login failed:', error);
+          setErrorMessage('Google login failed. Please try again.');
+      }
+    };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validate = (email: string) => {
+    const validateEmail = (email: string) => {
       return (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).test(email);
     };
 
+    const validateName = (name: string) => {
+      return (/^[a-zA-Z ]{2,30}$/).test(name);
+    };
+
+    const inputName = name.trim();
     const inputPassword = password.trim();
 
     setNameMessage('');
@@ -40,15 +70,18 @@ const SignupPage: React.FC = () => {
 
     let isValid = true;
 
-    if (!name) {
-      setEmailMessage('Please enter your name');
+    if (!inputName) {
+      setNameMessage('Please enter your name');
+      isValid = false;
+    } else if (!validateName(inputName)) {
+      setEmailMessage('Please enter a valid name');
       isValid = false;
     }
 
     if (!email) {
         setEmailMessage('Please enter the email');
         isValid = false;
-    } else if (!validate(email)) {
+    } else if (!validateEmail(email)) {
       setEmailMessage('Please enter a valid email');
       isValid = false;
     }
@@ -146,16 +179,23 @@ const SignupPage: React.FC = () => {
                     className={`transition-all duration-300 bg-transparent px-3 py-2 text-xl font-semibold border-b-[3px] bg-white ${emailMessage || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}/>
                 </div>
 
-                <div className="input-field flex flex-col p-3 pt-0 gap-y-2">
+                <div className="relative input-field flex flex-col p-3 pt-0 gap-y-2">
                     {passwordMessage ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500'>{passwordMessage}</label>
                     : <label htmlFor="password" className='opacity-75 font-semibold'>Password</label>}
                     <input 
-                    type="password" 
+                    type={showPassword ? 'text' : 'password'}
                     name="password" 
                     id="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className={`transition-all duration-300 bg-transparent px-3 py-2  text-xl font-semibold border-b-[3px] bg-white ${passwordMessage || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}/>
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-7 top-11 text-xl text-gray-600"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
                 </div>
 
                 {/* Submit button */}
@@ -176,6 +216,7 @@ const SignupPage: React.FC = () => {
                 {/* Google login button */}
                 <div className="input-field flex flex-col px-3 py-1">
                     <button
+                    onClick={handleGoogleLogin}
                     type='button'
                     className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-xl outline-none`}>
                         <span className='opacity-50 pr-5 text-sm'>OR</span><span>Login with</span> <span className='font-semibold'>Google</span>

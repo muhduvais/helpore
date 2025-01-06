@@ -8,6 +8,9 @@ import { AxiosError } from 'axios';
 import bgDark_1_img from '../assets/bg-darkGreen-1.jpeg';
 import logo from '../assets/Logo.png';
 import { authController } from '../controllers/authController';
+import { toast, ToastContainer } from 'react-toastify';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface LoginResponse {
   accessToken: string;
@@ -23,11 +26,17 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [emailMessage, setEmailMessage] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
-  const [errorMessage, setForgotMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotMessage, setErrorMessage] = useState('');
+  const [forgotMessage, setForgotMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 //   const [isLoading, setIsLoading] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -147,19 +156,22 @@ const LoginPage: React.FC = () => {
       }
 
       if (isValid) {
+        setIsLoading(true);
         try {
           const response = await axios.post('/api/auth/users/forgotPassword', { email: forgotEmail });
           if (response.status !== 200) {
             return setForgotMessage(response.data.message);
-        }
-  
-        if (response.data) {
-          const { data } = response.data;
-          navigate('/users/dashboard');
-        }
+          }
+    
+          if (response.status === 200) {
+            toast.success('Reset link has sent to your email!');
+            navigate('/users/login');
+          }
         } catch (error) {
-          console.error('Error resetting password:', error);
-          setErrorMessage('An unexpected error occurred');
+            setForgotMessage('An unexpected error occurred');
+        } finally {
+          setIsLoading(false);
+          setShowForgotModal(false);
         }
       }
       
@@ -168,6 +180,18 @@ const LoginPage: React.FC = () => {
 
   return (
     <>
+    <ToastContainer 
+        position="top-right" 
+        autoClose={5000} 
+        hideProgressBar={false} 
+        newestOnTop={false} 
+        closeOnClick 
+        rtl={false} 
+        pauseOnFocusLoss 
+        draggable 
+        pauseOnHover 
+    />
+
     {/* Modal */}
     {showForgotModal && (
         <div className={`fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 ${
@@ -176,7 +200,16 @@ const LoginPage: React.FC = () => {
           <div className={`bg-white bg-opacity-90 transition-all duration-300 rounded-xl p-3 px-5 mr-24 ${
         showForgotModal ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'
       }`}>
-            <h2 className="text-2xl font-bold mb-2">Forgot <span className='font-normal'>Password</span></h2>
+            <div className="header flex items-center justify-start gap-x-5">
+              <h2 className="text-2xl font-bold mb-1">Forgot <span className='font-normal'>Password</span></h2>
+              {isLoading && 
+              <DotLottieReact
+                src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
+                loop
+                autoplay
+                style={{ width: "30px", height: "50px", paddingTop: "15px", marginBottom: "14px" }}
+              />}
+            </div>
             {forgotMessage && <p className='opacity-90 font-semibold text-red-500 text-sm py-2 pb-3'>{forgotMessage}</p> }
               <form onSubmit={handleForgotPassword}>
                 <input
@@ -241,18 +274,27 @@ const LoginPage: React.FC = () => {
                     value={email}
                     onChange={validateEmail}
                     className={`transition-all duration-300 bg-transparent px-3 py-2 text-xl font-semibold border-b-[3px] bg-white ${emailMessage || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}/>
+                    
                 </div>
 
-                <div className="input-field flex flex-col p-3 pt-0 gap-y-2">
+                <div className="relative input-field flex flex-col p-3 pt-0 gap-y-2">
                     {passwordMessage ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500'>{passwordMessage}</label>
                     : <label htmlFor="password" className='opacity-75 font-semibold'>Password</label>}
                     <input 
-                    type="password" 
+                    type={showPassword ? 'text' : 'password'}
                     name="password" 
                     id="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className={`transition-all duration-300 bg-transparent px-3 py-2  text-xl font-semibold border-b-[3px] bg-white ${passwordMessage || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}/>
+                    
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-7 top-11 text-xl text-gray-600"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
                 </div>
 
                 {/* Forgot password */}

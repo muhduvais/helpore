@@ -12,6 +12,8 @@ export interface IUser extends Document {
     isVerified: boolean;
     isAdmin: boolean;
     googleId: string;
+    resetToken: string;
+    resetTokenExpiry: Date;
 }
 
 export interface IUserInput {
@@ -26,6 +28,8 @@ export interface IUserInput {
     isVerified: boolean;
     isAdmin: boolean;
     googleId: string;
+    resetToken: string;
+    resetTokenExpiry: Date;
 }
 
 const userSchema = new Schema<IUser>({
@@ -66,6 +70,14 @@ const userSchema = new Schema<IUser>({
     googleId: {
         type: String,
         default: null,
+    },
+    resetToken: { 
+        type: String, 
+        default: null 
+    },
+    resetTokenExpiry: { 
+        type: Date, 
+        default: null 
     },
 }, {
     timestamps: true

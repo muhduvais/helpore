@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import OtpVerification from './pages/OtpVerification';
 import UserDashboard from './pages/UserDashboard';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
                   <Route path="/users/register" element={<RegisterPage />} />
                   <Route path="/users/verifyOtp" element={<OtpVerification />} />
                   <Route path="/users/login" element={<LoginPage />} />
+                  <Route path="/users/resetPassword" element={<ResetPassword />} />
                   <Route path="/users/dashboard" element={<UserDashboard />} />
               </Routes>
           </Provider>

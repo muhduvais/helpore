@@ -17,6 +17,28 @@ class AuthRepository {
             return null;
         }
     }
+
+    async storeResetToken(email: string, resetToken: string, tokenExpiry: Date): Promise<void> {
+        try {
+            await User.updateOne(
+                { email },
+                { resetToken, resetTokenExpiry: tokenExpiry }
+            );
+        } catch (error) {
+            console.error('Error storing the reset toekn:', error);
+        }
+    }
+
+    async resetPassword(email: string, password: string): Promise<void> {
+        try {
+            await User.updateOne(
+                { email },
+                { password }
+            );
+        } catch (error) {
+            console.error('Error saving the new password!', error);
+        }
+    }
 }
 
 export default AuthRepository;

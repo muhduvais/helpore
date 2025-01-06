@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { generateOTP } from '../utils/otp';
 import { sendOtpEmail } from './otpService';
+import { sendResetEmail } from '../utils/email';
 
 class AuthService {
     private authRepository: AuthRepository;
@@ -95,6 +96,13 @@ class AuthService {
         }
     }
 
+    // async generateResetToken(email: string): Promise<string> {
+    //     const payload = { email };
+    //     const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1h' });
+    //     const tokenExpiry = new Date(Date.now() + 3600 * 1000);
+    //     return token;
+    // }
+
     async findOrCreateUser(profile: any): Promise<any> {
 
         const email = profile.email;
@@ -111,9 +119,42 @@ class AuthService {
           password: null,
           profilePicture: profile.picture,
         };
-        
+
         return await this.authRepository.createUser(newUser);
-      }
+    }
+
+    async sendResetLink (email: string) {
+        try {
+            const existingUser = await this.authRepository.findUser(email);
+            if (!existingUser) {
+                return false;
+            }
+
+            const payload = { email };
+            const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: '1h' });
+            const tokenExpiry = new Date(Date.now() + 3600 * 1000);
+            await this.authRepository.storeResetToken(email, resetToken, tokenExpiry);
+
+            const resetLink = `http://localhost:5173/users/resetPassword?token=${resetToken}`;
+            await sendResetEmail(email, "Password Reset", `Click here to reset your password: ${resetLink}`);
+
+            console.log("Reset link sent:", resetLink);
+            return true;
+        } catch (error) {
+            console.error('Error sending reset link to the mail:', error);
+            return null;
+        }
+    }
+
+    async resetPassword (email, password) {
+        try {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await this.authRepository.resetPassword(email, hashedPassword);
+        } catch (error) {
+            console.error('Error reseting the password:', error);
+            throw new Error('Error reseting the password');
+        }
+    }
 }
 
 export default AuthService;

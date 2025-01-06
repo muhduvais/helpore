@@ -7,6 +7,8 @@ router.post('/users/verifyOtp', authController.verifyOtp);
 router.post('/users/resendOtp', authController.resendOtp);
 router.post('/users/login', authController.loginUser);
 router.post('/users/refreshToken', authController.refreshToken);
+router.post('/users/forgotPassword', authController.forgotPassword);
+router.post('/users/resetPassword', authController.resetPassword);
 
 router.post('/google-login', authController.googleLogin);
 

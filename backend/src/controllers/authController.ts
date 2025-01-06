@@ -1,11 +1,9 @@
 import AuthService from '../services/authService';
-import jwt from 'jsonwebtoken';
-import { OAuth2Client } from 'google-auth-library';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { firebaseAdmin } from '../config/firebase.config';
 import dotenv from 'dotenv';
 dotenv.config();
-
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 class AuthController {
     private authService: AuthService;
@@ -18,6 +16,8 @@ class AuthController {
         this.loginUser = this.loginUser.bind(this);
         this.refreshToken = this.refreshToken.bind(this);
         this.googleLogin = this.googleLogin.bind(this);
+        this.forgotPassword = this.forgotPassword.bind(this);
+        this.resetPassword = this.resetPassword.bind(this);
     }
 
     async registerUser(req, res) {
@@ -142,6 +142,39 @@ class AuthController {
             }
         }
     }
+
+    async forgotPassword (req, res) {
+        try {
+            const { email } = req.body;
+            const sendResetLink = await this.authService.sendResetLink(email);
+            if (sendResetLink === false) {
+                res.status(400).json({ message: 'The email is not registered!' });
+            } else if (sendResetLink) {
+                res.status(200).json({ message: 'The otp has sent to your email' });
+            }
+        } catch (error) {
+            res.status(500).json({ message: 'Something went wrong!', error: error.message });
+            console.log('Something went wrong during resetting the forgot password', error);
+        }
+    }
+
+    async resetPassword (req, res) {
+        const { token, newPassword } = req.body;
+        console.log('token & pass: ', token, ' ', newPassword);
+        try {
+            interface TokenPayload extends JwtPayload {
+                email: string;
+            }
+
+            const decoded = jwt.verify(token, process.env.RESET_LINK_SECRET as string) as TokenPayload;
+            console.log('decoded: ', decoded);
+            const { email } = decoded;
+            await this.authService.resetPassword(email, newPassword);
+            res.status(200).json({ message: 'Token is valid', decoded });
+        } catch (error) {
+            res.status(400).json({ message: 'Invalid or expired token' });
+        }
+      };
 }
 
 export default new AuthController();
