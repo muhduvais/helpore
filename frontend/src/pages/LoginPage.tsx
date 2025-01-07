@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import axios from '../utils/urlProxy'
 import { useDispatch } from 'react-redux'
 import { login } from '../redux/slices/authSlice'
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../assets/bg-darkGreen-1.jpeg';
@@ -11,13 +11,16 @@ import { authController } from '../controllers/authController';
 import { toast, ToastContainer } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { useSelector } from 'react-redux';
 
 interface LoginResponse {
+  message: string,
   accessToken: string;
   refreshToken: string;
-  email: string;
-  message: string;
-  isAdmin: boolean;
+  user: {
+    email: string,
+    isAdmin: boolean,
+  }
 }
 
 const LoginPage: React.FC = () => {
@@ -41,10 +44,16 @@ const LoginPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
+  const isAdmin = useSelector((state: any) => state.auth.isAdmin);
+
+  if (isLoggedIn) {
+    return <Navigate to={isAdmin ? '/admin/dashboard' : '/users/dashboard'} />;
+  }
+
   const handleGoogleLogin = async () => {
     try {
         const user = await authController.handleGoogleLogin();
-        console.log('User:', user);
 
         const { accessToken, refreshToken, user: userData } = user;
 
@@ -84,18 +93,15 @@ const LoginPage: React.FC = () => {
     let isValid = true;
 
     if (!email) {
-        setEmailMessage('Please enter the email');
+        setEmailMessage('Please enter the email!');
         isValid = false;
     } else if (!validate(email)) {
-      setEmailMessage('Please enter a valid email');
+      setEmailMessage('Please enter a valid email!');
       isValid = false;
     }
 
     if (!inputPassword) {
-        setPasswordMessage('Please enter the password');
-        isValid = false;
-    } else if (inputPassword.length < 6) {
-        setPasswordMessage('Minimum 6 characters');
+        setPasswordMessage('Please enter the password!');
         isValid = false;
     }
 
@@ -114,9 +120,9 @@ const LoginPage: React.FC = () => {
             }
 
             if (response.data) {
-              const { email, accessToken, refreshToken, isAdmin } = response.data;
+              const { accessToken, refreshToken, user } = response.data;
 
-              dispatch(login({ email, accessToken, refreshToken, isAdmin }));
+              dispatch(login({ email: user.email, accessToken, refreshToken, isAdmin: user.isAdmin }));
               if (isAdmin) {
                 navigate('/admin/dashboard');
               } else {
@@ -158,6 +164,7 @@ const LoginPage: React.FC = () => {
       if (isValid) {
         setIsLoading(true);
         try {
+          setForgotMessage('');
           const response = await axios.post('/api/auth/users/forgotPassword', { email: forgotEmail });
           if (response.status !== 200) {
             return setForgotMessage(response.data.message);
@@ -165,13 +172,17 @@ const LoginPage: React.FC = () => {
     
           if (response.status === 200) {
             toast.success('Reset link has sent to your email!');
-            navigate('/users/login');
+            setShowForgotModal(false);
           }
         } catch (error) {
+          if (error instanceof AxiosError) {
+            const errorMessage = error.response?.data?.message;
+            setForgotMessage(errorMessage || 'Bad request!');
+          } else {
             setForgotMessage('An unexpected error occurred');
+          }
         } finally {
           setIsLoading(false);
-          setShowForgotModal(false);
         }
       }
       
@@ -197,7 +208,7 @@ const LoginPage: React.FC = () => {
         <div className={`fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 ${
           showForgotModal ? 'opacity-100' : 'opacity-0'
         }`}>
-          <div className={`bg-white bg-opacity-90 transition-all duration-300 rounded-xl p-3 px-5 mr-24 ${
+          <div className={`bg-white bg-opacity-90 transition-all duration-300 rounded-xl p-3 px-5 ${
         showForgotModal ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'
       }`}>
             <div className="header flex items-center justify-start gap-x-5">
@@ -243,7 +254,7 @@ const LoginPage: React.FC = () => {
       )}
 
       {/* Main container */}
-    <div className={`main-container relative w-[100vw] h-[100vh] flex items-center justify-between text-[#222222] bg-cover bg-center px-20 ${showForgotModal ? 'blur-sm' : ''}`}
+    <div className={`main-container relative w-[100vw] h-[100vh] flex items-center justify-between text-[#222222] bg-cover bg-center px-20 ${showForgotModal ? 'blur-[3px]' : ''}`}
     style={{ backgroundImage: `url(${bgDark_1_img})` }}
     >
       <div className="logo absolute top-16 left-28">

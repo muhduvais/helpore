@@ -78,12 +78,12 @@ class AuthController {
 
             res.status(200).json({
                 message: 'Login successful!',
-                responseData: {
+                accessToken,
+                refreshToken,
+                user: {
                     email: user.email,
-                    accessToken,
-                    refreshToken,
                     isAdmin: user.isAdmin,
-                },
+                }
             });
         } catch (error) {
             console.error('Error logging in:', error);
@@ -150,11 +150,11 @@ class AuthController {
             if (sendResetLink === false) {
                 res.status(400).json({ message: 'The email is not registered!' });
             } else if (sendResetLink) {
-                res.status(200).json({ message: 'The otp has sent to your email' });
+                res.status(200).json({ message: 'Reset link has sent to your email!' });
             }
         } catch (error) {
             res.status(500).json({ message: 'Something went wrong!', error: error.message });
-            console.log('Something went wrong during resetting the forgot password', error);
+            console.log('Something went wrong during sending the reset link', error);
         }
     }
 

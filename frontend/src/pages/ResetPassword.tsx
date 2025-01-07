@@ -57,11 +57,18 @@ const LoginPage: React.FC = () => {
 
     let isValid = true;
 
+    const validatePassword = (password: string) => {
+      return (/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/).test(password);
+    };
+
     if (!inputPassword) {
         setPasswordMessage('Please enter the password');
         isValid = false;
     } else if (inputPassword.length < 8) {
-        setPasswordMessage('Minimum 8 characters');
+      setPasswordMessage('Minimum 8 characters');
+      isValid = false;
+    } else if (!validatePassword(inputPassword)) {
+        setErrorMessage('Include numbers and a special characters!');
         isValid = false;
     }
 

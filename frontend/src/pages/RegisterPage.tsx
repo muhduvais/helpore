@@ -61,6 +61,10 @@ const SignupPage: React.FC = () => {
       return (/^[a-zA-Z ]{2,30}$/).test(name);
     };
 
+    const validatePassword = (password: string) => {
+      return (/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/).test(password);
+    };
+
     const inputName = name.trim();
     const inputPassword = password.trim();
 
@@ -89,8 +93,11 @@ const SignupPage: React.FC = () => {
     if (!inputPassword) {
         setPasswordMessage('Please enter the password');
         isValid = false;
-    } else if (inputPassword.length < 6) {
-        setPasswordMessage('Minimum 6 characters');
+    } else if (inputPassword.length < 8) {
+        setPasswordMessage('Minimum 8 characters');
+        isValid = false;
+    } else if (!validatePassword(inputPassword)) {
+        setPasswordMessage('Include numbers and a special characters!');
         isValid = false;
     }
 

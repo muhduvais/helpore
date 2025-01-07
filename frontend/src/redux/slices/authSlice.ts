@@ -1,19 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
-    user: { email: string } | null;
+    user: { email: string | null } | null;
     isLoggedIn: boolean;
     isAdmin: boolean;
     accessToken: string | null;
     refreshToken: string | null;
 }
 
+const setLocalStorage = (key: string, value: string) => localStorage.setItem(key, value);
+const removeLocalStorage = (key: string) => localStorage.removeItem(key);
+const getLocalStorage = (key: string): string | null => localStorage.getItem(key);
+
 const initialState: AuthState = {
-    user: null,
-    isLoggedIn: false,
-    isAdmin: false,
-    accessToken: null,
-    refreshToken: null,
+    user: getLocalStorage('email') ? { email: getLocalStorage('email') } : null,
+    isLoggedIn: getLocalStorage('isLoggedIn') === 'true',
+    isAdmin: getLocalStorage('isAdmin') === 'true',
+    accessToken: getLocalStorage('accessToken'),
+    refreshToken: getLocalStorage('refreshToken'),
 }
 
 const authSlice = createSlice({
@@ -26,21 +30,29 @@ const authSlice = createSlice({
             state.isAdmin = action.payload.isAdmin;
             state.accessToken = action.payload.accessToken;
             state.refreshToken = action.payload.refreshToken;
-            
-            localStorage.setItem('accessToken', action.payload.accessToken);
-            localStorage.setItem('refreshToken', action.payload.refreshToken);
+
+            setLocalStorage('email', action.payload.email);
+            setLocalStorage('accessToken', action.payload.accessToken);
+            setLocalStorage('refreshToken', action.payload.refreshToken);
+            setLocalStorage('isAdmin', action.payload.isAdmin.toString());
+            setLocalStorage('isLoggedIn', 'true');
         },
         logout(state) {
             state.user = null;
             state.isLoggedIn = false;
             state.accessToken = null;
             state.refreshToken = null;
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
+            state.isAdmin = false;
+
+            removeLocalStorage('accessToken');
+            removeLocalStorage('refreshToken');
+            removeLocalStorage('email');
+            removeLocalStorage('isAdmin');
+            removeLocalStorage('isLoggedIn');
         },
         refreshToken(state, action: PayloadAction<string>) {
             state.accessToken = action.payload;
-            localStorage.setItem('accessToken', action.payload);
+            setLocalStorage('accessToken', action.payload);
         }
     },
 });
