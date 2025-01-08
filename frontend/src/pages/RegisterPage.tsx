@@ -10,11 +10,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { authController } from '../controllers/authController';
 import { useDispatch } from 'react-redux';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-
-interface SignupResponse {
-  registeredMail: string;
-  message: string;
-}
+import { SignupResponse } from '../interfaces/authInterface';
 
 const SignupPage: React.FC = () => {
 
@@ -37,12 +33,12 @@ const SignupPage: React.FC = () => {
 
   const handleGoogleLogin = async () => {
       try {
-          const user = await authController.handleGoogleLogin();
-          console.log('User:', user);
+          const response = await authController.handleGoogleLogin();
+          console.log('Response:', response);
   
-          const { accessToken, refreshToken, user: userData } = user;
+          const { accessToken, refreshToken, user: userData } = response;
   
-          dispatch(login({ email: userData.email, accessToken, refreshToken, isAdmin: userData.isAdmin }));
+          dispatch(login({ email: userData.email, accessToken, refreshToken, role: userData.role }));
           navigate('/users/dashboard');
       } catch (error) {
           console.error('Google login failed:', error);

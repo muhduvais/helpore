@@ -9,9 +9,9 @@ class AuthRepository {
         const { email, name, googleId, password, profilePicture } = newUser;
         const isVerified = true;
         try {
-            const user = new User({ name, email, password, googleId, profilePicture, isVerified });
+            const user = new User({ name, email, password, googleId, profilePicture, isVerified, role: 'user' });
             await user.save();
-            return user.email;
+            return user;
         } catch (error) {
             console.error('Error creating the user:', error);
             return null;

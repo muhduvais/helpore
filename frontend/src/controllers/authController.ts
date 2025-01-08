@@ -1,6 +1,7 @@
 import { FirebaseError } from 'firebase/app';
 import { auth, googleProvider, signInWithPopup } from '../config/firebase.config';
 import axios from '../utils/urlProxy'
+import { AxiosError } from 'axios';
 
 export const authController = {
     async handleGoogleLogin() {
@@ -11,12 +12,12 @@ export const authController = {
             const response = await axios.post('/api/auth/google-login', { idToken });
             return response.data;
         } catch (error) {
-            // console.error('Google login failed:', error);
-            // throw error;
             if (error instanceof FirebaseError) {
                 console.error('Firebase error during Google login:', error.message);
-            } else {
-                console.error('Unexpected error during Google login:', error);
+            } else if (error instanceof AxiosError) {
+                if (error.response?.status === 401) {
+                    return error?.response.data;
+                }
             }
             throw new Error('Google login failed. Please try again later.');
         }

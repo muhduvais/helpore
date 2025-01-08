@@ -1,6 +1,7 @@
+import { Request, Response } from 'express';
 import AuthService from '../services/authService';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import { TokenPayload } from '../interfaces/authInterface';
+import jwt from 'jsonwebtoken';
 import { firebaseAdmin } from '../config/firebase.config';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -20,11 +21,11 @@ class AuthController {
         this.resetPassword = this.resetPassword.bind(this);
     }
 
-    async registerUser(req, res) {
+    async registerUser(req: Request, res: Response): Promise<void> {
         try {
             const { name, email, password } = req.body;
             const registeredMail = await this.authService.registerUser(name, email, password);
-            console.log('registered mail: ', registeredMail);
+            
             if (registeredMail) {
                 res.status(201).json({ success: true, registeredMail });
             } else {
@@ -36,7 +37,7 @@ class AuthController {
         }
     }
 
-    async resendOtp(req, res) {
+    async resendOtp(req: Request, res: Response): Promise<void> {
         try {
             const { email } = req.body;
             const otp = await this.authService.generateOtp(email);
@@ -45,12 +46,12 @@ class AuthController {
                 res.status(200).json({ success: true, message: 'Otp generated successfully!' });
             }
         } catch (error) {
-            console.log('Error generating the OTP:', error);
+            console.error('Error generating the OTP:', error);
             res.status(500).json({ message: 'Error generating the OTP', error });
         }
     }
 
-    async verifyOtp(req, res) {
+    async verifyOtp(req: Request, res: Response): Promise<void> {
         try {
             const { email, otp } = req.body;
             const verified = await this.authService.verifyOtp(email, otp);
@@ -65,25 +66,28 @@ class AuthController {
         }
     }
 
-    async loginUser(req, res) {
+    async loginUser(req: Request, res: Response): Promise<void> {
         try {
-            const { email, password } = req.body;
+            const { email, password, selectedRole } = req.body;
+
             const user = await this.authService.verifyLogin(email, password);
-            if (!user) {
-                res.status(400).json({ message: 'Invalid email or password!' });
+            
+            if (!user || user.role !== selectedRole) {
+                res.status(400).json({ message: 'Invalid email or password!'});
                 return;
             }
-            const accessToken = jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' });
-            const refreshToken = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1h' });
 
+            const accessToken = jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '20s' });
+            const refreshToken = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '1h' });
+            
             res.status(200).json({
                 message: 'Login successful!',
                 accessToken,
                 refreshToken,
                 user: {
                     email: user.email,
-                    isAdmin: user.isAdmin,
-                }
+                    role: user.role,
+                },
             });
         } catch (error) {
             console.error('Error logging in:', error);
@@ -91,7 +95,7 @@ class AuthController {
         }
     }
 
-    async refreshToken(req, res) {
+    async refreshToken(req: Request, res: Response): Promise<void> {
         try {
             const { refreshToken } = req.body;
             if (!refreshToken) {
@@ -113,68 +117,70 @@ class AuthController {
         }
     }
 
-    async googleLogin(req, res) {
+    async googleLogin(req: Request, res: Response): Promise<void> {
         const { idToken } = req.body;
 
         try {
             const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
             const user = await this.authService.findOrCreateUser(decodedToken);
 
-            const accessToken = jwt.sign({ userId: user.uid }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' });
-            const refreshToken = jwt.sign({ userId: user.uid }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1h' });
+            if (!user) {
+                res.status(401).json({
+                    success: false,
+                    message: "You are not registered as a volunteer!"
+                });
+                return;
+            }
 
-            res.status(200).json({ 
+            const accessToken = jwt.sign({ userId: user.uid }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '20s' });
+            const refreshToken = jwt.sign({ userId: user.uid }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '1h' });
+
+            res.status(200).json({
                 success: true,
                 accessToken,
                 refreshToken,
                 user: {
                     email: user.email,
-                    isAdmin: false,
-                }
+                    role: user.role,
+                },
             });
-        } catch (error) {
+        } catch (error: any) {
             if (error.code === 'auth/invalid-id-token') {
                 res.status(400).json({ message: 'Invalid Google ID Token' });
-                console.log('Invalid Google ID Token', error);
+                console.error('Invalid Google ID Token', error);
             } else {
                 res.status(500).json({ message: 'Something went wrong during login', error: error.message });
-                console.log('Something went wrong during login', error);
+                console.error('Something went wrong during login', error);
             }
         }
     }
 
-    async forgotPassword (req, res) {
+    async forgotPassword(req: Request, res: Response): Promise<void> {
         try {
             const { email } = req.body;
             const sendResetLink = await this.authService.sendResetLink(email);
-            if (sendResetLink === false) {
+            if (!sendResetLink) {
                 res.status(400).json({ message: 'The email is not registered!' });
-            } else if (sendResetLink) {
-                res.status(200).json({ message: 'Reset link has sent to your email!' });
+            } else {
+                res.status(200).json({ message: 'Reset link has been sent to your email!' });
             }
-        } catch (error) {
+        } catch (error: any) {
             res.status(500).json({ message: 'Something went wrong!', error: error.message });
-            console.log('Something went wrong during sending the reset link', error);
+            console.error('Something went wrong during sending the reset link', error);
         }
     }
 
-    async resetPassword (req, res) {
+    async resetPassword(req: Request, res: Response): Promise<void> {
         const { token, newPassword } = req.body;
-        console.log('token & pass: ', token, ' ', newPassword);
         try {
-            interface TokenPayload extends JwtPayload {
-                email: string;
-            }
-
-            const decoded = jwt.verify(token, process.env.RESET_LINK_SECRET as string) as TokenPayload;
-            console.log('decoded: ', decoded);
+            const decoded = jwt.verify(token, process.env.RESET_LINK_SECRET!) as TokenPayload;
             const { email } = decoded;
             await this.authService.resetPassword(email, newPassword);
-            res.status(200).json({ message: 'Token is valid', decoded });
+            res.status(200).json({ message: 'Password reset successful' });
         } catch (error) {
             res.status(400).json({ message: 'Invalid or expired token' });
         }
-      };
+    }
 }
 
 export default new AuthController();

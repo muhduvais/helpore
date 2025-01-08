@@ -7,14 +7,6 @@ import logo from '../assets/Logo.png';
 import { toast, ToastContainer } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-interface resetResponse {
-  accessToken: string;
-  refreshToken: string;
-  email: string;
-  message: string;
-  isAdmin: boolean;
-}
-
 const LoginPage: React.FC = () => {
 
   const [token, setToken] = useState('');
@@ -83,7 +75,7 @@ const LoginPage: React.FC = () => {
     if (isValid) {
 
         try {
-            const response = await axios.post<resetResponse>('/api/auth/users/resetPassword', { 
+            const response = await axios.post('/api/auth/users/resetPassword', { 
                 token, 
                 newPassword: inputPassword, 
             });

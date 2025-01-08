@@ -34,7 +34,7 @@ const userDashboard = () => {
     <div className={`main-container w-[100vw] h-[100vh] flex items-center justify-center text-[#ffffff] bg-cover bg-center gap-x-10 px-20`}
     style={{ backgroundImage: `url(${bgDark_1_img})` }}
     >
-      <h2 className='text-5xl font-bold'>User Dashboard</h2>
+      <h2 className='text-5xl font-bold'>Volunteer Dashboard</h2>
       <button className={`text-3xl font-semiboldbold px-3 py-1 rounded bg-[#636363] opacity-8}`}
       onMouseEnter={() => setLogoutText('Noo🥹!!')}
       onMouseLeave={() => setLogoutText('Logout')}

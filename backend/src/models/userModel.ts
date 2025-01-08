@@ -1,36 +1,5 @@
-import mongoose, { Document, Schema } from "mongoose";
-
-export interface IUser extends Document {
-    name: string;
-    age: number;
-    gender: string;
-    phone: number;
-    email: string;
-    password: string;
-    profilePicture: string;
-    isBlocked: boolean;
-    isVerified: boolean;
-    isAdmin: boolean;
-    googleId: string;
-    resetToken: string;
-    resetTokenExpiry: Date;
-}
-
-export interface IUserInput {
-    name: string;
-    age: number;
-    gender: string;
-    phone: number;
-    email: string;
-    password: string;
-    profilePicture: string;
-    isBlocked: boolean;
-    isVerified: boolean;
-    isAdmin: boolean;
-    googleId: string;
-    resetToken: string;
-    resetTokenExpiry: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { IUser } from "../interfaces/userInterface";
 
 const userSchema = new Schema<IUser>({
     name: {
@@ -55,6 +24,10 @@ const userSchema = new Schema<IUser>({
         type: String,
         default: null,
     },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
     isBlocked: {
         type: Boolean,
         default: false,
@@ -63,9 +36,9 @@ const userSchema = new Schema<IUser>({
         type: Boolean,
         default: false,
     },
-    isAdmin: {
-        type: Boolean,
-        default: false,
+    role: {
+        type: String,
+        enum: ['admin', 'volunteer', 'user'],
     },
     googleId: {
         type: String,

@@ -74,10 +74,12 @@ const LoginPage: React.FC = () => {
             if (response.status !== 200) {
                 return setOtpMessage(response.data.message);
             }
-            toast.success('Successfully verified your email, now you can login!');  // Alert
+            toast.success('Successfully verified your email, now you can login!');
 
             if (response.data) {
-                navigate('/users/login');
+                setTimeout(() => {
+                  navigate('/users/login');
+                }, 3000);
             }
         } catch (error: unknown) {
           if (error instanceof AxiosError) {

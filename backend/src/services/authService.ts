@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { generateOTP } from '../utils/otp';
 import { sendOtpEmail } from './otpService';
 import { sendResetEmail } from '../utils/email';
+import { IUser } from '../interfaces/userInterface';
 
 class AuthService {
     private authRepository: AuthRepository;
@@ -23,14 +24,15 @@ class AuthService {
             }
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            const newUser = {
+            const newUser: Partial<IUser> = {
                 email,
                 name,
                 googleId: null,
                 password: hashedPassword,
               };
 
-            const registeredMail = await this.authRepository.createUser(newUser);
+            const user = await this.authRepository.createUser(newUser);
+            const registeredMail = user.email;
 
             const otp = generateOTP();
             await this.otpRepository.storeOtp(email, otp);
@@ -44,7 +46,7 @@ class AuthService {
         }
     }
 
-    async generateOtp(email: string): Promise<any> {
+    async generateOtp(email: string): Promise<string | null> {
         try {
             const otp = generateOTP();
             await this.otpRepository.storeOtp(email, otp);
@@ -67,7 +69,7 @@ class AuthService {
     async verifyLogin(email: string, password: string): Promise<any> {
         try {
             const user = await this.authRepository.findUser(email);
-            if (user && (await bcrypt.compare(password, user.password))) {
+            if (user && await bcrypt.compare(password, user.password)) {
                 return user;
             }
             return null;
@@ -96,31 +98,29 @@ class AuthService {
         }
     }
 
-    // async generateResetToken(email: string): Promise<string> {
-    //     const payload = { email };
-    //     const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1h' });
-    //     const tokenExpiry = new Date(Date.now() + 3600 * 1000);
-    //     return token;
-    // }
+    async findOrCreateUser(profile: any): Promise<IUser | null> {
+        try {
+            const email = profile.email;
+            const existingUser = await this.authRepository.findUser(email);
+            
+            if (existingUser) {
+                return existingUser;
+            }
+            
+            const newUser = {
+                email,
+                name: profile.name,
+                googleId: profile.uid,
+                password: null,
+                profilePicture: profile.picture,
+                role: 'user',
+            };
 
-    async findOrCreateUser(profile: any): Promise<any> {
-
-        const email = profile.email;
-        const existingUser = await this.authRepository.findUser(email);
-        
-        if (existingUser) {
-          return existingUser;
+            return await this.authRepository.createUser(newUser);
+        } catch (error) {
+            console.error('Error finding/creating the user:', error);
+            return null;
         }
-        
-        const newUser = {
-          email,
-          name: profile.name,
-          googleId: profile.uid,
-          password: null,
-          profilePicture: profile.picture,
-        };
-
-        return await this.authRepository.createUser(newUser);
     }
 
     async sendResetLink (email: string) {

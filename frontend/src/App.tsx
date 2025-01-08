@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import OtpVerification from './pages/OtpVerification';
 import UserDashboard from './pages/UserDashboard';
+import VolunteerDashboard from './pages/VolunteerDashboard';
 import ResetPassword from './pages/ResetPassword';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
@@ -19,10 +20,10 @@ function App() {
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
         const email = localStorage.getItem('userEmail');
-        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        const role = localStorage.getItem('role') || 'user';
 
         if (accessToken && refreshToken && email) {
-            dispatch(login({ email, accessToken, refreshToken, isAdmin }));
+            dispatch(login({ email, accessToken, refreshToken, role }));
         }
     }, [dispatch]);
 
@@ -37,6 +38,7 @@ function App() {
                   <Route path="/users/login" element={<LoginPage />} />
                   <Route path="/users/resetPassword" element={<ResetPassword />} />
                   <Route path="/users/dashboard" element={<UserDashboard />} />
+                  <Route path="/volunteers/dashboard" element={<VolunteerDashboard />} />
               </Routes>
           </Provider>
       </Router>

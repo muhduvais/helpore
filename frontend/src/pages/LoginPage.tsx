@@ -12,6 +12,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useSelector } from 'react-redux';
+import { SiTicktick } from "react-icons/si";
 
 interface LoginResponse {
   message: string,
@@ -19,7 +20,7 @@ interface LoginResponse {
   refreshToken: string;
   user: {
     email: string,
-    isAdmin: boolean,
+    role: string,
   }
 }
 
@@ -35,6 +36,7 @@ const LoginPage: React.FC = () => {
   const [forgotMessage, setForgotMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVolunteer, setIsVolunteer] = useState(false);
 //   const [isLoading, setIsLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -45,23 +47,50 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
-  const isAdmin = useSelector((state: any) => state.auth.isAdmin);
+  const role = useSelector((state: any) => state.auth.role);
 
   if (isLoggedIn) {
-    return <Navigate to={isAdmin ? '/admin/dashboard' : '/users/dashboard'} />;
+    if (role === 'admin') {
+      return <Navigate to={'/admin/dashboard'} />
+    } else if (role === 'user') {
+      return <Navigate to={'/users/dashboard'} />
+    } else {
+      return <Navigate to={'/volunteers/dashboard'} />
+    }
+  }
+
+  const toggleRole = (value: boolean) => {
+    setIsVolunteer(value);
+    setEmail('');
+    setPassword('');
+    setErrorMessage('');
+    setEmailMessage('');
+    setPasswordMessage('');
   }
 
   const handleGoogleLogin = async () => {
     try {
-        const user = await authController.handleGoogleLogin();
+        const response = await authController.handleGoogleLogin();
 
-        const { accessToken, refreshToken, user: userData } = user;
+        if (!response.success) {
+          setErrorMessage(response.message);
+          return;
+        }
 
-        dispatch(login({ email: userData.email, accessToken, refreshToken, isAdmin: userData.isAdmin }));
+        const { accessToken, refreshToken, user: userData } = response;
+
+        dispatch(login({ email: userData.email, accessToken, refreshToken, role: userData.role }));
         navigate('/users/dashboard');
     } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          const errorMessage = error.response?.data?.message || 'An error occurred';
+            setErrorMessage(errorMessage);
+        }
+      } else {
         console.error('Google login failed:', error);
         setErrorMessage('Google login failed. Please try again.');
+      }
     }
   };
 
@@ -109,11 +138,10 @@ const LoginPage: React.FC = () => {
 
         try {
             const response = await axios.post<LoginResponse>('/api/auth/users/login', { 
+                selectedRole: isVolunteer ? 'volunteer' : 'user',
                 email, 
                 password: inputPassword 
             });
-
-            console.log('Response: ', response)
 
             if (response.status !== 200) {
                 return setErrorMessage(response.data.message);
@@ -121,12 +149,13 @@ const LoginPage: React.FC = () => {
 
             if (response.data) {
               const { accessToken, refreshToken, user } = response.data;
+              
+              dispatch(login({ email: user.email, accessToken, refreshToken, role: user.role }));
 
-              dispatch(login({ email: user.email, accessToken, refreshToken, isAdmin: user.isAdmin }));
-              if (isAdmin) {
-                navigate('/admin/dashboard');
+              if (user.role === 'user') {
+                return <Navigate to={'/users/dashboard'} />
               } else {
-                navigate('/users/dashboard');
+                return <Navigate to={'/volunteers/dashboard'} />
               }
             }
         } catch (error: unknown) {
@@ -270,6 +299,23 @@ const LoginPage: React.FC = () => {
         <div className='login-title flex items-center justify-start gap-x-2 p-4 pb-8 text-4xl font-bold'>
             <h2 className={`text-[#414141]`}>Login <span className='font-light'>here</span></h2>
         </div>
+
+        {/* Are you a volunteer? */}
+        <div className='login-title flex items-center justify-center mx-4 mb-1'>
+          <button className={`${!isVolunteer ? 'bg-[#688D48]' : ''} w-[50%] flex gap-x-2 items-center justify-center`}
+          onClick={() => toggleRole(false)}
+          >
+              {!isVolunteer && <SiTicktick className='text-white'/>}
+              <h2 className={`text-black ${!isVolunteer ? 'text-white' : 'font-semibold'}`}>Not a volunteer</h2>
+          </button>
+          <button className={`${isVolunteer ? 'bg-[#688D48]' : ''} w-[50%] flex gap-x-2 items-center justify-center`}
+          onClick={() => toggleRole(true)}
+          >
+              {isVolunteer && <SiTicktick className='text-white'/>}
+              <h2 className={`text-black ${isVolunteer ? 'text-white' : 'font-semibold'}`}>I am a volunteer</h2>
+          </button>
+        </div>
+
         {errorMessage && <span className='p-3 opacity-90 font-semibold text-red-500'>{errorMessage}</span>}
         <hr className='opacity-100'/>
         
@@ -327,20 +373,21 @@ const LoginPage: React.FC = () => {
                 </div>
 
                 {/* Register now button */}
+                { !isVolunteer && 
                 <div className="btns flex items-center justify-between mx-3 mb-2 mt-2">
                     <div className='new-user text-[14px]'><span className='opacity-60 pr-2'>Not Registered?</span><Link to="/users/register" 
                     className={`text-[#414141] font-semibold pr-1 hover:underline`}>Register Now</Link></div>
-                </div>
+                </div>}
 
                 {/* Google login button */}
-                <div className="input-field flex flex-col px-3 py-1">
+                { !isVolunteer && <div className="input-field flex flex-col px-3 py-1">
                     <button
                     onClick={handleGoogleLogin}
                     type='button'
                     className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-xl outline-none`}>
                         <span className='opacity-50 pr-5 text-sm'>OR</span><span>Login with</span> <span className='font-semibold'>Google</span>
                     </button>
-                </div>
+                </div>}
 
             </form>
       </div>
