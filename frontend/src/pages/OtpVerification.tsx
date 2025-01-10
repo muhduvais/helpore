@@ -23,7 +23,7 @@ const LoginPage: React.FC = () => {
 
   const resendOtp = async () => {
     if (count !== 0) return;
-    const response = await axios.post(`/api/auth/users/resendOtp`, {email});
+    const response = await axios.post(`/api/auth/resendOtp`, {email});
     if (response.data.success) {
         setCount(30);
         toast.success('A new OTP has been sent to your email!');
@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
     if (isValid) {
 
         try {
-            const response = await axios.post<LoginResponse>('/api/auth/users/verifyOtp', { 
+            const response = await axios.post<LoginResponse>('/api/auth/verifyOtp', { 
                 email,
                 otp: inputOtp,
             });

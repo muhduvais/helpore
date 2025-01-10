@@ -75,7 +75,7 @@ const LoginPage: React.FC = () => {
     if (isValid) {
 
         try {
-            const response = await axios.post('/api/auth/users/resetPassword', { 
+            const response = await axios.post('/api/auth/resetPassword', { 
                 token, 
                 newPassword: inputPassword, 
             });

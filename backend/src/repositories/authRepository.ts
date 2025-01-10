@@ -2,7 +2,12 @@ import User from '../models/userModel';
 
 class AuthRepository {
     async findUser(email: string) {
-        return User.findOne({ email });
+        try {
+            return await User.findOne({ email });
+        } catch (error) {
+            console.error('Error finding the user:', error);
+            return null;
+        }
     }
 
     async createUser(newUser) {

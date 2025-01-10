@@ -6,7 +6,7 @@ const removeLocalStorage = (key: string) => localStorage.removeItem(key);
 const getLocalStorage = (key: string): string | null => localStorage.getItem(key);
 
 const initialState: AuthState = {
-    user: getLocalStorage('email') ? { email: getLocalStorage('email') } : null,
+    userId: getLocalStorage('userId') || null,
     isLoggedIn: getLocalStorage('isLoggedIn') === 'true',
     role: getLocalStorage('role') || null,
     accessToken: getLocalStorage('accessToken'),
@@ -17,21 +17,21 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        login(state, action: PayloadAction<{ email: string, accessToken: string, refreshToken: string, role: string }>) {
-            state.user = { email: action.payload.email };
+        login(state, action: PayloadAction<{ userId: string, accessToken: string, refreshToken: string, role: string }>) {
+            state.userId = action.payload.userId;
             state.isLoggedIn = true;
             state.role = action.payload.role;
             state.accessToken = action.payload.accessToken;
             state.refreshToken = action.payload.refreshToken;
 
-            setLocalStorage('email', action.payload.email);
+            setLocalStorage('email', action.payload.userId);
             setLocalStorage('accessToken', action.payload.accessToken);
             setLocalStorage('refreshToken', action.payload.refreshToken);
             setLocalStorage('role', action.payload.role);
             setLocalStorage('isLoggedIn', 'true');
         },
         logout(state) {
-            state.user = null;
+            state.userId = null;
             state.isLoggedIn = false;
             state.accessToken = null;
             state.refreshToken = null;

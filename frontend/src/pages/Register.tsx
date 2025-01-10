@@ -38,7 +38,7 @@ const SignupPage: React.FC = () => {
   
           const { accessToken, refreshToken, user: userData } = response;
   
-          dispatch(login({ email: userData.email, accessToken, refreshToken, role: userData.role }));
+          dispatch(login({ userId: userData.id, accessToken, refreshToken, role: userData.role }));
           navigate('/users/dashboard');
       } catch (error) {
           console.error('Google login failed:', error);
@@ -100,7 +100,7 @@ const SignupPage: React.FC = () => {
     if (isValid) {
         setIsLoading(true);
         try {
-            const response = await axios.post<SignupResponse>('/api/auth/users/register', { 
+            const response = await axios.post<SignupResponse>('/api/auth/register', { 
                 name,
                 email, 
                 password: inputPassword 

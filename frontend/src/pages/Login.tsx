@@ -13,16 +13,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useSelector } from 'react-redux';
 import { SiTicktick } from "react-icons/si";
-
-interface LoginResponse {
-  message: string,
-  accessToken: string;
-  refreshToken: string;
-  user: {
-    email: string,
-    role: string,
-  }
-}
+import { LoginResponse } from '../interfaces/authInterface';
 
 const LoginPage: React.FC = () => {
 
@@ -50,11 +41,9 @@ const LoginPage: React.FC = () => {
   const role = useSelector((state: any) => state.auth.role);
 
   if (isLoggedIn) {
-    if (role === 'admin') {
-      return <Navigate to={'/admin/dashboard'} />
-    } else if (role === 'user') {
+    if (role === 'user') {
       return <Navigate to={'/users/dashboard'} />
-    } else {
+    } else if (role === 'volunteer') {
       return <Navigate to={'/volunteers/dashboard'} />
     }
   }
@@ -79,7 +68,7 @@ const LoginPage: React.FC = () => {
 
         const { accessToken, refreshToken, user: userData } = response;
 
-        dispatch(login({ email: userData.email, accessToken, refreshToken, role: userData.role }));
+        dispatch(login({ userId: userData.id, accessToken, refreshToken, role: userData.role }));
         navigate('/users/dashboard');
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -137,7 +126,7 @@ const LoginPage: React.FC = () => {
     if (isValid) {
 
         try {
-            const response = await axios.post<LoginResponse>('/api/auth/users/login', { 
+            const response = await axios.post<LoginResponse>('/api/auth/login', { 
                 selectedRole: isVolunteer ? 'volunteer' : 'user',
                 email, 
                 password: inputPassword 
@@ -150,7 +139,7 @@ const LoginPage: React.FC = () => {
             if (response.data) {
               const { accessToken, refreshToken, user } = response.data;
               
-              dispatch(login({ email: user.email, accessToken, refreshToken, role: user.role }));
+              dispatch(login({ userId: user.id, accessToken, refreshToken, role: user.role }));
 
               if (user.role === 'user') {
                 return <Navigate to={'/users/dashboard'} />
@@ -194,7 +183,7 @@ const LoginPage: React.FC = () => {
         setIsLoading(true);
         try {
           setForgotMessage('');
-          const response = await axios.post('/api/auth/users/forgotPassword', { email: forgotEmail });
+          const response = await axios.post('/api/auth/forgotPassword', { email: forgotEmail });
           if (response.status !== 200) {
             return setForgotMessage(response.data.message);
           }

@@ -13,14 +13,9 @@ const userDashboard = () => {
   const navigate = useNavigate();
 
   const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
-  const role = useSelector((state: any) => state.auth.role);
 
   if (!isLoggedIn) {
-    if (role === 'admin') {
-      return <Navigate to={'/admin/login'} />
-    } else {
-      return <Navigate to={'/users/login'} />
-    }
+    return <Navigate to={'/users/login'} />
   }
   
   const handleLogout = () => {
