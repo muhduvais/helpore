@@ -70,6 +70,49 @@ class AdminRepository {
             return null;
         }
     }
+
+    async toggleIsBlocked(isBlocked: boolean, userId: string): Promise<boolean> {
+        try {
+            await User.findByIdAndUpdate(userId, { isBlocked });
+            return true;
+        } catch (error) {
+            console.error('Error updating the block status: ', error);
+            return false;
+        }
+    }
+
+    // Volunteers
+    async findVolunteers(query: object, skip: number, limit: number): Promise<IUser[]> | null {
+        try {
+            return await User.find(query).skip(skip).limit(limit);
+        } catch (error) {
+            console.error('Error finding the volunteers:', error);
+            return null;
+        }
+    }
+
+    async findVolunteer(email: string) {
+        try {
+            return await User.findOne({ email });
+        } catch (error) {
+            console.error('Error finding the volunteer:', error);
+            return null;
+        }
+    }
+
+    async createVolunteer(newUser: Partial<IUser>) {
+        const { name, email, password, googleId, profilePicture } = newUser;
+        const isVerified = true;
+        const role = 'volunteer';
+        try {
+            const user = new User({ name, email, password, googleId, profilePicture, isVerified, role });
+            await user.save();
+            return user;
+        } catch (error) {
+            console.error('Error creating the volunteer:', error);
+            return null;
+        }
+    }
 }
 
 export default AdminRepository;
