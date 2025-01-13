@@ -1,5 +1,8 @@
 import AdminRepository from '../repositories/adminRepository';
 import { IUser } from '../interfaces/userInterface';
+import bcrypt from 'bcrypt';
+import { IAddUserForm } from '../interfaces/adminInterface';
+import { IAddress } from '../interfaces/userInterface';
 
 class AdminService {
     private adminRepository: AdminRepository;
@@ -26,6 +29,46 @@ class AdminService {
             return 0;
         }
     }
+
+    async addUser(formData: IAddUserForm) {
+            try {
+                const { name, age, gender, phone, email, password, fname, lname, street, city, state, country, pincode } = formData;
+                const existingUser = await this.adminRepository.findUser(email);
+                if (existingUser) {
+                    return false;
+                }
+                const hashedPassword = await bcrypt.hash(password, 10);
+    
+                const newUser: Partial<IUser> = {
+                    name,
+                    age,
+                    gender,
+                    phone,
+                    email,
+                    googleId: null,
+                    password: hashedPassword,
+                  };
+
+                  const newAddress: IAddress = {
+                    fname,
+                    lname,
+                    street,
+                    city,
+                    state,
+                    country,
+                    pincode,
+                  };
+    
+                const user = await this.adminRepository.createUser(newUser);
+                await this.adminRepository.addAddress(newAddress, user._id as string);
+                const registeredMail = user.email;
+    
+                return registeredMail;
+            } catch (error) {
+                console.error('Error registering the user', error);
+                return null;
+            }
+        }
 }
 
 export default AdminService;

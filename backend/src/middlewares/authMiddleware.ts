@@ -1,7 +1,7 @@
 import jwt, {TokenExpiredError} from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
-export const authenticateToken = async (req, res, next) => {
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const authHeader = req.header('Authorization');
         const token = authHeader && authHeader.split(' ')[1];
@@ -9,7 +9,7 @@ export const authenticateToken = async (req, res, next) => {
 
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
             if (err) {
-                console.log('Access token verification error');
+                console.log('Access token verification error', err);
                 if (err instanceof TokenExpiredError) {
                     console.log('Expired');
                     res.status(401).json({ message: 'Token expired!' });

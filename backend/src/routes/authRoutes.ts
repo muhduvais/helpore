@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import authController from '../controllers/authController';
+import { authenticateToken } from '../middlewares/authMiddleware';
 
 router.post('/admin/login', authController.loginUser);
 

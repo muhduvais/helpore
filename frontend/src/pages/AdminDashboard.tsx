@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import axios from '../utils/urlProxy';
+import { customAxios } from '../utils/apiClient';
 import { AxiosError } from 'axios';
 import { IUser } from '../interfaces/userInterface';
 
@@ -28,7 +29,7 @@ const userDashboard = () => {
 
   const getUsers = async () => {
     try {
-      const response = await axios.get(`/api/admin/users`, {
+      const response = await customAxios.get(`/api/admin/users`, {
         params: {
           page: currentPage,
           limit: 5,
@@ -115,21 +116,23 @@ const userDashboard = () => {
       </table>
 
       <div className="pagination">
-          <button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}
-            className='text-white'
-            >Previous</button>
+        { currentPage !== 1 && 
+        <button onClick={() => setCurrentPage(currentPage - 1)}
+        className='text-white'
+        >Previous</button>}
           {[...Array(totalPages)].map((_, index) => (
               <button
                   key={index}
-                  className={`text-white ${currentPage === index + 1 ? 'active' : ''}`}
+                  className={`text-white px-1 m-1 bg-lime-500 ${currentPage === index + 1 ? 'active' : ''}`}
                   onClick={() => setCurrentPage(index + 1)}
               >
                   {index + 1}
               </button>
           ))}
-          <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}
-            className='text-white'
-            >Next</button>
+          { currentPage !== totalPages && 
+          <button onClick={() => setCurrentPage(currentPage + 1)}
+          className='text-white'
+          >Next</button>}
       </div>
 
     </div>
