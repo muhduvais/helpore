@@ -8,6 +8,8 @@ import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import OtpVerification from './pages/OtpVerification';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUserManagement from './pages/AdminUserManagement';
+import AdminVolunteerManagement from './pages/AdminVolunteerManagement';
 import UserDashboard from './pages/UserDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import ResetPassword from './pages/ResetPassword';
@@ -37,6 +39,8 @@ function App() {
                   <Route path="/" element={<Navigate to="/users/login" replace/>} />
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/userManagement" element={<AdminUserManagement />} />
+                  <Route path="/admin/volunteerManagement" element={<AdminVolunteerManagement />} />
 
                   <Route path="/users/register" element={<RegisterPage />} />
                   <Route path="/users/verifyOtp" element={<OtpVerification />} />

@@ -163,7 +163,7 @@ const AdminLoginPage: React.FC = () => {
                 </div>
 
                 {/* Submit button */}
-                <div className="input-field flex flex-col px-3 py-1">
+                <div className="input-field flex flex-col px-3 py-1 mt-5">
                     <button
                     type='submit'
                     className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-xl outline-none font-semibold`}>

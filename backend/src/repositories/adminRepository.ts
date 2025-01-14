@@ -113,6 +113,16 @@ class AdminRepository {
             return null;
         }
     }
+
+    async countVolunteers(): Promise<number> {
+        try {
+            return await User.countDocuments({ role: 'volunteer' });
+        } catch (error) {
+            console.error('Error counting the volunteers:', error);
+            return 0;
+        }
+    }
+
 }
 
 export default AdminRepository;

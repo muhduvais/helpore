@@ -82,11 +82,8 @@ class AdminController {
 
         try {
             const volunteers = await this.adminService.fetchVolunteers(search, skip, limit);
-            const documentsCount = await this.adminService.countDocuments();
+            const documentsCount = await this.adminService.countVolunteersDocuments();
             const totalPages = Math.ceil(documentsCount / limit);
-
-            console.log('Documnents count: ', documentsCount)
-            console.log('Total pages: ', totalPages)
             
             if (volunteers) {
                 res.status(200).json({ success: true, volunteers, totalPages });

@@ -16,4 +16,5 @@ export interface IUser {
     resetTokenExpiry: Date;
     _id?: string;
     uid?: string;
+    createdAt?: Date;
 }

@@ -130,6 +130,15 @@ class AdminService {
                 return null;
             }
         }
+
+        async countVolunteersDocuments(): Promise<number> {
+            try {
+                return await this.adminRepository.countVolunteers();
+            } catch (error) {
+                console.error('Error counting the volunteers:', error);
+                return 0;
+            }
+        }
 }
 
 export default AdminService;
