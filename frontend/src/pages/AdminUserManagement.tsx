@@ -7,6 +7,7 @@ import logo from '../assets/Logo-black.png'
 import { customAxios } from '../utils/apiClient';
 import { AxiosError } from 'axios';
 import { IUser } from '../interfaces/userInterface';
+
 import { MdDashboard, MdMessage } from "react-icons/md";
 import { FaUsers, FaUserCircle } from "react-icons/fa";
 import { FaUsersLine, FaAngleRight, FaAngleLeft  } from "react-icons/fa6";
@@ -14,6 +15,8 @@ import { IoNotifications } from "react-icons/io5";
 import { IoMdLogOut } from "react-icons/io";
 import { CiSearch } from "react-icons/ci";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { TiUserAdd } from "react-icons/ti";
+import { Link } from 'react-router-dom';
 
 const userDashboard = () => {
 
@@ -85,15 +88,15 @@ const userDashboard = () => {
           <img src={logo} alt="logo" />
         </div>
         <ul className="buttons w-[100%] flex flex-col gap-y-3">
-          <li className=''><a href="/admin/dashboard"><button className='bg-[#688D48] w-[100%] text-white px-4 py-2 text-start text-sm rounded flex items-center gap-x-2'>
+          <li className=''><Link to={'/admin/dashboard'}><button className='bg-[#688D48] w-[100%] text-white px-4 py-2 text-start text-sm rounded flex items-center gap-x-2'>
             <MdDashboard/> <span>Dashboard</span>
-          </button></a></li>
+          </button></Link></li>
           <li><button className='bg-[#435D2C] w-[100%] text-white px-4 py-2 text-start text-sm rounded flex items-center gap-x-2'>
           <FaUsers/> <span>User Management</span>
           </button></li>
-          <li><a href="/admin/volunteerManagement"><button className='bg-[#688D48] w-[100%] text-white px-4 py-2 text-start text-sm rounded flex items-center gap-x-2'>
+          <li><Link to="/admin/volunteerManagement"><button className='bg-[#688D48] w-[100%] text-white px-4 py-2 text-start text-sm rounded flex items-center gap-x-2'>
           <FaUsersLine/> <span>Volunteer Management</span>
-          </button></a></li>
+          </button></Link></li>
         </ul>
       </div>
 
@@ -123,19 +126,28 @@ const userDashboard = () => {
 
         <div className="bread-crumps">
           <div className="crumps flex items-center gap-x-1">
-            <span className='text-sm text-[#5F5F5F]'>Users List</span>
+            <span className='text-sm text-[#5F5F5F]'>Users Management</span>
             <FaAngleRight className='text-[#5F5F5F]' />
           </div>
         </div>
 
-        <div className="table-top-right shadow-[10px_0_50px_rgba(0,0,0,0.2)] flex items-center justify-center bg-white rounded
-        ">
-          <input type="text" className='py-2 px-3 outline-none rounded' 
-          value={searchTerm} 
-          onChange={handleSearch} 
-          placeholder="Search by name"
-          />
-          <CiSearch className='text-xl mr-4'/>
+        <div className="right-table flex items-center justify-center">
+
+          <Link to={'/admin/addUser'} className="addUser flex items-center justify-center gap-x-2 mr-3 py-1 px-3 bg-[#688D48] text-white">
+            <TiUserAdd />
+            <button className=''>Add User</button>
+          </Link>
+
+          <div className="right shadow-[10px_0_50px_rgba(0,0,0,0.2)] flex items-center justify-center bg-white rounded
+          ">
+            <input type="text" className='py-2 px-3 outline-none rounded' 
+            value={searchTerm} 
+            onChange={handleSearch} 
+            placeholder="Search by name"
+            />
+            <CiSearch className='text-xl mr-4'/>
+          </div>
+
         </div>
 
       </div>

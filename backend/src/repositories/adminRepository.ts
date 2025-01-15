@@ -41,11 +41,11 @@ class AdminRepository {
     }
 
     async createUser(newUser: Partial<IUser>) {
-        const { name, email, password, googleId, profilePicture } = newUser;
+        const { name, age, gender, phone, email, password, googleId, profilePicture } = newUser;
         const isVerified = true;
         const role = 'user';
         try {
-            const user = new User({ name, email, password, googleId, profilePicture, isVerified, role });
+            const user = new User({ name, age, gender, phone, email, password, googleId, profilePicture, isVerified, role });
             await user.save();
             return user;
         } catch (error) {
@@ -101,11 +101,11 @@ class AdminRepository {
     }
 
     async createVolunteer(newUser: Partial<IUser>) {
-        const { name, email, password, googleId, profilePicture } = newUser;
+        const { name, age, gender, phone, email, password, googleId, profilePicture } = newUser;
         const isVerified = true;
         const role = 'volunteer';
         try {
-            const user = new User({ name, email, password, googleId, profilePicture, isVerified, role });
+            const user = new User({ name, age, gender, phone, email, password, googleId, profilePicture, isVerified, role });
             await user.save();
             return user;
         } catch (error) {

@@ -9,7 +9,9 @@ import RegisterPage from './pages/Register';
 import OtpVerification from './pages/OtpVerification';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUserManagement from './pages/AdminUserManagement';
+import AdminAddUser from './pages/AdminAddUser'
 import AdminVolunteerManagement from './pages/AdminVolunteerManagement';
+import AdminAddVolunteer from './pages/AdminAddVolunteer';
 import UserDashboard from './pages/UserDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import ResetPassword from './pages/ResetPassword';
@@ -40,7 +42,9 @@ function App() {
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />
                   <Route path="/admin/userManagement" element={<AdminUserManagement />} />
+                  <Route path="/admin/addUser" element={<AdminAddUser />} />
                   <Route path="/admin/volunteerManagement" element={<AdminVolunteerManagement />} />
+                  <Route path="/admin/addVolunteer" element={<AdminAddVolunteer />} />
 
                   <Route path="/users/register" element={<RegisterPage />} />
                   <Route path="/users/verifyOtp" element={<OtpVerification />} />

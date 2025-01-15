@@ -133,7 +133,7 @@ const LoginPage: React.FC = () => {
             });
 
             if (response.status !== 200) {
-                return setErrorMessage(response.data.message);
+                return setErrorMessage(response.data.message); // thunk middleware
             }
 
             if (response.data) {
