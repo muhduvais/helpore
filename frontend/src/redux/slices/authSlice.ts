@@ -9,39 +9,33 @@ const initialState: AuthState = {
     userId: getLocalStorage('userId') || null,
     isLoggedIn: getLocalStorage('isLoggedIn') === 'true',
     role: getLocalStorage('role') || null,
-    accessToken: getLocalStorage('accessToken'),
-    refreshToken: getLocalStorage('refreshToken'),
-}
+    accessToken: getLocalStorage('accessToken') || '',
+    refreshToken: getLocalStorage('refreshToken') || '',
+};
 
 const authSlice = createSlice({
     name: 'auth',
-    initialState,
+    initialState: initialState,
     reducers: {
         login(state, action: PayloadAction<{ userId: string, accessToken: string, refreshToken: string, role: string }>) {
             state.userId = action.payload.userId;
             state.isLoggedIn = true;
             state.role = action.payload.role;
-            state.accessToken = action.payload.accessToken;
-            state.refreshToken = action.payload.refreshToken;
-
-            setLocalStorage('email', action.payload.userId);
-            setLocalStorage('accessToken', action.payload.accessToken);
-            setLocalStorage('refreshToken', action.payload.refreshToken);
+            setLocalStorage('userId', action.payload.userId);
             setLocalStorage('role', action.payload.role);
             setLocalStorage('isLoggedIn', 'true');
+            setLocalStorage('accessToken', action.payload.accessToken);
+            setLocalStorage('refreshToken', action.payload.refreshToken);
         },
         logout(state) {
             state.userId = null;
             state.isLoggedIn = false;
-            state.accessToken = null;
-            state.refreshToken = null;
             state.role = null;
-
-            removeLocalStorage('accessToken');
-            removeLocalStorage('refreshToken');
-            removeLocalStorage('email');
+            removeLocalStorage('userId');
             removeLocalStorage('role');
             removeLocalStorage('isLoggedIn');
+            removeLocalStorage('accessToken');
+            removeLocalStorage('refreshToken');
         },
         refreshToken(state, action: PayloadAction<string>) {
             state.accessToken = action.payload;

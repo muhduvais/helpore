@@ -24,7 +24,7 @@ class AdminRepository {
 
     async findUserDetails(id: string) {
         try {
-            return await User.findOne({ _id: id });
+            return await User.findById(id);
         } catch (error) {
             console.error('Error finding the user:', error);
             return null;

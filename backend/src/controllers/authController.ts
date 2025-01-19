@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import AuthService from '../services/authService';
-import { TokenPayload } from '../interfaces/authInterface';
+import { JwtPayload } from '../interfaces/authInterface';
 import jwt from 'jsonwebtoken';
 import { firebaseAdmin } from '../config/firebase.config';
 import dotenv from 'dotenv';
@@ -40,10 +40,14 @@ class AuthController {
     async resendOtp(req: Request, res: Response): Promise<void> {
         try {
             const { email } = req.body;
-            const otp = await this.authService.generateOtp(email);
+    
+            const otp = await this.authService.resendOtp(email);
+    
             if (otp) {
-                console.log('New otp: ', otp);
-                res.status(200).json({ success: true, message: 'Otp generated successfully!' });
+                console.log('New OTP:', otp);
+                res.status(200).json({ success: true, message: 'OTP generated successfully!' });
+            } else {
+                res.status(404).json({ success: false, message: 'Email not found in temporary registration!' });
             }
         } catch (error) {
             console.error('Error generating the OTP:', error);
@@ -69,16 +73,29 @@ class AuthController {
     async loginUser(req: Request, res: Response): Promise<void> {
         try {
             const { email, password, selectedRole } = req.body;
-
-            const user = await this.authService.verifyLogin(email, password);
             
+            const user = await this.authService.verifyLogin(email, password);
+
             if (!user || user.role !== selectedRole) {
                 res.status(400).json({ message: 'Invalid email or password!'});
                 return;
             }
 
-            const accessToken = jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '20s' });
-            const refreshToken = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '1h' });
+            const accessToken = await this.authService.generateAccessToken(user._id, user.role);
+            const refreshToken = await this.authService.generateRefreshToken(user._id, user.role);
+
+            // res.cookie("accessToken", accessToken, {
+            //     secure: false,
+            //     sameSite: "none",
+            //     maxAge: 20 * 1000,
+            // });
+            
+            // res.cookie("refreshToken", refreshToken, {
+            //     httpOnly: true,
+            //     secure: false,
+            //     sameSite: "none",
+            //     maxAge: 1 * 60 * 60 * 1000,
+            // });
             
             res.status(200).json({
                 message: 'Login successful!',
@@ -97,19 +114,24 @@ class AuthController {
 
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
-            const { refreshToken } = req.body;
+            const refreshToken = req.body.refreshToken;
+
             if (!refreshToken) {
-                res.status(401).json({ message: 'Refresh token not found' });
-                return;
+                console.log(' Refresh token is missing!');
+                res.status(403).json({ message: 'Refresh token is missing!' });
+                return
             }
 
-            const userId = await this.authService.verifyRefreshToken(refreshToken);
+            const payload = await this.authService.verifyRefreshToken(refreshToken);
+            const userId = payload.userId;
+            const role = payload.role;
             if (!userId) {
-                res.status(403).json({ message: 'Invalid refresh token' });
-                return;
+                res.status(403).json({ message: 'Invalid refresh token!' });
+                return
             }
 
-            const newAccessToken = await this.authService.generateAccessToken(userId);
+            const newAccessToken = await this.authService.generateAccessToken(userId, role);
+
             res.status(200).json({ accessToken: newAccessToken });
         } catch (error) {
             console.error('Error refreshing token:', error);
@@ -123,6 +145,8 @@ class AuthController {
         try {
             const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
             const user = await this.authService.findOrCreateUser(decodedToken);
+            const userId = user._id as string;
+            const role = user.role as string; 
 
             if (!user) {
                 res.status(401).json({
@@ -132,8 +156,21 @@ class AuthController {
                 return;
             }
 
-            const accessToken = jwt.sign({ userId: user.uid }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '20s' });
-            const refreshToken = jwt.sign({ userId: user.uid }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '1h' });
+            const accessToken = await this.authService.generateAccessToken(userId, role);
+            const refreshToken = await this.authService.generateRefreshToken(userId, role);
+
+            // res.cookie("accessToken", accessToken, {
+            //     secure: process.env.NODE_ENV === "production",
+            //     sameSite: "strict",
+            //     maxAge: 20 * 1000,
+            // });
+            
+            // res.cookie("refreshToken", refreshToken, {
+            //     httpOnly: true,
+            //     secure: process.env.NODE_ENV === "production",
+            //     sameSite: "strict",
+            //     maxAge: 1 * 60 * 60 * 1000,
+            // });
 
             res.status(200).json({
                 success: true,
@@ -173,8 +210,11 @@ class AuthController {
     async resetPassword(req: Request, res: Response): Promise<void> {
         const { token, newPassword } = req.body;
         try {
-            const decoded = jwt.verify(token, process.env.RESET_LINK_SECRET!) as TokenPayload;
-            const { email } = decoded;
+            const decoded = jwt.verify(token, process.env.RESET_LINK_SECRET!) as JwtPayload;
+            const { userId } = decoded;
+            const user = await this.authService.findUserById(userId);
+            const email = user.email;
+
             await this.authService.resetPassword(email, newPassword);
             res.status(200).json({ message: 'Password reset successful' });
         } catch (error) {

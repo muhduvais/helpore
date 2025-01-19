@@ -2,59 +2,53 @@ import './App.css';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { login } from '../src/redux/slices/authSlice'
-import AdminLoginPage from './pages/AdminLogin';
-import LoginPage from './pages/Login';
-import RegisterPage from './pages/Register';
-import OtpVerification from './pages/OtpVerification';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminUserManagement from './pages/AdminUserManagement';
-import AdminAddUser from './pages/AdminAddUser'
-import AdminVolunteerManagement from './pages/AdminVolunteerManagement';
-import AdminAddVolunteer from './pages/AdminAddVolunteer';
-import UserDashboard from './pages/UserDashboard';
-import VolunteerDashboard from './pages/VolunteerDashboard';
-import ResetPassword from './pages/ResetPassword';
+import { login } from './redux/slices/authSlice'
+import AdminLoginPage from './pages/auth/AdminLogin';
+import LoginPage from './pages/auth/Login';
+import RegisterPage from './pages/auth/Register';
+import OtpVerification from './pages/auth/OtpVerification';
+import ResetPassword from './pages/auth/ResetPassword';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
+import ProtectedRoutes from './routes/protectedRoutes';
 
 function App() {
 
   const dispatch = useDispatch();
 
-    useEffect(() => {
-        const accessToken = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
-        const userId = localStorage.getItem('userId');
-        const role = localStorage.getItem('role') || 'user';
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    const role = localStorage.getItem('role') || 'user';
+    const accessToken = localStorage.getItem('accessToken') || '';
+    const refreshToken = localStorage.getItem('refreshToken') || '';
 
-        if (accessToken && refreshToken && userId) {
-            dispatch(login({ userId, accessToken, refreshToken, role }));
-        }
-    }, [dispatch]);
+    if (userId && role) {
+      dispatch(login({ userId, accessToken, refreshToken, role }));
+    }
+  }, [dispatch]);
 
   return (
     <>
       <Router>
-          <Provider store={store}>
-              <Routes>
-                  <Route path="/" element={<Navigate to="/users/login" replace/>} />
-                  <Route path="/admin/login" element={<AdminLoginPage />} />
-                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                  <Route path="/admin/userManagement" element={<AdminUserManagement />} />
-                  <Route path="/admin/addUser" element={<AdminAddUser />} />
-                  <Route path="/admin/volunteerManagement" element={<AdminVolunteerManagement />} />
-                  <Route path="/admin/addVolunteer" element={<AdminAddVolunteer />} />
+        <Provider store={store}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/user/login" replace />} />
 
-                  <Route path="/users/register" element={<RegisterPage />} />
-                  <Route path="/users/verifyOtp" element={<OtpVerification />} />
-                  <Route path="/users/login" element={<LoginPage />} />
-                  <Route path="/users/resetPassword" element={<ResetPassword />} />
-                  <Route path="/users/dashboard" element={<UserDashboard />} />
+            {/* Public Routes */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
 
-                  <Route path="/volunteers/dashboard" element={<VolunteerDashboard />} />
-              </Routes>
-          </Provider>
+            <Route path="/user/login" element={<LoginPage />} />
+            
+            <Route path="/user/register" element={<RegisterPage />} />
+            <Route path="/user/verifyOtp" element={<OtpVerification />} />
+            <Route path="/user/resetPassword" element={<ResetPassword />} />
+
+            <Route path="/volunteer/login" element={<LoginPage />} />
+
+            {/* Protected Routes */}
+            <Route path="/*" element={<ProtectedRoutes />} />
+          </Routes>
+        </Provider>
       </Router>
     </>
   )

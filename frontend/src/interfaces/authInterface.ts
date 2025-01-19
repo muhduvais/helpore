@@ -3,8 +3,8 @@ export interface AuthState {
   userId: string | null;
   isLoggedIn: boolean;
   role: string | null;
-  accessToken: string | null;
-  refreshToken: string | null;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface SignupResponse {
@@ -13,7 +13,7 @@ export interface SignupResponse {
 }
 
 export interface LoginResponse {
-  message: string,
+  message: string;
   accessToken: string;
   refreshToken: string;
   user: {

@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
-import axios from '../utils/urlProxy'
+import axios from '../../utils/urlProxy'
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 import { AxiosError } from 'axios';
-import bgDark_1_img from '../assets/bg-darkGreen-1.jpeg';
-import logo from '../assets/Logo.png';
-import { login } from '../redux/slices/authSlice'
+import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
+import logo from '../../assets/Logo.png';
+import { login } from '../../redux/slices/authSlice'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { authController } from '../controllers/authController';
+import { authController } from '../../controllers/authController';
 import { useDispatch } from 'react-redux';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { SignupResponse } from '../interfaces/authInterface';
+import { SignupResponse } from '../../interfaces/authInterface';
 
 const SignupPage: React.FC = () => {
 
@@ -36,10 +36,10 @@ const SignupPage: React.FC = () => {
           const response = await authController.handleGoogleLogin();
           console.log('Response:', response);
   
-          const { accessToken, refreshToken, user: userData } = response;
+          const { user: userData, accessToken, refreshToken } = response;
   
           dispatch(login({ userId: userData.id, accessToken, refreshToken, role: userData.role }));
-          navigate('/users/dashboard');
+          navigate('/user/dashboard');
       } catch (error) {
           console.error('Google login failed:', error);
           setErrorMessage('Google login failed. Please try again.');
@@ -112,7 +112,7 @@ const SignupPage: React.FC = () => {
 
             if (response.data) {
               const { registeredMail } = response.data;
-              navigate(`/users/verifyOtp?email=${registeredMail}`);
+              navigate(`/user/verifyOtp?email=${registeredMail}`);
             }
         } catch (error: unknown) {
           if (error instanceof AxiosError) {
@@ -212,7 +212,7 @@ const SignupPage: React.FC = () => {
 
                 {/* Register now button */}
                 <div className="btns flex items-center justify-between mx-3 mb-2 mt-2">
-                    <div className='new-user text-[14px]'><span className='opacity-60 pr-2'>Already Registered?</span><Link to="/users/login" 
+                    <div className='new-user text-[14px]'><span className='opacity-60 pr-2'>Already Registered?</span><Link to="/user/login" 
                     className={`text-[#414141] font-semibold pr-1 hover:underline`}>Login Now</Link></div>
                 </div>
 

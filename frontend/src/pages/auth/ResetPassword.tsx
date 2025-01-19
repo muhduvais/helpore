@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import axios from '../utils/urlProxy'
+import axios from '../../utils/urlProxy'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AxiosError } from 'axios';
-import bgDark_1_img from '../assets/bg-darkGreen-1.jpeg';
-import logo from '../assets/Logo.png';
+import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
+import logo from '../../assets/Logo.png';
 import { toast, ToastContainer } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -89,7 +89,7 @@ const LoginPage: React.FC = () => {
             if (response.data) {
                 toast.success('Password reset successfully!');
                 setTimeout(() => {
-                    navigate('/users/login');
+                    navigate('/user/login');
                 }, 2000);
             }
         } catch (error: unknown) {

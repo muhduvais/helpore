@@ -13,13 +13,13 @@ class AdminController {
         this.toggleIsBlocked = this.toggleIsBlocked.bind(this);
         this.getVolunteers = this.getVolunteers.bind(this);
         this.addVolunteer = this.addVolunteer.bind(this);
+        this.getUserDetails = this.getUserDetails.bind(this);
     }
 
     async getUsers(req: Request, res: Response): Promise<void> {
         const page = parseInt(req.query.page as string, 10) || 1;
         let limit = parseInt(req.query.limit as string, 10) || 5;
         const search = req.query.search as string;
-        console.log('reqHeaders: ', req.headers);
 
         let skip =  !search ? ((page - 1) * limit) : 0;
 
@@ -39,6 +39,24 @@ class AdminController {
         } catch (error) {
             console.error('Error fetching the users:', error);
             res.status(500).json({ message: 'Error fetching the users', error });
+        }
+    }
+
+    async getUserDetails(req: Request, res: Response): Promise<void> {
+
+        const userId = req.params.id;
+
+        try {
+            const user = await this.adminService.fetchUserDetails(userId);
+            
+            if (user) {
+                res.status(200).json({ success: true, user });
+            } else {
+                res.status(400).json({ success: false, message: 'User not found!' });
+            }
+        } catch (error) {
+            console.error('Error fetching the user details:', error);
+            res.status(500).json({ message: 'Error fetching the user details', error });
         }
     }
 

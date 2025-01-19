@@ -10,6 +10,15 @@ class AuthRepository {
         }
     }
 
+    async findUserById(userId: string) {
+        try {
+            return await User.findById(userId);
+        } catch (error) {
+            console.error('Error finding the user:', error);
+            return null;
+        }
+    }
+
     async createUser(newUser) {
         const { email, name, googleId, password, profilePicture } = newUser;
         const isVerified = true;

@@ -6,6 +6,7 @@ import { generateOTP } from '../utils/otp';
 import { sendOtpEmail } from './otpService';
 import { sendResetEmail } from '../utils/email';
 import { IUser } from '../interfaces/userInterface';
+import redisClient from '../utils/redisClient';
 
 class AuthService {
     private authRepository: AuthRepository;
@@ -22,26 +23,59 @@ class AuthService {
             if (existingUser) {
                 return false;
             }
+
             const hashedPassword = await bcrypt.hash(password, 10);
-
-            const newUser: Partial<IUser> = {
-                email,
-                name,
-                googleId: null,
-                password: hashedPassword,
-              };
-
-            const user = await this.authRepository.createUser(newUser);
-            const registeredMail = user.email;
+            // const newUser: Partial<IUser> = { email, name, googleId: null, password: hashedPassword };
 
             const otp = generateOTP();
-            await this.otpRepository.storeOtp(email, otp);
-            await sendOtpEmail(registeredMail, otp);
+
+            const registrationData = {
+                name,
+                email,
+                password: hashedPassword,
+                otp,
+            };
+
+            await redisClient.setEx(`temp_registration:${email}`, 3600, JSON.stringify(registrationData));
+
+            await sendOtpEmail(email, otp);
             console.log('OTP:', otp);
 
-            return registeredMail;
+            return email;
         } catch (error) {
             console.error('Error registering the user', error);
+            return null;
+        }
+    }
+
+    async resendOtp(email: string): Promise<string | null> {
+        try {
+            const redisData = await redisClient.get(`temp_registration:${email}`);
+            if (!redisData) {
+                console.log('Registration data not found in Redis');
+                return null;
+            }
+    
+            const registrationData = JSON.parse(redisData);
+    
+            const newOtp = generateOTP();
+    
+            const updatedData = {
+                ...registrationData,
+                otp: newOtp,
+            };
+    
+            await redisClient.set(
+                `temp_registration:${email}`,
+                JSON.stringify(updatedData),
+                { EX: 3600 }
+            );
+    
+            await sendOtpEmail(email, newOtp);
+    
+            return newOtp;
+        } catch (error) {
+            console.error('Error generating and resending OTP:', error);
             return null;
         }
     }
@@ -59,7 +93,31 @@ class AuthService {
 
     async verifyOtp(email: string, otp: string): Promise<boolean> {
         try {
-            return await this.otpRepository.verifyOtp(email, otp);
+            const redisData = await redisClient.get(`temp_registration:${email}`);
+            if (!redisData) {
+                console.log('Registration data not found or expired in Redis');
+                return false;
+            }
+
+            const registrationData = JSON.parse(redisData);
+
+            if (otp !== registrationData.otp) {
+                console.log('Invalid OTP');
+                return false;
+            }
+
+            const user: Partial<IUser> = {
+                email: registrationData.email,
+                name: registrationData.name,
+                password: registrationData.password,
+                googleId: null,
+            };
+
+            await this.authRepository.createUser(user);
+
+            await redisClient.del(`temp_registration:${email}`);
+
+            return true;
         } catch (error) {
             console.error('Error verifying OTP:', error);
             return false;
@@ -79,22 +137,31 @@ class AuthService {
         }
     }
 
-    async verifyRefreshToken(refreshToken: string): Promise<string | null> {
+    async generateAccessToken(userId: string, role: string): Promise<string> {
         try {
-            const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
-            return (decoded as any).userId;
-        } catch (error) {
-            console.error('Error verifying refresh token:', error);
-            return null;
-        }
-    }
-
-    async generateAccessToken(userId: string): Promise<string> {
-        try {
-            return jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '20s' });
+            return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '20s' });
         } catch (error) {
             console.error('Error generating access token:', error);
             throw new Error('Failed to generate access token');
+        }
+    }
+
+    async generateRefreshToken(userId: string, role: string): Promise<string> {
+        try {
+            return jwt.sign({ userId, role }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '1h' });
+        } catch (error) {
+            console.error('Error generating refresh token:', error);
+            throw new Error('Failed to generate refresh token');
+        }
+    }
+
+    async verifyRefreshToken(refreshToken: string): Promise<any> {
+        try {
+            const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
+            return decoded as any;
+        } catch (error) {
+            console.error('Error verifying refresh token:', error);
+            return null;
         }
     }
 
@@ -102,11 +169,11 @@ class AuthService {
         try {
             const email = profile.email;
             const existingUser = await this.authRepository.findUser(email);
-            
+
             if (existingUser) {
                 return existingUser;
             }
-            
+
             const newUser = {
                 email,
                 name: profile.name,
@@ -123,7 +190,16 @@ class AuthService {
         }
     }
 
-    async sendResetLink (email: string) {
+    async findUserById(userId: string): Promise<IUser | null> {
+        try {
+            return await this.authRepository.findUserById(userId);
+        } catch (error) {
+            console.error('Error finding the user:', error);
+            return null;
+        }
+    }
+
+    async sendResetLink(email: string) {
         try {
             const existingUser = await this.authRepository.findUser(email);
             if (!existingUser) {
@@ -146,7 +222,7 @@ class AuthService {
         }
     }
 
-    async resetPassword (email, password) {
+    async resetPassword(email, password) {
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
             await this.authRepository.resetPassword(email, hashedPassword);

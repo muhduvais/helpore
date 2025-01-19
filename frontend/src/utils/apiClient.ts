@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { store } from '../redux/store';
 import { logout, refreshToken } from '../redux/slices/authSlice';
-import { useSelector } from 'react-redux';
 
 export const customAxios = axios.create({
     baseURL: 'http://localhost:5000',
@@ -29,12 +28,10 @@ customAxios.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             console.log('Detected 401 error, attempting token refresh...');
             originalRequest._retry = true;
-            const storedRefreshToken = store.getState().auth.refreshToken;
+            const storedRefreshToken = localStorage.getItem('refreshToken');
             console.log('refreshToken: ', storedRefreshToken);
             try {
-                const refreshResponse = await customAxios.post('/api/auth/refreshToken', { refreshToken: storedRefreshToken }, {
-                    withCredentials: true,
-                });
+                const refreshResponse = await customAxios.post('/api/auth/refreshToken', { refreshToken: storedRefreshToken });
 
                 const newAccessToken = refreshResponse.data.accessToken;
                 if (newAccessToken) {
@@ -45,16 +42,8 @@ customAxios.interceptors.response.use(
                 }
             } catch (refreshError) {
                 console.error('Token refresh failed:', refreshError);
-
                 store.dispatch(logout());
-
-                const role = store.getState().auth.role;
-
-                if (role === 'admin') {
-                    window.location.href = '/admin/login';
-                } else {
-                    '/users/login';
-                }
+                return Promise.reject(refreshError);
             }
         }
 

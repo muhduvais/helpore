@@ -80,6 +80,15 @@ class AdminService {
             }
         }
 
+        async fetchUserDetails(userId: string): Promise<IUser> {
+            try {
+                return await this.adminRepository.findUserDetails(userId);
+            } catch (error) {
+                console.error('Error fetching the user details: ', error);
+                return null;
+            }
+        }
+
         // Volunteers
         async fetchVolunteers(search: string, skip: number, limit: number): Promise<IUser[]| null> {
             try {

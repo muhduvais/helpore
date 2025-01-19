@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../utils/urlProxy';
+import axios from '../../utils/urlProxy';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 import { AxiosError } from 'axios';
-import bgDark_1_img from '../assets/bg-darkGreen-1.jpeg';
-import logo from '../assets/Logo.png';
+import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
+import logo from '../../assets/Logo.png';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -78,7 +78,7 @@ const LoginPage: React.FC = () => {
 
             if (response.data) {
                 setTimeout(() => {
-                  navigate('/users/login');
+                  navigate('/user/login');
                 }, 3000);
             }
         } catch (error: unknown) {
