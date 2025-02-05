@@ -1,45 +1,50 @@
-import { Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
-import { customAxios } from '../../utils/apiClient';
+import { Navigate, Link } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { IUser } from '../../interfaces/userInterface';
-import { FaUsersLine, FaAngleRight, FaAngleLeft  } from "react-icons/fa6";
-import { CiSearch } from "react-icons/ci";
-import { Link } from 'react-router-dom';
-import { TiUserAdd } from 'react-icons/ti';
-import Sidebar from '../../components/Sidebar';
-import Topbar from '../../components/AdminTopbar';
 import { useDebounce } from 'use-debounce';
+import { FaUsers, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { CiSearch } from 'react-icons/ci';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { TiUserAdd } from 'react-icons/ti';
+import { adminService } from '../../services/adminService';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { IUser } from '@/interfaces/userInterface';
+import profile_pic from '../../assets/profile_pic.png'
 
 const AdminVolunteerManagement = () => {
-
   const [volunteers, setVolunteers] = useState<IUser[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
+  const [totalVolunteers, setTotalVolunteers] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
 
+  const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
+
   if (!isLoggedIn) {
-    return <Navigate to={'/admin/login'} />
+    return <Navigate to={'/admin/login'} />;
   }
 
   const getVolunteers = async () => {
+    setIsLoading(true);
     try {
-      const response = await customAxios.get(`/api/admin/volunteers`, {
-        params: {
-          page: currentPage,
-          limit: 5,
-          search: searchTerm.trim()
-        }
-      });
-      
+      const response = await adminService.fetchVolunteers(currentPage, 5, searchTerm.trim());
+
       if (response.status === 200) {
         setVolunteers(response.data.volunteers);
         setTotalPages(response.data.totalPages);
+        setTotalVolunteers(response.data.totalVolunteers);
       }
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -48,6 +53,8 @@ const AdminVolunteerManagement = () => {
         }
       }
       console.log('Error fetching the users!', error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -60,115 +67,150 @@ const AdminVolunteerManagement = () => {
     getVolunteers();
   }, [currentPage, debouncedSearchTerm]);
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    img.src = profile_pic;
+  };
+
   return (
-    <>
-    <div className="main-container w-[100vw] h-[100vh] bg-[#F4F4F4]">
+    <div className="table-container p-5">
 
-      {/* Sidebar */}
-      <Sidebar activeLink="/admin/volunteerManagement" />
+      {/* Breadcrumbs */}
+      <div className="flex items-center gap-x-2 my-3">
+        <Link to="/admin/volunteerManagement" className="text-sm text-[#8a8a8a]">Volunteer Management</Link>
+        <FaAngleRight className="text-[#8a8a8a]" />
+      </div>
 
-      {/* Topbar */}
-      <Topbar />
+      <div className="w-full flex justify-between items-center mb-5">
+        <div className="flex items-center gap-x-2">
+          <FaUsers className="text-xl text-[#5F5F5F]" />
+          <span className="font-bold text-xl text-[#5F5F5F]">Volunteers List</span>
+        </div>
+        <div className="flex items-center gap-x-3">
 
-      {/* Table container */}
-      <div className="table-container flex flex-col items-center px-10 py-5 ml-[240px] pt-[50px]">
-      
-      <div className="w-[100%] top-part flex items-center justify-between mt-10 mb-5">
+          <Link
+            to={'/admin/addVolunteer'}
+            className="flex items-center gap-x-2 py-1 px-3 bg-[#688D48] text-white rounded"
+          >
+            <TiUserAdd />
+            <span>Add Volunteer</span>
+          </Link>
 
-        <div className="bread-crumps">
-          <div className="crumps flex items-center gap-x-1">
-            <span className='text-sm text-[#5F5F5F]'>Volunteers Management</span>
-            <FaAngleRight className='text-[#5F5F5F]' />
+          <div className="flex items-center bg-white border p-2 rounded">
+            <CiSearch className="text-xl mr-2" />
+            <input
+              type="text"
+              className="outline-none"
+              value={searchTerm}
+              onChange={handleSearch}
+              placeholder="Search by name"
+            />
           </div>
         </div>
-
-        <div className="right-table flex items-center justify-center">
-        
-        <Link to={'/admin/addVolunteer'} className="addUser flex items-center justify-center gap-x-2 mr-3 py-1 px-3 bg-[#688D48] text-white">
-                    <TiUserAdd />
-                    <button className=''>Add Volunteer</button>
-                  </Link>
-        
-                  <div className="right shadow-[10px_0_50px_rgba(0,0,0,0.2)] flex items-center justify-center bg-white rounded
-                  ">
-                    <input type="text" className='py-2 px-3 outline-none rounded' 
-                    value={searchTerm} 
-                    onChange={handleSearch} 
-                    placeholder="Search by name"
-                    />
-                    <CiSearch className='text-xl mr-4'/>
-                  </div>
-        
-                </div>
-
       </div>
 
-      <div className="main-table shadow-[10px_0_50px_rgba(0,0,0,0.2)] w-full rounded-xl bg-white">
-        <div className="table-top bg-white w-[100%] rounded-t border-b-[1px] border-[#cdcdcd] px-10 py-3 flex items-center justify-start gap-x-3">
-        <FaUsersLine className='text-xl text-[#5F5F5F]' />
-        <span className='font-bold text-xl text-[#5F5F5F]'>Volunteers List</span>
-        </div>
+      {isLoading && (
+        <DotLottieReact
+          src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
+          loop
+          autoplay
+          style={{ width: '30px', height: '50px', paddingTop: '15px', marginBottom: '14px' }}
+        />
+      )}
 
-        <table className="w-full text-start bg-white rounded text-sm my-3">
-          <thead>
-            <tr>
-              <th className="px-10 py-3 text-start">Sl.No.</th>
-              <th className="px-10 py-3 text-start">Name</th>
-              <th className="px-10 py-3 text-start">Email</th>
-              <th className="px-10 py-3 text-start">DOJ</th>
-              <th className="px-10 py-3 text-start">Phone</th>
-              <th className="px-10 py-3 text-start">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {volunteers.length === 0 ? (
-              <tr>
-                <td className='px-10 py-3' colSpan={2}>No volunteers found</td>
-              </tr>
+      {!isLoading && (
+        <Table className="border-4 rounded">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Sl.No.</TableHead>
+              <TableHead>Profile</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>DOJ</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {volunteers?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6}>No volunteers found</TableCell>
+              </TableRow>
             ) : (
-              volunteers.map((volunteer, index) => (
-                <tr key={volunteer._id}>
-                  <td className="px-10 py-3">{(currentPage - 1) * 5 + index + 1}</td>
-                  <td className="px-10 py-3">{volunteer.name}</td>
-                  <td className="px-10 py-3">{volunteer.email}</td>
-                  <td className="px-10 py-3">{volunteer.createdAt?.toString().slice(0, 10)}</td>
-                  <td className="px-10 py-3">{volunteer.phone}</td>
-                  <td className={`px-10 py-3`}>
-                    <span className={`${volunteer.isActive ? 'bg-[#688D48]' : 'bg-[#962929]'} text-white px-4 rounded-sm`}>
-                    {volunteer.isActive ? 'Active' : 'Inactive'}
+              volunteers?.map((volunteer, index) => (
+                <TableRow key={volunteer._id}>
+                  <TableCell>{(currentPage - 1) * 5 + index + 1}</TableCell>
+                  <TableCell>
+                    <img
+                      src={volunteer.profilePicture || profile_pic}
+                      alt="Profile"
+                      className="rounded-full object-cover w-[30px] h-[30px]"
+                      onError={handleImageError}
+                    />
+                  </TableCell>
+                  <TableCell>{volunteer.name}</TableCell>
+                  <TableCell>{volunteer.email}</TableCell>
+                  <TableCell>{volunteer.createdAt?.toString().slice(0, 10)}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`${!volunteer.isBlocked ? 'bg-[#688D48]' : 'bg-[#962929]'
+                        } text-white px-4 rounded-sm`}
+                    >
+                      {!volunteer.isBlocked ? 'Active' : 'Inactive'}
                     </span>
-                  </td>
-                </tr>
+                  </TableCell>
+                  <TableCell>
+                    <Link to={`/admin/volunteerDetails/${volunteer._id}`} className="text-blue-600">
+                      View
+                    </Link>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
-      </div>
-      
-      <div className="pagination py-5 flex items-center justify-center">
-        { currentPage !== 1 && 
-        <button onClick={() => setCurrentPage(currentPage - 1)}
-        className='text-black font-bold text-sm px-2 flex items-center justify-center'
-        ><FaAngleLeft className='text-[#5F5F5F]' /><span>PREV</span></button>}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={7} className="text-right">Total Volunteers</TableCell>
+              <TableCell>{totalVolunteers}</TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      )}
+
+      {!isLoading && (
+        <div className="pagination py-5 flex items-center justify-center">
+          {currentPage !== 1 && (
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className="text-black font-bold text-sm px-2 flex items-center justify-center"
+            >
+              <FaAngleLeft className="text-[#5F5F5F]" />
+              <span>PREV</span>
+            </button>
+          )}
           {[...Array(totalPages)].map((_, index) => (
-              <button
-                  key={index}
-                  className={`text-white px-2 m-1 ${currentPage === index + 1 ? 'active bg-[#435D2C]' : 'bg-[#688D48]'}`}
-                  onClick={() => setCurrentPage(index + 1)}
-              >
-                  {index + 1}
-              </button>
+            <button
+              key={index}
+              className={`text-white px-2 m-1 ${currentPage === index + 1 ? 'active bg-[#435D2C]' : 'bg-[#688D48]'
+                }`}
+              onClick={() => setCurrentPage(index + 1)}
+            >
+              {index + 1}
+            </button>
           ))}
-          { currentPage !== totalPages && 
-          <button onClick={() => setCurrentPage(currentPage + 1)}
-          className='text-black font-bold text-sm px-2 flex items-center justify-center'
-          ><span>NEXT</span><FaAngleRight className='text-[#5F5F5F]' /></button>}
-      </div>
-      
-      </div>
+          {currentPage !== totalPages && (
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className="text-black font-bold text-sm px-2 flex items-center justify-center"
+            >
+              <span>NEXT</span>
+              <FaAngleRight className="text-[#5F5F5F]" />
+            </button>
+          )}
+        </div>
+      )}
     </div>
-    </>
-  )
-}
+  );
+};
 
 export default AdminVolunteerManagement;

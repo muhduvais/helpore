@@ -10,14 +10,13 @@ const initialState: AuthState = {
     isLoggedIn: getLocalStorage('isLoggedIn') === 'true',
     role: getLocalStorage('role') || null,
     accessToken: getLocalStorage('accessToken') || '',
-    refreshToken: getLocalStorage('refreshToken') || '',
 };
 
 const authSlice = createSlice({
     name: 'auth',
     initialState: initialState,
     reducers: {
-        login(state, action: PayloadAction<{ userId: string, accessToken: string, refreshToken: string, role: string }>) {
+        login(state, action: PayloadAction<{ userId: string, accessToken: string, role: string }>) {
             state.userId = action.payload.userId;
             state.isLoggedIn = true;
             state.role = action.payload.role;
@@ -25,7 +24,6 @@ const authSlice = createSlice({
             setLocalStorage('role', action.payload.role);
             setLocalStorage('isLoggedIn', 'true');
             setLocalStorage('accessToken', action.payload.accessToken);
-            setLocalStorage('refreshToken', action.payload.refreshToken);
         },
         logout(state) {
             state.userId = null;
@@ -35,7 +33,6 @@ const authSlice = createSlice({
             removeLocalStorage('role');
             removeLocalStorage('isLoggedIn');
             removeLocalStorage('accessToken');
-            removeLocalStorage('refreshToken');
         },
         refreshToken(state, action: PayloadAction<string>) {
             state.accessToken = action.payload;

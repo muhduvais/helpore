@@ -1,8 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
-import connectDB from './config/db';
 import adminRoutes from './routes/adminRoutes';
+import userRoutes from './routes/userRoutes';
+import connectDB from './config/db';
 import dotenv from 'dotenv';
 import { handleError } from './middlewares/errorMiddleware';
 import cookieParser from 'cookie-parser';
@@ -19,12 +20,12 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-
 app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/user', userRoutes);
 
 // Error handling middleware
 app.use(handleError);

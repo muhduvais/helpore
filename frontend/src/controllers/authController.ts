@@ -1,6 +1,6 @@
 import { FirebaseError } from 'firebase/app';
 import { auth, googleProvider, signInWithPopup } from '../config/firebase.config';
-import axios from '../utils/urlProxy'
+import customAxios from '../utils/urlProxy'
 import { AxiosError } from 'axios';
 
 export const authController = {
@@ -9,7 +9,7 @@ export const authController = {
             const result = await signInWithPopup(auth, googleProvider);
             const idToken = await result.user.getIdToken();
 
-            const response = await axios.post('/api/auth/google-login', { idToken });
+            const response = await customAxios.post('/api/auth/google-login', { idToken });
             return response.data;
         } catch (error) {
             if (error instanceof FirebaseError) {

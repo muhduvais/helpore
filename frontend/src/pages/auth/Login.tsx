@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import axios from '../../utils/urlProxy'
+import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { login } from '../../redux/slices/authSlice'
 import { Link, Navigate, useLocation } from 'react-router-dom';
@@ -7,28 +6,45 @@ import { useNavigate } from 'react-router-dom'
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
-import { authController } from '../../controllers/authController';
 import { toast, ToastContainer } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { SiTicktick } from "react-icons/si";
-import { LoginResponse } from '../../interfaces/authInterface';
 import { RootState } from '../../redux/store';
 import { useSelector } from 'react-redux';
+import { validateForm } from '../../utils/validation';
+import { authService } from '../../services/authService';
+import { authController } from '../../controllers/authController';
 
 const LoginPage: React.FC = () => {
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [emailMessage, setEmailMessage] = useState('');
-  const [passwordMessage, setPasswordMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const role = useSelector((state: RootState) => state.auth.role);
+
+  if (isLoggedIn) {
+    if (role === 'user') {
+      return <Navigate to={'/user'} />
+    } else if (role === 'volunteer') {
+      return <Navigate to={'/volunteer/dashboard'} />
+    }
+  }
+
+  const initialData = {
+    email: '',
+    password: ''
+  }
+
+  const [formData, setFormData] = useState<any>(initialData);
+  const [formErrors, setFormErrors] = useState<any>(initialData);
+  const [isLoading, setIsLoading] = useState<any>(false);
+
+  const [showPassword, setShowPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isVolunteer, setIsVolunteer] = useState(false);
+
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotMessage, setForgotMessage] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isVolunteer, setIsVolunteer] = useState(false);
+  const [forgotError, setForgotError] = useState('');
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -38,30 +54,75 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-  const role = useSelector((state: RootState) => state.auth.role);
+  // Toggle role
+  const toggleRole = (value: boolean) => {
+    setIsVolunteer(value);
+    setFormData(initialData);
+    setErrorMessage('');
+  }
 
-  console.log('pageload: ', isLoading, role);
+  // Handle Input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData({
+      ...formData,
+      [name]: value
+    })
+  }
 
-  if (isLoggedIn) {
-    if (role === 'user') {
-      return <Navigate to={'/user/dashboard'} />
-    } else if (role === 'volunteer') {
-      return <Navigate to={'/volunteer/dashboard'} />
+  // Handle login
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const selectedRole = isVolunteer ? 'volunteer' : 'user';
+
+    let hasError = false;
+
+    const newFormErrors = { ...formErrors };
+
+    Object.keys(formData).forEach((field: any) => {
+      const validationResult = validateForm(field, formData[field]);
+      if (validationResult?.error) {
+        newFormErrors[field] = validationResult.error;
+        hasError = true;
+      } else {
+        newFormErrors[field] = '';
+      }
+    });
+
+    setFormErrors(newFormErrors);
+
+    if (hasError) return;
+
+    setIsLoading(true);
+
+    try {
+      const response = await authService.login(formData, selectedRole);
+      if (response?.status === 200) {
+        const { user, accessToken } = response.data;
+        dispatch(login({ userId: user.id, accessToken, role: user.role }));
+
+        if (user.role === 'user') {
+          navigate('/user');
+        } else {
+          navigate('/volunteer/dashboard');
+        }
+      }
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 400) {
+          setErrorMessage(error.response?.data?.message || 'Invalid email or password!');
+        }
+      } else {
+        setErrorMessage('An unexpected error occured!');
+      }
+    } finally {
+      setIsLoading(false);
     }
   }
 
-  const toggleRole = (value: boolean) => {
-    setIsVolunteer(value);
-    setEmail('');
-    setPassword('');
-    setErrorMessage('');
-    setEmailMessage('');
-    setPasswordMessage('');
-  }
-
+  // Handle Google login
   const handleGoogleLogin = async () => {
-
     try {
       const response = await authController.handleGoogleLogin();
 
@@ -70,17 +131,16 @@ const LoginPage: React.FC = () => {
         return;
       }
 
-      const { user: userData, accessToken, refreshToken } = response;
+      const { user: userData, accessToken } = response;
 
-      dispatch(login({ userId: userData.id, accessToken, refreshToken, role: userData.role }));
+      dispatch(login({ userId: userData.id, accessToken, role: userData.role }));
 
-      const navigateTo = location.state?.from || '/user/dashboard';
+      const navigateTo = location.state?.from || '/user';
       navigate(navigateTo);
     } catch (error) {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
-          const errorMessage = error.response?.data?.message || 'An error occurred';
-          setErrorMessage(errorMessage);
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
         }
       } else {
         console.error('Google login failed:', error);
@@ -89,127 +149,47 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const validateEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputEmail = e.target.value.trim();
-    setEmail(inputEmail);
-
-    const validate = (email: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-
-    if ((emailMessage || errorMessage) && !validate(inputEmail)) {
-      setEmailMessage('Please enter a valid email!');
-    } else {
-      setEmailMessage('');
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const validate = (email: string) => {
-      return (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).test(email);
-    };
-
-    const inputPassword = password.trim();
-
-    setEmailMessage('');
-    setPasswordMessage('');
-
-    let isValid = true;
-
-    if (!email) {
-      setEmailMessage('Please enter the email!');
-      isValid = false;
-    } else if (!validate(email)) {
-      setEmailMessage('Please enter a valid email!');
-      isValid = false;
-    }
-
-    if (!inputPassword) {
-      setPasswordMessage('Please enter the password!');
-      isValid = false;
-    }
-
-    if (isValid) {
-
-      try {
-        const response = await axios.post<LoginResponse>('/api/auth/login', {
-          selectedRole: isVolunteer ? 'volunteer' : 'user',
-          email,
-          password: inputPassword
-        });
-
-        if (response.status !== 200) {
-          return setErrorMessage(response.data.message); // thunk middleware
-        }
-
-        if (response.data) {
-          const { user, accessToken, refreshToken } = response.data;
-
-          dispatch(login({ userId: user.id, accessToken, refreshToken, role: user.role }));
-
-          if (user.role === 'user') {
-            navigate('/user/dashboard');
-          } else {
-            navigate('/volunteer/dashboard');
-          }
-        }
-      } catch (error: unknown) {
-        // setIsLoading(false);
-        if (error instanceof AxiosError) {
-          const errorMessage = error.response?.data?.message || 'An error occurred';
-          setErrorMessage(errorMessage);
-        } else {
-          console.error('Login failed:', error);
-          setErrorMessage('An unexpected error occurred');
-        }
-      } finally {
-        // setIsLoading(false);
-      }
-    }
-  }
-
+  // Handle Forgot password
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validate = (email: string) => {
-      return (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).test(email);
-    };
+    let hasError = false;
 
-    let isValid = true;
-
-    if (!forgotEmail) {
-      setForgotMessage('Please enter your email');
-      isValid = false;
-    } else if (!validate(forgotEmail)) {
-      setForgotMessage('Please enter a valid email');
-      isValid = false;
+    const validationResult = validateForm('email', forgotEmail);
+    if (validationResult?.error) {
+      setForgotError(validationResult.error);
+      hasError = true;
+    } else {
+      setForgotError('');
     }
 
-    if (isValid) {
-      setIsLoading(true);
-      try {
-        setForgotMessage('');
-        const response = await axios.post('/api/auth/forgotPassword', { email: forgotEmail });
-        if (response.status !== 200) {
-          return setForgotMessage(response.data.message);
-        }
+    if (hasError) {
+      return;
+    }
 
-        if (response.status === 200) {
-          toast.success('Reset link has sent to your email!');
-          setShowForgotModal(false);
-        }
-      } catch (error) {
-        if (error instanceof AxiosError) {
-          const errorMessage = error.response?.data?.message;
-          setForgotMessage(errorMessage || 'Bad request!');
-        } else {
-          setForgotMessage('An unexpected error occurred');
-        }
-      } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+
+    try {
+      setForgotError('');
+      const response = await authService.forgotPassword(forgotEmail);
+      if (response.status !== 200) {
+        return setForgotError(response.data.message);
       }
-    }
 
+      if (response.status === 200) {
+        toast.success('Reset link has sent to your email!');
+        setShowForgotModal(false);
+      }
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const errorMessage = error.response?.data?.message;
+        setForgotError(errorMessage || 'Bad request!');
+      } else {
+        setForgotError('An unexpected error occurred');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
 
@@ -243,27 +223,29 @@ const LoginPage: React.FC = () => {
                   style={{ width: "30px", height: "50px", paddingTop: "15px", marginBottom: "14px" }}
                 />}
             </div>
-            {forgotMessage && <p className='opacity-90 font-semibold text-red-500 text-sm py-2 pb-3'>{forgotMessage}</p>}
+            {forgotError && <p className='opacity-90 font-semibold text-red-500 text-sm py-2 pb-3'>{forgotError}</p>}
             <form onSubmit={handleForgotPassword}>
               <input
                 type="email"
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
                 placeholder="Enter your email"
-                className={`transition-all duration-300 bg-transparent px-3 py-2 my-2 text-xl font-semibold border-b-[3px] bg-white ${forgotMessage || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}
+                className={`transition-all duration-300 bg-transparent px-3 py-2 my-2 text-xl font-semibold border-b-[3px] bg-white ${forgotError || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}
               />
               <div className="btns flex gap-x-1">
                 <button
                   onClick={handleForgotPassword}
-                  className="w-full p-2 bg-[#688D48] text-white mt-2"
+                  className={`w-full p-2 bg-[#688D48] text-white mt-2 ${isLoading ? 'opacity-80' : ''}`}
+                  disabled={isLoading}
                 >
                   Send Reset Link
                 </button>
                 <button
                   onClick={() => {
                     setShowForgotModal(false);
-                    setForgotMessage('');
+                    setForgotError('');
                     setErrorMessage('');
+                    setIsLoading(false);
                   }}
                   className="w-full p-2 bg-gray-300 text-black mt-2"
                 >
@@ -315,28 +297,28 @@ const LoginPage: React.FC = () => {
           <form onSubmit={handleLogin} className='py-3'>
 
             <div className="input-field flex flex-col p-3 pt-0 gap-y-1">
-              {emailMessage ? <label htmlFor="email" className='opacity-90 font-semibold text-red-500'>{emailMessage}</label>
+              {formErrors.email ? <label htmlFor="email" className='opacity-90 font-semibold text-red-500'>{formErrors.email}</label>
                 : <label htmlFor="email" className='opacity-75 font-semibold'>Email</label>}
               <input
                 type="text"
                 name="email"
                 id="email"
-                value={email}
-                onChange={validateEmail}
-                className={`transition-all duration-300 bg-transparent px-3 py-2 text-xl font-semibold border-b-[3px] bg-white ${emailMessage || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`transition-all duration-300 bg-transparent px-3 py-2 text-xl font-semibold border-b-[3px] bg-white ${formErrors.email || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
 
             </div>
 
             <div className="relative input-field flex flex-col p-3 pt-0 gap-y-2">
-              {passwordMessage ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500'>{passwordMessage}</label>
+              {formErrors.password ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500'>{formErrors.password}</label>
                 : <label htmlFor="password" className='opacity-75 font-semibold'>Password</label>}
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`transition-all duration-300 bg-transparent px-3 py-2  text-xl font-semibold border-b-[3px] bg-white ${passwordMessage || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
+                value={formData.password}
+                onChange={handleInputChange}
+                className={`transition-all duration-300 bg-transparent px-3 py-2  text-xl font-semibold border-b-[3px] bg-white ${formErrors.password || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
 
               <button
                 type="button"

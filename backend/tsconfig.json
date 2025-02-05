@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
   },
-  "include": ["src/**/*", "../frontend/src/types"],   
+  "include": ["src/**/*"],   
   "exclude": ["node_modules", "dist"]
 }
 

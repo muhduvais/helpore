@@ -25,11 +25,11 @@ class AuthController {
         try {
             const { name, email, password } = req.body;
             const registeredMail = await this.authService.registerUser(name, email, password);
-            
+
             if (registeredMail) {
                 res.status(201).json({ success: true, registeredMail });
             } else {
-                res.status(400).json({ success: false, message: 'This email is already registered!' });
+                res.status(400).json({ success: false, message: 'Email is already registered!' });
             }
         } catch (error) {
             console.error('Error registering the user:', error);
@@ -40,9 +40,9 @@ class AuthController {
     async resendOtp(req: Request, res: Response): Promise<void> {
         try {
             const { email } = req.body;
-    
+
             const otp = await this.authService.resendOtp(email);
-    
+
             if (otp) {
                 console.log('New OTP:', otp);
                 res.status(200).json({ success: true, message: 'OTP generated successfully!' });
@@ -72,35 +72,29 @@ class AuthController {
 
     async loginUser(req: Request, res: Response): Promise<void> {
         try {
-            const { email, password, selectedRole } = req.body;
-            
+            const { email, password } = req.body.data;
+            const selectedRole = req.body.selectedRole;
+
             const user = await this.authService.verifyLogin(email, password);
 
             if (!user || user.role !== selectedRole) {
-                res.status(400).json({ message: 'Invalid email or password!'});
+                res.status(400).json({ message: 'Invalid email or password!' });
                 return;
             }
 
             const accessToken = await this.authService.generateAccessToken(user._id, user.role);
             const refreshToken = await this.authService.generateRefreshToken(user._id, user.role);
 
-            // res.cookie("accessToken", accessToken, {
-            //     secure: false,
-            //     sameSite: "none",
-            //     maxAge: 20 * 1000,
-            // });
-            
-            // res.cookie("refreshToken", refreshToken, {
-            //     httpOnly: true,
-            //     secure: false,
-            //     sameSite: "none",
-            //     maxAge: 1 * 60 * 60 * 1000,
-            // });
-            
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 60 * 60 * 1000
+            });
+
             res.status(200).json({
                 message: 'Login successful!',
                 accessToken,
-                refreshToken,
                 user: {
                     id: user._id,
                     role: user.role,
@@ -114,8 +108,8 @@ class AuthController {
 
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
-            const refreshToken = req.body.refreshToken;
-
+            const refreshToken = req.cookies.refreshToken;
+            
             if (!refreshToken) {
                 console.log(' Refresh token is missing!');
                 res.status(403).json({ message: 'Refresh token is missing!' });
@@ -146,7 +140,7 @@ class AuthController {
             const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
             const user = await this.authService.findOrCreateUser(decodedToken);
             const userId = user._id as string;
-            const role = user.role as string; 
+            const role = user.role as string;
 
             if (!user) {
                 res.status(401).json({
@@ -158,19 +152,6 @@ class AuthController {
 
             const accessToken = await this.authService.generateAccessToken(userId, role);
             const refreshToken = await this.authService.generateRefreshToken(userId, role);
-
-            // res.cookie("accessToken", accessToken, {
-            //     secure: process.env.NODE_ENV === "production",
-            //     sameSite: "strict",
-            //     maxAge: 20 * 1000,
-            // });
-            
-            // res.cookie("refreshToken", refreshToken, {
-            //     httpOnly: true,
-            //     secure: process.env.NODE_ENV === "production",
-            //     sameSite: "strict",
-            //     maxAge: 1 * 60 * 60 * 1000,
-            // });
 
             res.status(200).json({
                 success: true,

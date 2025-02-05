@@ -1,6 +1,6 @@
 import AuthRepository from '../repositories/authRepository';
 import OtpRepository from '../repositories/otpRepository';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { generateOTP } from '../utils/otp';
 import { sendOtpEmail } from './otpService';
@@ -25,7 +25,6 @@ class AuthService {
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
-            // const newUser: Partial<IUser> = { email, name, googleId: null, password: hashedPassword };
 
             const otp = generateOTP();
 
@@ -211,7 +210,7 @@ class AuthService {
             const tokenExpiry = new Date(Date.now() + 3600 * 1000);
             await this.authRepository.storeResetToken(email, resetToken, tokenExpiry);
 
-            const resetLink = `http://localhost:5173/users/resetPassword?token=${resetToken}`;
+            const resetLink = `http://localhost:5173/user/resetPassword?token=${resetToken}`;
             await sendResetEmail(email, "Password Reset", `Click here to reset your password: ${resetLink}`);
 
             console.log("Reset link sent:", resetLink);

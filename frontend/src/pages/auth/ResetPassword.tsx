@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import axios from '../../utils/urlProxy'
+import customAxios from '../../utils/urlProxy'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
 import { toast, ToastContainer } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { authService } from '../../services/authService';
 
 const LoginPage: React.FC = () => {
 
@@ -75,23 +76,18 @@ const LoginPage: React.FC = () => {
     if (isValid) {
 
         try {
-            const response = await axios.post('/api/auth/resetPassword', { 
-                token, 
-                newPassword: inputPassword, 
-            });
-
-            console.log('Response: ', response)
+            const response = await authService.resetPassword(token, password.trim());
 
             if (response.status !== 200) {
                 return setErrorMessage(response.data.message);
             }
 
             if (response.data) {
-                toast.success('Password reset successfully!');
-                setTimeout(() => {
-                    navigate('/user/login');
-                }, 2000);
+              toast.success('Password reset successfully!', {
+                onClose: () => navigate('/user/login')
+              });
             }
+
         } catch (error: unknown) {
           if (error instanceof AxiosError) {
             const errorMessage = error.response?.data?.message || 'An error occurred';

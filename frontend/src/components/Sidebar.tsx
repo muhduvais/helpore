@@ -1,14 +1,17 @@
 import { FaUsers } from "react-icons/fa";
 import { FaUsersLine } from "react-icons/fa6";
 import { MdDashboard } from "react-icons/md";
+import { AiFillProduct } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import logo from '.././assets/Logo-black.png'
 
 const Sidebar: React.FC<{ activeLink: string }> = ({ activeLink }) => {
+    
     const menuItems = [
         { label: "Dashboard", icon: <MdDashboard />, path: "/admin/dashboard" },
         { label: "User Management", icon: <FaUsers />, path: "/admin/userManagement" },
         { label: "Volunteer Management", icon: <FaUsersLine />, path: "/admin/volunteerManagement" },
+        { label: "Asset Management", icon: <AiFillProduct />, path: "/admin/assetManagement" },
     ];
 
     return (

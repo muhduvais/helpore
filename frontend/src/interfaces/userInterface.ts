@@ -1,5 +1,6 @@
 
 export interface IUser {
+    userId?: string;
     name: string;
     age: number;
     gender: string;
@@ -17,4 +18,14 @@ export interface IUser {
     _id?: string;
     uid?: string;
     createdAt?: Date;
+}
+
+export interface UserProfileOptionsProps {
+    triggerOption: (value: string) => void;
+}
+
+export interface ChangePasswordData {
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string,
 }

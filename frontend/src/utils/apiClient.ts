@@ -1,6 +1,6 @@
-import axios from 'axios';
 import { store } from '../redux/store';
 import { logout, refreshToken } from '../redux/slices/authSlice';
+import axios from 'axios';
 
 export const customAxios = axios.create({
     baseURL: 'http://localhost:5000',
@@ -28,12 +28,11 @@ customAxios.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             console.log('Detected 401 error, attempting token refresh...');
             originalRequest._retry = true;
-            const storedRefreshToken = localStorage.getItem('refreshToken');
-            console.log('refreshToken: ', storedRefreshToken);
             try {
-                const refreshResponse = await customAxios.post('/api/auth/refreshToken', { refreshToken: storedRefreshToken });
+                const refreshResponse = await customAxios.post('/api/auth/refreshToken');
 
                 const newAccessToken = refreshResponse.data.accessToken;
+                
                 if (newAccessToken) {
                     store.dispatch(refreshToken(newAccessToken));
                     originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;

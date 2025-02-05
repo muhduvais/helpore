@@ -14,3 +14,10 @@ export interface IAddUserForm {
     country: string;
     pincode: number;
 }
+
+export interface AddAssetData {
+    name: string,
+    description: string,
+    stocks: Number | null,
+    image: string | null,
+}

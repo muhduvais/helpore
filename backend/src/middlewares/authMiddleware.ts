@@ -12,8 +12,6 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
             return;
         }
 
-        console.log('Token from middleware:', token);
-
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, decoded) => {
             if (err) {
                 if (err instanceof TokenExpiredError) {
@@ -26,7 +24,6 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
                 return;
             }
 
-            console.log('Decoded token payload:', decoded);
             req.user = decoded as JwtPayload;
             next();
         });
@@ -36,12 +33,11 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     }
 };
 
+
 export const authorizeRole = (requiredRole: string) => {
     return (req: Request, res: Response, next: NextFunction): void => {
         try {
             const user = req.user as JwtPayload | undefined;
-
-            console.log('req.user: ', user);
 
             if (!user) {
                 res.status(403).json({ message: 'User not authenticated!' });
@@ -55,7 +51,6 @@ export const authorizeRole = (requiredRole: string) => {
                 return;
             }
 
-            console.log(`User role '${role}' authorized for this route.`);
             next();
         } catch (error) {
             console.error('Role authorization error:', error);
