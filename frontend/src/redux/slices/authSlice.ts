@@ -9,6 +9,7 @@ const initialState: AuthState = {
     userId: getLocalStorage('userId') || null,
     isLoggedIn: getLocalStorage('isLoggedIn') === 'true',
     role: getLocalStorage('role') || null,
+    isBlocked: getLocalStorage('isBlocked') === 'true',
     accessToken: getLocalStorage('accessToken') || '',
 };
 
@@ -37,9 +38,23 @@ const authSlice = createSlice({
         refreshToken(state, action: PayloadAction<string>) {
             state.accessToken = action.payload;
             setLocalStorage('accessToken', action.payload);
+        },
+        blockToggle(state, action: PayloadAction<boolean>) {
+            state.isBlocked = action.payload;
+            setLocalStorage('isBlocked', String(action.payload));
+
+            if (state.role !== 'admin' && action.payload) {
+                state.userId = null;
+                state.isLoggedIn = false;
+                state.role = null;
+                removeLocalStorage('userId');
+                removeLocalStorage('role');
+                removeLocalStorage('isLoggedIn');
+                removeLocalStorage('accessToken');
+            }
         }
     },
 });
 
-export const { login, logout, refreshToken } = authSlice.actions;
+export const { login, logout, refreshToken, blockToggle } = authSlice.actions;
 export default authSlice.reducer;

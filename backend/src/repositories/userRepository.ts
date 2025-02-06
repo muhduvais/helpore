@@ -1,8 +1,9 @@
 import Address from '../models/addressModel';
 import User from '../models/userModel';
 import AssetRequest from '../models/assetRequestModel';
-import { IAsset, IAssetRequest } from '../interfaces/userInterface';
+import { BaseAssetRequest, IAsset, IAssetRequestResponse } from '../interfaces/userInterface';
 import Asset from '../models/assetModel';
+import mongoose, { FlattenMaps } from 'mongoose';
 
 class AdminRepository {
 
@@ -15,9 +16,27 @@ class AdminRepository {
         }
     }
 
+    async updateUser(id: string, submitData: any) {
+        try {
+            return await User.findByIdAndUpdate(id, submitData);
+        } catch (error) {
+            console.error('Error updating the user:', error);
+            return null;
+        }
+    }
+
+    async updateAddress(id: string, submitData: any) {
+        try {
+            return await Address.findOneAndUpdate({ entity: id }, { $set: submitData} );
+        } catch (error) {
+            console.error('Error updating the address:', error);
+            return null;
+        }
+    }
+
     async findAddressDetails(id: string) {
         try {
-            return await Address.findById(id);
+            return await Address.findOne({ entity: id });
         } catch (error) {
             console.error('Error finding the user:', error);
             return null;
@@ -72,11 +91,12 @@ class AdminRepository {
     }
 
     // Request asset
-    async createAssetRequest(assetId: string, userId: string, requestedDate: Date) {
+    async createAssetRequest(assetId: string, userId: string, requestedDate: Date, quantity: number) {
         try {
-            console.log('Requested date: ', requestedDate)
-            const assetRequest = new AssetRequest({ asset: assetId, user: userId, requestedDate, status: 'pending' });
+            console.log('qty: ', quantity)
+            const assetRequest = new AssetRequest({ asset: assetId, user: userId, requestedDate, quantity, status: 'pending' });
             await assetRequest.save();
+            await Asset.findByIdAndUpdate(assetId, { $inc: { stocks: -quantity } })
             return true;
         } catch (error) {
             console.error('Error creating the request:', error);
@@ -84,18 +104,53 @@ class AdminRepository {
         }
     }
 
-    async findAssetRequests(query: object, skip: number, limit: number): Promise<IAssetRequest[]> | null {
+    async findAssetRequests(search: string, filter: string, userId: string, skip: number, limit: number): Promise<IAssetRequestResponse[] | null> {
         try {
-            return await AssetRequest.find(query).skip(skip).limit(limit);
+            const matchStage: any = filter ? { user: new mongoose.Types.ObjectId(userId), status: filter } : { user: new mongoose.Types.ObjectId(userId) };
+
+            if (search) {
+                matchStage['asset.name'] = { $regex: search, $options: 'i' };
+            }
+
+            const requests = await AssetRequest.aggregate([
+                { $match: { user: new mongoose.Types.ObjectId(userId) } },
+                {
+                    $lookup: {
+                        from: 'assets',
+                        localField: 'asset',
+                        foreignField: '_id',
+                        as: 'asset'
+                    }
+                },
+                { $unwind: '$asset' },
+                { $match: matchStage },
+                { $skip: skip },
+                { $limit: limit },
+                {
+                    $project: {
+                        _id: 1,
+                        asset: 1,
+                        requestedDate: 1,
+                        quantity: 1,
+                        status: 1,
+                        comment: 1,
+                        createdAt: 1,
+                        updatedAt: 1
+                    }
+                }
+            ]);
+
+            return requests as IAssetRequestResponse[];
         } catch (error) {
             console.error('Error finding the asset requests:', error);
             return null;
         }
     }
 
+
     async countAssetRequests(userId: string): Promise<number> {
         try {
-            return await User.countDocuments({ user: userId });
+            return await AssetRequest.countDocuments({ user: userId });
         } catch (error) {
             console.error('Error counting the assetRequests:', error);
             return 0;
@@ -108,6 +163,16 @@ class AdminRepository {
         } catch (error) {
             console.error('Error finding the asset request:', error);
             return null;
+        }
+    }
+
+    async updateProfilePicture(userId: string, profilePicture: string) {
+        try {
+            await User.findByIdAndUpdate(userId, { profilePicture });
+            return true;
+        } catch (error) {
+            console.error('Error updating the profile picture:', error);
+            return false;
         }
     }
 

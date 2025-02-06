@@ -17,7 +17,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { adminService } from '@/services/adminService';
 import { IAsset } from '@/interfaces/adminInterface';
-import { useToast } from "@/hooks/use-toast";
+import { validateAddAsset } from '@/utils/validation';
+import { AddAssetFormData, AddAssetFormErrors } from '@/interfaces/authInterface';
+import { AxiosError } from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 interface EditAssetModalProps {
     isOpen: boolean;
@@ -26,21 +31,39 @@ interface EditAssetModalProps {
     onAssetUpdated: (updatedAsset: IAsset) => void;
 }
 
+const initialData = {
+    name: '',
+    category: '',
+    description: '',
+    stocks: 0,
+    image: null as File | null,
+};
+
+const initialErrorData = {
+    name: '',
+    category: '',
+    description: '',
+    stocks: '',
+    image: '',
+};
+
 const EditAssetModal: React.FC<EditAssetModalProps> = ({
     isOpen, onClose, asset, onAssetUpdated
 }) => {
-    const { toast } = useToast();
+
+    const navigate = useNavigate();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [file, setFile] = useState<File | string | null>(null);
+    const [isFileChanged, setIsFileChanged] = useState<boolean>(false);
 
-    const [formData, setFormData] = useState({
-        name: '',
-        description: '',
-        category: '',
-        stocks: 0,
-        image: null as File | null
-    });
+    const [formData, setFormData] = useState<AddAssetFormData>(initialData);
+    const [formErrors, setFormErrors] = useState<AddAssetFormErrors>(initialErrorData);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isImageLoading, setIsImageLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         if (asset) {
@@ -51,6 +74,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                 stocks: asset.stocks || 0,
                 image: null
             });
+            setFile(asset.image);
             setPreviewImage(asset.image || null);
             setErrors({});
         }
@@ -68,65 +92,85 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
         const file = e.target.files?.[0];
+
+        setIsFileChanged(true);
+
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
                 setErrors(prev => ({ ...prev, image: 'Image size should be less than 5MB' }));
                 return;
             }
             setFormData(prev => ({ ...prev, image: file }));
+            setFile(file);
             setPreviewImage(URL.createObjectURL(file));
             setErrors(prev => ({ ...prev, image: '' }));
         }
     };
 
-    const validateForm = () => {
-        const newErrors: Record<string, string> = {};
-        
-        if (!formData.name.trim()) newErrors.name = "Name is required";
-        if (!formData.description.trim()) newErrors.description = "Description is required";
-        if (!formData.category) newErrors.category = "Category is required";
-        if (formData.stocks < 0) newErrors.stocks = "Stock cannot be negative";
-        
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!validateForm()) return;
-        
-        setIsSubmitting(true);
-        try {
-            const submitData = new FormData();
-            submitData.append('name', formData.name);
-            submitData.append('description', formData.description);
-            submitData.append('category', formData.category);
-            submitData.append('stocks', formData.stocks.toString());
+        setErrorMessage('');
 
-            if (formData.image) {
-                submitData.append('image', formData.image);
+        let uploadedImageUrl = null;
+
+        if (file && isFileChanged) {
+            const formFileData = new FormData();
+            formFileData.append('file', file);
+
+            setIsImageLoading(true);
+
+            try {
+                const uploadResponse = await adminService.uploadAssetImage(formFileData);
+                uploadedImageUrl = uploadResponse.data.imageUrl;
+            } catch (error: any) {
+                setErrorMessage( error.response?.data?.message || 'Failed to upload asset image!');
+                console.error('File uploading error: ', error);
+                return;
+            } finally {
+                setIsImageLoading(false);
             }
+        }
 
-            const response = await adminService.updateAsset(asset?._id || '', submitData);
+        const finalFormData = {
+            ...formData,
+            image: uploadedImageUrl || file,
+            stocks: Number(formData.stocks),
+        };
 
-            if (response.status === 200) {
-                toast({
-                    title: "Success!",
-                    description: "Asset has been successfully updated.",
-                    variant: "default"
-                });
-                onAssetUpdated(response.data);
-                onClose();
+        const { errors } = validateAddAsset(finalFormData);
+        setFormErrors({...errors, ['image']: ''});
+
+        let isFormValid = false;
+
+        if (formErrors === initialErrorData) {
+            isFormValid = true;
+        }
+
+        if (!isFormValid) return;
+
+        setIsLoading(true);
+
+        try {
+            const response = await adminService.updateAsset(asset?._id as string, finalFormData);
+
+            if (response.data) {
+                console.log('response', response)
+                toast.success('Asset updated successfully!');
+                onAssetUpdated(response.data.asset);
             }
         } catch (error) {
-            toast({
-                title: "Error",
-                description: "Failed to update asset. Please try again.",
-                variant: "destructive"
-            });
+            console.log('err response: ', error)
+            if (error instanceof AxiosError) {
+                const errorMessage = error.response?.data?.message || 'An error occurred';
+                setErrorMessage(errorMessage);
+            } else {
+                console.error('Asset updation failed:', error);
+                setErrorMessage('An unexpected error occurred');
+            }
         } finally {
-            setIsSubmitting(false);
+            setIsLoading(false);
         }
     };
 
@@ -145,6 +189,8 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                     </DialogDescription>
                 </DialogHeader>
 
+                {errorMessage && <p className='text-sm text-red-500'>{errorMessage}</p>}
+
                 <form onSubmit={handleSubmit} className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-start gap-4">
                         <Label htmlFor="name" className="text-right pt-2">
@@ -156,12 +202,12 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                 name="name"
                                 value={formData.name}
                                 onChange={handleInputChange}
-                                className={`${errors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                className={`${formErrors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
                                 required
                             />
-                            {errors.name && (
+                            {formErrors.name && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                    <FaExclamationCircle size={12} /> {errors.name}
+                                    <FaExclamationCircle size={12} /> {formErrors.name}
                                 </p>
                             )}
                         </div>
@@ -177,12 +223,12 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                 name="description"
                                 value={formData.description}
                                 onChange={handleInputChange}
-                                className={`${errors.description ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                className={`${formErrors.description ? 'border-red-500 focus:ring-red-500' : ''}`}
                                 required
                             />
-                            {errors.description && (
+                            {formErrors.description && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                    <FaExclamationCircle size={12} /> {errors.description}
+                                    <FaExclamationCircle size={12} /> {formErrors.description}
                                 </p>
                             )}
                         </div>
@@ -194,14 +240,13 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                         </Label>
                         <div className="col-span-3">
                             <Select
-                                defaultValue={asset?.category}
                                 value={formData.category}
                                 onValueChange={(value) => {
                                     setFormData(prev => ({ ...prev, category: value }));
                                     setErrors(prev => ({ ...prev, category: '' }));
                                 }}
                             >
-                                <SelectTrigger className={`${errors.category ? 'border-red-500' : ''}`}>
+                                <SelectTrigger className={`${formErrors.category ? 'border-red-500' : ''}`}>
                                     <SelectValue placeholder="Select a category" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -212,9 +257,9 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.category && (
+                            {formErrors.category && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                    <FaExclamationCircle size={12} /> {errors.category}
+                                    <FaExclamationCircle size={12} /> {formErrors.category}
                                 </p>
                             )}
                         </div>
@@ -229,15 +274,15 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                 id="stocks"
                                 name="stocks"
                                 type="number"
-                                value={formData.stocks}
+                                value={Number(formData.stocks)}
                                 onChange={handleInputChange}
-                                className={`${errors.stocks ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                className={`${formErrors.stocks ? 'border-red-500 focus:ring-red-500' : ''}`}
                                 min="0"
                                 required
                             />
-                            {errors.stocks && (
+                            {formErrors.stocks && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                    <FaExclamationCircle size={12} /> {errors.stocks}
+                                    <FaExclamationCircle size={12} /> {formErrors.stocks}
                                 </p>
                             )}
                         </div>
@@ -254,7 +299,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                     type="file"
                                     accept="image/*"
                                     onChange={handleImageChange}
-                                    className={`flex-grow ${errors.image ? 'border-red-500' : ''}`}
+                                    className={`flex-grow ${formErrors.image ? 'border-red-500' : ''}`}
                                 />
                                 {previewImage && (
                                     <div className="relative">
@@ -267,7 +312,6 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                             type="button"
                                             onClick={() => {
                                                 setPreviewImage(null);
-                                                setFormData(prev => ({ ...prev, image: null }));
                                             }}
                                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 
                                                      hover:bg-red-600 transition-colors"
@@ -277,9 +321,9 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                     </div>
                                 )}
                             </div>
-                            {errors.image && (
+                            {formErrors.image && (
                                 <p className="text-red-500 text-sm flex items-center gap-1">
-                                    <FaExclamationCircle size={12} /> {errors.image}
+                                    <FaExclamationCircle size={12} /> {formErrors.image}
                                 </p>
                             )}
                             <p className="text-sm text-gray-500">
@@ -310,7 +354,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                 </>
                             ) : (
                                 <>
-                                    <FaSave className="mr-2" /> Save Changes
+                                    <FaSave className="mr-2" /> {isImageLoading ? 'Saving...' : 'Save Changes'}
                                 </>
                             )}
                         </Button>

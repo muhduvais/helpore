@@ -19,6 +19,7 @@ class AuthController {
         this.googleLogin = this.googleLogin.bind(this);
         this.forgotPassword = this.forgotPassword.bind(this);
         this.resetPassword = this.resetPassword.bind(this);
+        this.authenticateUser = this.authenticateUser.bind(this);
     }
 
     async registerUser(req: Request, res: Response): Promise<void> {
@@ -150,6 +151,14 @@ class AuthController {
                 return;
             }
 
+            if (user.isBlocked) {
+                res.status(403).json({
+                    success: false,
+                    message: "Invalid email or password!"
+                });
+                return;
+            }
+
             const accessToken = await this.authService.generateAccessToken(userId, role);
             const refreshToken = await this.authService.generateRefreshToken(userId, role);
 
@@ -200,6 +209,17 @@ class AuthController {
             res.status(200).json({ message: 'Password reset successful' });
         } catch (error) {
             res.status(400).json({ message: 'Invalid or expired token' });
+        }
+    }
+
+    async authenticateUser(req: Request, res: Response): Promise<void> {
+        const userId = req.params.id;
+        try {
+            const isBlocked = await this.authService.findIsBlocked(userId);
+            res.status(200).json({ isBlocked, message: 'Authenticated user successfully!' });
+        } catch (error) {
+            console.log('Error authenticating the user!');
+            res.status(500).json({ isBlocked: false, message: 'Error authenticating the user!' });
         }
     }
 }

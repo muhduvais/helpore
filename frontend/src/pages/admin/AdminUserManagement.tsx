@@ -131,12 +131,12 @@ const AdminUserManagement = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.length === 0 ? (
+            {users?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6}>No users found</TableCell>
               </TableRow>
             ) : (
-              users.map((user, index) => (
+              users?.map((user, index) => (
                 <TableRow key={user._id}>
                   <TableCell>{(currentPage - 1) * 5 + index + 1}</TableCell>
                   <TableCell>
@@ -187,7 +187,7 @@ const AdminUserManagement = () => {
               <span>PREV</span>
             </button>
           )}
-          {[...Array(totalPages)].map((_, index) => (
+          {[...Array(totalPages)]?.map((_, index) => (
             <button
               key={index}
               className={`text-white px-2 m-1 ${currentPage === index + 1 ? 'active bg-[#435D2C]' : 'bg-[#688D48]'

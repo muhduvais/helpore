@@ -22,9 +22,12 @@ class AdminController {
         this.getVolunteerDetails = this.getVolunteerDetails.bind(this);
         this.getAssetDetails = this.getAssetDetails.bind(this);
         this.updateAsset = this.updateAsset.bind(this);
+        this.fetchAssetRequests = this.fetchAssetRequests.bind(this);
+        this.updateAssetRequestStatus = this.updateAssetRequestStatus.bind(this);
     }
 
     async getUsers(req: Request, res: Response): Promise<void> {
+
         const page = parseInt(req.query.page as string, 10) || 1;
         let limit = parseInt(req.query.limit as string, 10) || 5;
         const search = req.query.search as string;
@@ -53,9 +56,10 @@ class AdminController {
 
         try {
             const user = await this.adminService.fetchUserDetails(userId);
+            const address = await this.adminService.fetchAddress(userId);
 
             if (user) {
-                res.status(200).json({ success: true, user });
+                res.status(200).json({ success: true, user, address });
             } else {
                 res.status(400).json({ success: false, message: 'User not found!' });
             }
@@ -277,6 +281,57 @@ class AdminController {
             res.status(500).json({ message: 'Error updating the asset details', error });
         }
     }
+
+    async fetchAssetRequests(req: Request, res: Response): Promise<void> {
+        try {
+            const { search, page = 1, limit = 10, sort = "desc", user, status = 'all' } = req.query;
+            console.log('req: ', req.query)
+
+            const skip = (Number(page) - 1) * Number(limit);
+
+            const documentsCount = await this.adminService.countAssetRequests(search);
+            const totalPages = Math.ceil(documentsCount / Number(limit));
+
+            const assetRequests = await this.adminService.fetchAssetRequests(
+                search as string,
+                skip,
+                Number(limit),
+                user as string,
+                sort as string,
+                status as string,
+            );
+
+            if (!assetRequests) {
+                res.status(404).json({ message: "No asset requests found" });
+                return;
+            }
+
+            res.status(200).json({ assetRequests, totalPages, totalRequests: documentsCount });
+        } catch (error) {
+            console.error("Error getting asset requests:", error);
+            res.status(500).json({ message: "Server error" });
+        }
+    }
+
+    async updateAssetRequestStatus(req: Request, res: Response): Promise<void> {
+        const requestId = req.params.id;
+        const { status, comment } = req.body;
+
+        try {
+            const updatedRequest = await this.adminService.updateStatus(requestId, status, comment);
+
+            if (!updatedRequest) {
+                res.status(404).json({ message: 'Asset request not found' });
+                return;
+            }
+
+            res.status(200).json(updatedRequest);
+        } catch (error) {
+            console.error('Error updating asset request status:', error);
+            res.status(500).json({ message: 'An error occurred while updating the asset request' });
+        }
+    }
+
 }
 
 export default new AdminController();

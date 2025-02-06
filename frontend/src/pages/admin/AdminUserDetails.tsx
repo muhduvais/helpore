@@ -2,7 +2,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
-import { FaAngleRight, FaUser, FaEnvelope, FaPhone } from "react-icons/fa";
+import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe } from "react-icons/fa";
 import { IUser } from '../../interfaces/userInterface';
 import profile_pic from '../../assets/profile_pic.png';
 import { Link } from 'react-router-dom';
@@ -23,11 +23,22 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+interface IAddress {
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    pincode: number;
+    latitude: string;
+    longtitude: string;
+}
+
 const AdminUserDetails = () => {
     const params = useParams();
     const userId = params.id || '';
 
     const [user, setUser] = useState<IUser | null>(null);
+    const [address, setAddress] = useState<IAddress | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>('');
 
@@ -44,6 +55,7 @@ const AdminUserDetails = () => {
             const response = await adminService.fetchUserDetails(userId);
             if (response.status === 200) {
                 setUser(response.data.user);
+                setAddress(response.data.address);
             }
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -203,6 +215,49 @@ const AdminUserDetails = () => {
                             </div>
                         </div>
                     </div>
+                </CardContent>
+            </Card>
+
+            {/* Address Section */}
+            <Card>
+                <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold mb-4">Address Information</h3>
+                    {address ? (
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <UserInfoField
+                                icon={FaMapMarkerAlt}
+                                label="Street Address"
+                                value={address.street}
+                            />
+                            <UserInfoField
+                                icon={FaCity}
+                                label="City"
+                                value={address.city}
+                            />
+                            <UserInfoField
+                                icon={FaCity}
+                                label="State"
+                                value={address.state}
+                            />
+                            <UserInfoField
+                                icon={FaGlobe}
+                                label="Country"
+                                value={address.country}
+                            />
+                            <UserInfoField
+                                icon={FaMapMarkerAlt}
+                                label="Pincode"
+                                value={address.pincode.toString()}
+                            />
+                            <UserInfoField
+                                icon={FaMapMarkerAlt}
+                                label="Location"
+                                value={`${address.latitude}, ${address.longtitude}`}
+                            />
+                        </div>
+                    ) : (
+                        <p className="text-gray-500">No address information available</p>
+                    )}
                 </CardContent>
             </Card>
 

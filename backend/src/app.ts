@@ -12,10 +12,10 @@ dotenv.config();
 
 const app = express();
 
-const CLIENT_PORT = parseInt(process.env.CLIENT_PORT, 10);
+const CLIENT_URL = process.env.CLIENT_URL;
 
 app.use(cors({
-  origin: `http://localhost:${CLIENT_PORT}`,
+  origin: CLIENT_URL,
   credentials: true,
 }));
 
@@ -33,7 +33,8 @@ app.use(handleError);
 connectDB();
 
 const PORT = parseInt(process.env.PORT, 10);
+const SERVER_URL = process.env.SERVER_URL;
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on ${SERVER_URL}`);
 });

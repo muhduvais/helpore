@@ -3,7 +3,7 @@ import User from '../models/userModel';
 class AuthRepository {
     async findUser(email: string) {
         try {
-            return await User.findOne({ email });
+            return await User.findOne({ email, isBlocked: false });
         } catch (error) {
             console.error('Error finding the user:', error);
             return null;
@@ -15,6 +15,16 @@ class AuthRepository {
             return await User.findById(userId);
         } catch (error) {
             console.error('Error finding the user:', error);
+            return null;
+        }
+    }
+
+    async findIsBlocked(userId: string) {
+        try {
+            const user = await User.findById(userId);
+            return user.isBlocked;
+        } catch (error) {
+            console.error('Error authenticating the user:', error);
             return null;
         }
     }

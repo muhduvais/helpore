@@ -13,7 +13,7 @@ export interface IAsset {
     category: string;
     description: string;
     stocks: number;
-    image: string;
+    image: string | null;
     createdAt: string;
     updatedAt: string;
 }

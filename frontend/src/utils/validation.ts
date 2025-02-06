@@ -167,12 +167,6 @@ export const validateChangePassword = (formData: ChangePasswordFormData) => {
   if (!formData.currentPassword.trim()) {
     errors.currentPassword = 'Current password required'
     isValid = false
-  } else if (formData.currentPassword.length < 8) {
-    errors.currentPassword = 'Password must be at least 8 characters'
-    isValid = false
-  } else if (!/(?=.*[0-9])(?=.*[!@#$%^&*])/.test(formData.currentPassword)) {
-    errors.currentPassword = 'Password must include a number and special character'
-    isValid = false
   }
 
   if (!formData.newPassword.trim()) {

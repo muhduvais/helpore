@@ -1,14 +1,14 @@
 import AdminRepository from '../repositories/adminRepository';
-import { IAsset, IUser } from '../interfaces/userInterface';
+import { IAsset, IAssetRequestResponse, IUser } from '../interfaces/userInterface';
 import bcrypt from 'bcryptjs';
-import { AddAssetData, IAddUserForm } from '../interfaces/adminInterface';
+import { IAddUserForm } from '../interfaces/adminInterface';
 import { IAddress } from '../interfaces/userInterface';
 import cloudinary from 'cloudinary';
 
 cloudinary.v2.config({
-    cloud_name: 'dq7kramm9',
-    api_key: '166253346469816',
-    api_secret: 'KL3TNbaCxAAiIzx1vXj2aI15o1g',
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 class AdminService {
@@ -128,6 +128,15 @@ class AdminService {
         }
     }
 
+    async fetchAddress(userId: string): Promise<IAddress> {
+        try {
+            return await this.adminRepository.findAddress(userId);
+        } catch (error) {
+            console.error('Error fetching the address details: ', error);
+            return null;
+        }
+    }
+
     // Volunteers
     async fetchVolunteers(search: string, skip: number, limit: number): Promise<IUser[] | null> {
         try {
@@ -203,23 +212,23 @@ class AdminService {
             if (!file.path) {
                 throw new Error('No file path provided');
             }
-    
+
             const randomDigits = Math.floor(100000 + Math.random() * 900000);
-            
+
             console.log('Attempting to upload to Cloudinary:', {
                 path: file.path,
                 publicId: `asset-images/${randomDigits}`
             });
-    
+
             const uploadResponse = await cloudinary.v2.uploader.upload(file.path, {
                 public_id: `asset-images/${randomDigits}`,
                 folder: 'assets',
                 resource_type: 'auto',
                 secure: true,
             });
-    
+
             console.log('Cloudinary upload successful:', uploadResponse.secure_url);
-    
+
             return uploadResponse.secure_url;
         } catch (error) {
             console.error('Error in uploadAssetImage service:', error);
@@ -254,6 +263,49 @@ class AdminService {
             return null;
         }
     }
+
+    async countAssetRequests(search: any): Promise<number> {
+        try {
+            let query: any = {};
+
+            if (search) {
+                query["asset.name"] = { $regex: search, $options: "i" };
+            }
+            return await this.adminRepository.countAssetRequests(query);
+        } catch (error) {
+            console.error('Error counting the asset requests:', error);
+            return 0;
+        }
+    }
+
+    async fetchAssetRequests(
+        search: string,
+        skip: number,
+        limit: number,
+        userId: string,
+        sort: string,
+        status: string,
+    ): Promise<IAssetRequestResponse[] | null> {
+        try {
+            const result = await this.adminRepository.findAssetRequests(search, skip, userId, limit, sort, status);
+            return result;
+        } catch (error) {
+            console.error("Error fetching asset requests:", error);
+            return null;
+        }
+    }
+
+    async updateStatus(requestId: string, status: string, comment: string) {
+        try {
+            const updatedRequest = await this.adminRepository.updateStatus(requestId, status, comment);
+
+            return updatedRequest;
+        } catch (error) {
+            console.error('Error updating asset request status in service:', error);
+            throw error;
+        }
+    }
+
 }
 
 export default AdminService;

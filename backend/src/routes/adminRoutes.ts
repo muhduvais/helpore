@@ -17,8 +17,7 @@ const storage = multer.diskStorage({
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (!allowedTypes.includes(file.mimetype)) {
-        cb(new Error('Invalid file type. Only JPEG, JPG and PNG allowed!'));
-        return;
+        return cb(new Error('Invalid file type. Only JPEG, JPG, and PNG allowed!'));
     }
     cb(null, true);
 };
@@ -31,6 +30,18 @@ const upload = multer({
     }
 });
 
+// Asset image uploading
+adminRoutes.post('/assetImage', (req, res, next) => {
+    upload.single('file')(req, res, (err) => {
+        if (err instanceof multer.MulterError) {
+            return res.status(400).json({ success: false, message: err.message });
+        } else if (err) {
+            return res.status(400).json({ success: false, message: err.message });
+        }
+        next();
+    });
+}, adminController.uploadAssetImage);
+
 adminRoutes.use(authenticateToken);
 adminRoutes.use(authorizeRole('admin'));
 
@@ -39,7 +50,10 @@ adminRoutes.get('/assets', adminController.getAssets);
 adminRoutes.get('/assets/:id', adminController.getAssetDetails);
 adminRoutes.post('/assets', adminController.addAsset);
 adminRoutes.put('/assets/:id', adminController.updateAsset);
-adminRoutes.post('/assetImage', upload.single('file'), adminController.uploadAssetImage);
+
+// Asset requests
+adminRoutes.get('/assetRequests', adminController.fetchAssetRequests);
+adminRoutes.patch('/assetRequests/:id', adminController.updateAssetRequestStatus);
 
 // Users
 adminRoutes.get('/users', adminController.getUsers);

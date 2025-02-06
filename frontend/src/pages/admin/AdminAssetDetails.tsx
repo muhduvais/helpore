@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AxiosError } from 'axios';
 import { Card } from "@/components/ui/card";
@@ -13,9 +13,10 @@ import {
     FaHistory,
     FaBoxOpen,
     FaClipboardList,
-    FaQrcode
+    FaQrcode,
+    FaTimes
 } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { adminService } from '@/services/adminService';
 import { IAsset } from '@/interfaces/adminInterface';
@@ -23,11 +24,16 @@ import asset_picture from '../../assets/asset_picture.png';
 import EditAssetModal from '@/components/AdminEditAsset';
 
 const AdminAssetDetails = () => {
+
+    const [pageParams] = useSearchParams();
+    const page = Number(pageParams.get('page')) || 1;
+
     const { id } = useParams();
     const [asset, setAsset] = useState<IAsset | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
@@ -35,28 +41,28 @@ const AdminAssetDetails = () => {
         return <Navigate to={'/admin/login'} />;
     }
 
-    useEffect(() => {
-        const fetchAssetDetails = async () => {
-            try {
-                setIsLoading(true);
-                const assetId = id || '';
-                const response = await adminService.fetchAssetDetails(assetId);
-                if (response.status === 200) {
-                    setAsset(response.data.asset);
-                }
-            } catch (error) {
-                if (error instanceof AxiosError) {
-                    setError(error.response?.data.message || 'Error fetching asset details');
-                } else {
-                    setError('An unexpected error occurred');
-                }
-            } finally {
-                setIsLoading(false);
+    const fetchAssetDetails = async () => {
+        try {
+            setIsLoading(true);
+            const assetId = id || '';
+            const response = await adminService.fetchAssetDetails(assetId);
+            if (response.status === 200) {
+                setAsset(response.data.asset);
             }
-        };
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                setError(error.response?.data.message || 'Error fetching asset details');
+            } else {
+                setError('An unexpected error occurred');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchAssetDetails();
-    }, [id]);
+    }, [id])
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
         e.currentTarget.src = asset_picture;
@@ -87,6 +93,7 @@ const AdminAssetDetails = () => {
     const handleAssetUpdated = (updatedAsset: IAsset) => {
         setAsset(updatedAsset);
         setIsEditModalOpen(false);
+        fetchAssetDetails();
     };
 
     if (error) {
@@ -100,7 +107,7 @@ const AdminAssetDetails = () => {
                 <FaWarehouse className="mx-auto text-6xl text-gray-300 mb-4 animate-pulse" />
                 <h3 className="text-2xl font-bold text-gray-600 mb-2">Oops! Asset Not Found</h3>
                 <p className="text-gray-500 mb-6">{error}</p>
-                <Link to="/admin/assets">
+                <Link to={`/admin/assetManagement?page=${page}`}>
                     <Button variant="outline" className="hover:bg-[#688D48] hover:text-white transition-all">
                         <FaArrowLeft className="mr-2" />
                         Back to Assets
@@ -112,6 +119,41 @@ const AdminAssetDetails = () => {
 
     return (
         <>
+            {/* Image Expansion Modal */}
+            <AnimatePresence>
+                {expandedImage && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+                        onClick={() => setExpandedImage(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.9 }}
+                            className="relative max-w-[40vw] max-h-[40vw]"
+                        >
+                            <motion.img
+                                src={expandedImage}
+                                alt="Expanded Asset"
+                                className="max-w-full max-h-full object-contain"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="absolute top-4 right-4 text-white text-3xl"
+                                onClick={() => setExpandedImage(null)}
+                            >
+                                <FaTimes />
+                            </motion.button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {isEditModalOpen &&
                 <EditAssetModal
                     isOpen={isEditModalOpen}
@@ -130,7 +172,7 @@ const AdminAssetDetails = () => {
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div className="flex items-center gap-3">
-                        <Link to="/admin/assetManagement">
+                        <Link to={`/admin/assetManagement?page=${page}`}>
                             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                                 <Button variant="ghost" size="icon">
                                     <FaArrowLeft className="text-[#688D48]" />
@@ -173,7 +215,10 @@ const AdminAssetDetails = () => {
                         className="lg:col-span-1"
                     >
                         <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                            <div className="aspect-video w-full overflow-hidden bg-gray-100 relative">
+                            <div
+                                className="aspect-video w-full overflow-hidden bg-gray-100 relative cursor-pointer"
+                                onClick={() => setExpandedImage(asset?.image || asset_picture)}
+                            >
                                 <motion.img
                                     whileHover={{ scale: 1.05 }}
                                     transition={{ duration: 0.3 }}

@@ -15,6 +15,7 @@ import VolunteerRoutes from './routes/volunteerRoutes';
 import AdminRoutes from './routes/adminRoutes';
 import NotFound404 from './pages/NotFound404';
 import { SidebarProvider } from './context/sidebarContext';
+import LandingPage from './pages/user/LandingPage';
 
 function App() {
 
@@ -37,7 +38,9 @@ function App() {
           <SidebarProvider>
             <Routes>
               {/* Auth Routes */}
-              <Route path="/" element={<Navigate to="/user/login" replace />} />
+              <Route path="/" element={<Navigate to="/home" replace />} />
+              <Route path="/home" element={<LandingPage />} />
+
               <Route path="/user/login" element={<LoginPage />} />
               <Route path="/user/register" element={<RegisterPage />} />
               <Route path="/user/verifyOtp" element={<OtpVerification />} />

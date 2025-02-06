@@ -23,6 +23,8 @@ class UserController {
         this.getAssetRequestDetails = this.getAssetRequestDetails.bind(this);
         this.getAssets = this.getAssets.bind(this);
         this.getAssetDetails = this.getAssetDetails.bind(this);
+        this.updateProfilePicture = this.updateProfilePicture.bind(this);
+        this.updateUserDetails = this.updateUserDetails.bind(this);
     }
 
     async getUserDetails(req: Request, res: Response): Promise<void> {
@@ -40,6 +42,21 @@ class UserController {
         } catch (error) {
             console.error('Error fetching the user details:', error);
             res.status(500).json({ message: 'Error fetching the user details', error });
+        }
+    }
+
+    async updateUserDetails(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = req.user.userId;
+            const { formData } = req.body;
+            const registeredMail = await this.userService.editUser(userId, formData);
+
+            if (registeredMail) {
+                res.status(200).json({ success: true, registeredMail });
+            }
+        } catch (error) {
+            console.error('Error registering the user:', error);
+            res.status(500).json({ message: 'Error registering user', error });
         }
     }
 
@@ -70,6 +87,7 @@ class UserController {
     }
 
     async getAssets(req: Request, res: Response): Promise<void> {
+        
         const page = parseInt(req.query.page as string, 10) || 1;
         let limit = parseInt(req.query.limit as string, 10) || 5;
         const search = req.query.search as string;
@@ -117,10 +135,10 @@ class UserController {
 
         const assetId = req.params.id;
         const userId = req.user.userId;
-        const requestedDate = req.body.requestedDate;
-        
+        const { requestedDate, quantity } = req.body;
+
         try {
-            const createAssetRequest = await this.userService.createAssetRequest(assetId, userId, requestedDate);
+            const createAssetRequest = await this.userService.createAssetRequest(assetId, userId, requestedDate, quantity);
 
             if (createAssetRequest) {
                 res.status(200).json({ success: true, message: 'Request created successfully!' });
@@ -136,18 +154,19 @@ class UserController {
         const page = parseInt(req.query.page as string, 10) || 1;
         let limit = parseInt(req.query.limit as string, 10) || 5;
         const search = req.query.search as string;
+        const filter = req.query.filter as string;
 
         let skip = !search ? ((page - 1) * limit) : 0;
 
         const userId = req.user.userId;
 
         try {
-            const assetRequests = await this.userService.fetchAssetRequests(search, skip, limit, userId);
-            const documentsCount = await this.userService.countDocuments(userId);
+            const assetRequests = await this.userService.fetchAssetRequests(search, filter, skip, limit, userId);
+            const documentsCount = await this.userService.countAssetRequests(userId);
             const totalPages = Math.ceil(documentsCount / limit);
 
             if (assetRequests) {
-                res.status(200).json({ success: true, assetRequests, totalPages });
+                res.status(200).json({ success: true, assetRequests, totalPages, totalRequests: documentsCount });
             } else {
                 res.status(400).json({ success: false, message: 'Asset requests not found!' });
             }
@@ -173,6 +192,27 @@ class UserController {
         } catch (error) {
             console.error('Error fetching the asset request details:', error);
             res.status(500).json({ message: 'Error fetching the asset request details', error });
+        }
+    }
+
+    async updateProfilePicture(req: Request, res: Response): Promise<void> {
+
+        const userId = req.user.userId;
+
+        const { profilePicture } = req.body;
+
+        try {
+            const changeProfilePicture = await this.userService.changeProfilePicture(userId, profilePicture);
+
+            if (!changeProfilePicture) {
+                res.status(400).json({ success: false, message: 'Error changing the profile!' });
+                return;
+            }
+
+            res.status(200).json({ success: true, message: 'profile updated successfully!' });
+        } catch (error) {
+            console.error('Error updating the profile picture: ', error);
+            res.status(500).json({ message: 'Error updating the profile picture: ', error });
         }
     }
 }

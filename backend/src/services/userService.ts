@@ -1,4 +1,4 @@
-import { IAsset, IAssetRequest, IUser } from '../interfaces/userInterface';
+import { IAddress, IAsset, IAssetRequest, IAssetRequestResponse, IUser } from '../interfaces/userInterface';
 import UserRepository from '../repositories/userRepository';
 import bcrypt from 'bcryptjs';
 
@@ -16,6 +16,38 @@ class UserService {
             return { user, address };
         } catch (error) {
             console.error('Error fetching the user details: ', error);
+            return null;
+        }
+    }
+
+    async editUser(userId: string, formData: any) {
+        try {
+            const { name, age, gender, phone, fname, lname, street, city, state, country, pincode } = formData;
+
+            const newUser: Partial<IUser> = {
+                name,
+                age,
+                gender,
+                phone,
+            };
+
+            const newAddress: IAddress = {
+                fname,
+                lname,
+                street,
+                city,
+                state,
+                country,
+                pincode,
+            };
+
+            const user = await this.userRepository.updateUser(userId, newUser);
+            await this.userRepository.updateAddress(user._id as string, newAddress);
+            const registeredMail = user.email;
+
+            return registeredMail;
+        } catch (error) {
+            console.error('Error registering the user', error);
             return null;
         }
     }
@@ -42,9 +74,9 @@ class UserService {
     }
 
     // Request asset
-    async createAssetRequest(assetId: string, userId: string, requestedDate: Date): Promise<any> {
+    async createAssetRequest(assetId: string, userId: string, requestedDate: Date, quantity: number): Promise<any> {
         try {
-            await this.userRepository.createAssetRequest(assetId, userId, requestedDate);
+            await this.userRepository.createAssetRequest(assetId, userId, requestedDate, quantity);
             return true;
         } catch (error) {
             console.error('Error creating the request: ', error);
@@ -119,18 +151,17 @@ class UserService {
         }
     }
 
-    async fetchAssetRequests(search: string, skip: number, limit: number, userId: string): Promise<IAssetRequest[] | null> {
+    async fetchAssetRequests(search: string, filter: string, skip: number, limit: number, userId: string): Promise<IAssetRequestResponse[] | null> {
         try {
-            const query = search ? { name: { $regex: search, $options: 'i' }, user: userId } : { user: userId };
-            const result = await this.userRepository.findAssetRequests(query, skip, limit);
+            const result = await this.userRepository.findAssetRequests(search, filter, userId, skip, limit);
             return result;
         } catch (error) {
-            console.error('Error finding the assets requests:', error);
+            console.error('Error finding the asset requests:', error);
             return null;
         }
     }
 
-    async countDocuments(userId: string): Promise<number> {
+    async countAssetRequests(userId: string): Promise<number> {
         try {
             return await this.userRepository.countAssetRequests(userId);
         } catch (error) {
@@ -146,6 +177,16 @@ class UserService {
         } catch (error) {
             console.error('Error fetching the asset request details: ', error);
             return null;
+        }
+    }
+
+    async changeProfilePicture(userId: string, profilePicture: string): Promise<any> {
+        try {
+            await this.userRepository.updateProfilePicture(userId, profilePicture);
+            return true;
+        } catch (error) {
+            console.error('Error updating the profile picture: ', error);
+            return false;
         }
     }
 }

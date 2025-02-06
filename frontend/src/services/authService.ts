@@ -35,7 +35,7 @@ export const authService = {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             const idToken = await result.user.getIdToken();
-            
+
             const response = await customAxios.post('/api/auth/google-login', { idToken });
             return response.data;
         } catch (error) {
@@ -47,6 +47,15 @@ export const authService = {
                 }
             }
             throw new Error('Google login failed. Please try again later.');
+        }
+    },
+    authenticateUser: async (userId: string) => {
+        try {
+            const response = await customAxios.post(`/api/auth/authenticateUser/${userId}`);
+            const isBlocked = response.data.isBlocked;
+            return isBlocked;
+        } catch (error) {
+            throw error;
         }
     },
     forgotPassword: async (email: string) => {

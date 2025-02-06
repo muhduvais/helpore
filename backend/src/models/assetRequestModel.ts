@@ -4,14 +4,20 @@ import { IAssetRequest } from "../interfaces/userInterface";
 const assetRequestSchema = new Schema<IAssetRequest>({
     asset: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Asset',
+        ref: 'assets',
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
     },
     requestedDate: {
         type: Date,
+    },
+    quantity: {
+        type: Number,
+    },
+    comment: {
+        type: String,
     },
     status: {
         type: String,
@@ -21,5 +27,5 @@ const assetRequestSchema = new Schema<IAssetRequest>({
     timestamps: true
 });
 
-const AssetRequest = mongoose.model<IAssetRequest>('AssetRequests', assetRequestSchema);
+const AssetRequest = mongoose.model<IAssetRequest>('assetRequests', assetRequestSchema);
 export default AssetRequest;

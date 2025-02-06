@@ -50,7 +50,7 @@ const AddAsset = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle profile change
+  // Handle image change
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {

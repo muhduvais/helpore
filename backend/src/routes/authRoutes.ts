@@ -2,6 +2,8 @@ import express from 'express';
 const router = express.Router();
 import authController from '../controllers/authController';
 
+router.get('/authenticateUser/:id', authController.authenticateUser);
+
 router.post('/admin/login', authController.loginUser);
 
 router.post('/register', authController.registerUser);

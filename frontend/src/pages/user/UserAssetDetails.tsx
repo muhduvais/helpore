@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactEventHandler } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AxiosError } from 'axios';
@@ -6,8 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import {
     ArrowLeft,
@@ -18,7 +20,9 @@ import {
     Clock,
     CheckCircle2,
     XCircle,
-    AlertCircle
+    AlertCircle,
+    MinusCircle,
+    PlusCircle
 } from 'lucide-react';
 import {
     Dialog,
@@ -190,17 +194,20 @@ const UserAssetDetails: React.FC = () => {
         setIsRequestModalOpen(true);
     };
 
-    const handleRequest = async () => {
+    // Handle request
+    const handleRequest = async (qty: number) => {
         if (!selectedDate) return;
 
         try {
             setIsSubmitting(true);
             const assetId = asset?._id || '';
             await userService.requestAsset(assetId, {
-                requestedDate: format(selectedDate, 'yyyy-MM-dd')
+                requestedDate: format(selectedDate, 'yyyy-MM-dd'), quantity: qty
             });
             setIsRequestModalOpen(false);
-            toast.success('Asset requested successfully!');
+            toast.success('Asset requested successfully!', {
+                onClose: () => window.location.reload()
+            });
         } catch (error) {
             toast.success('Error requesting asset!');
             console.error('Error requesting asset:', error);
@@ -210,56 +217,117 @@ const UserAssetDetails: React.FC = () => {
     };
 
     // Request Modal Component
-    const RequestModal = () => (
-        <Dialog
-            open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Request Asset</DialogTitle>
-                    <DialogDescription>
-                        Select a date for when you need the {asset?.name}
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                    <div className="flex flex-col space-y-4">
-                        <div className="flex items-center space-x-2">
-                            <FaCalendar className="text-gray-500" />
-                            <span className="text-sm text-gray-600">
-                                {selectedDate ? format(selectedDate, "PPP") : "Select a date"}
-                            </span>
-                        </div>
-                        <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={(date) => {
-                                if (date instanceof Date) {
-                                    setSelectedDate(date);
-                                }
-                            }}
-                            disabled={(date: Date) => date < new Date()}
-                            className="rounded-md border"
-                        />
-                    </div>
-                </div>
+    const RequestModal = () => {
+        const [qty, setQty] = React.useState(1);
 
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        onClick={() => setIsRequestModalOpen(false)}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleRequest}
-                        disabled={!selectedDate || isSubmitting}
-                        className="bg-[#688D48] hover:bg-[#557239] text-white"
-                    >
-                        {isSubmitting ? 'Submitting...' : 'Submit Request'}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
+        const incrementQty = () => {
+            if (qty < 3) {
+                setQty(qty + 1);
+            }
+        };
+
+        const decrementQty = () => {
+            if (qty > 1) {
+                setQty(qty - 1);
+            }
+        };
+
+        const handleQtyChange = (e: any) => {
+            const value = parseInt(e.target.value);
+            if (!isNaN(value) && value >= 1 && value <= 3) {
+                setQty(value);
+            }
+        };
+
+        const maxStocks = asset && asset.stocks > 3 ? 3 : asset?.stocks || 0;
+
+        return (
+            <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Request Asset</DialogTitle>
+                        <DialogDescription>
+                            Select a date and quantity for when you need the {asset?.name}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <div className="flex flex-col space-y-6">
+
+                            {/* Date Selection */}
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <CalendarIcon className="h-4 w-4 text-gray-500" />
+                                    <span className="text-sm text-gray-600">
+                                        {selectedDate ? format(selectedDate, "PPP") : "Select a date"}
+                                    </span>
+                                </div>
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={setSelectedDate}
+                                    disabled={(date) => date < new Date()}
+                                    className="rounded-md border"
+                                />
+                            </div>
+
+                            {/* Quantity Selection */}
+                            <div className="space-y-2">
+                                <Label htmlFor="quantity">{`Quantity (Max: ${maxStocks} )`}</Label>
+                                <div className="flex items-center space-x-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={decrementQty}
+                                        disabled={qty <= 1}
+                                        className="h-8 w-8"
+                                    >
+                                        <MinusCircle className="h-4 w-4" />
+                                    </Button>
+                                    <Input
+                                        id="quantity"
+                                        type="number"
+                                        min="1"
+                                        max={maxStocks}
+                                        value={qty}
+                                        onChange={handleQtyChange}
+                                        className="w-20 text-center"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={incrementQty}
+                                        disabled={qty >= maxStocks}
+                                        className="h-8 w-8"
+                                    >
+                                        <PlusCircle className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsRequestModalOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => handleRequest(qty)}
+                            disabled={!selectedDate || isSubmitting}
+                            className="bg-[#688D48] hover:bg-[#557239] text-white"
+                        >
+                            {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        );
+    };
 
     return (
         <>

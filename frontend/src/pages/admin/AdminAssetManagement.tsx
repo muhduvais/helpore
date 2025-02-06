@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useSearchParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useDebounce } from 'use-debounce';
 import { Card } from "@/components/ui/card";
@@ -21,9 +21,14 @@ import { IAsset } from '@/interfaces/adminInterface';
 import asset_picture from '../../assets/asset_picture.png';
 
 const AdminAssetManagement = () => {
+
+  const [pageParams] = useSearchParams();
+  const currentPageNum = Number(pageParams.get('page')) || 1;
+  console.log('page: ', currentPageNum)
+
   const [assets, setAssets] = useState<IAsset[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(currentPageNum);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -133,7 +138,7 @@ const AdminAssetManagement = () => {
                   <span className="text-sm text-gray-500">
                     Added {new Date(asset.createdAt).toLocaleDateString()}
                   </span>
-                  <Link to={`/admin/assetDetails/${asset._id}`}>
+                  <Link to={`/admin/assetDetails/${asset._id}?page=${currentPage}`}>
                     <Button variant="outline" size="sm" className="text-[#688D48] hover:text-white hover:bg-[#688D48]">
                       <FaEye className="mr-2" />
                       View Details

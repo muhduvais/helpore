@@ -1,4 +1,7 @@
+import { logout } from "@/redux/slices/authSlice";
+import { authService } from "@/services/authService";
 import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
 
@@ -7,25 +10,49 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ roleRequired }) => {
+
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { isLoggedIn, role } = useSelector((state: any) => state.auth);
+    const { isLoggedIn, role, isBlocked, userId } = useSelector((state: any) => state.auth);
 
     useEffect(() => {
-        if (!isLoggedIn) {
-            navigate(`/${roleRequired}/login`);
+
+        const authenticated = async () => {
+            try {
+                await authService.authenticateUser(userId);
+            } catch (error) {
+                console.log('Error authenticating the user!');
+                throw error;
+            }
+        }
+
+        if (!authenticated) {
+            console.log('Not authenticated')
+            navigate(`/${roleRequired}/login`, { replace: true });
             return;
         }
 
-        if (role && role !== roleRequired) {
-            navigate(`/${role}/404`);
+        if (!isLoggedIn) {
+            navigate(`/home`, { replace: true });
+            return;
         }
-    }, [isLoggedIn, role, roleRequired, navigate]);
+    
+        if (isBlocked && role !== 'admin') {
+            dispatch(logout());
+            return;
+        }
+    
+        if (role && role !== roleRequired) {
+            navigate(`/${role}/404`, { replace: true });
+        }
 
-    if (!isLoggedIn || (role && role !== roleRequired)) {
+    }, [isLoggedIn, role, roleRequired, isBlocked, navigate]);
+
+    if (!isLoggedIn || isBlocked) {
         return null;
     }
-
+    
     return <Outlet />;
 };
 

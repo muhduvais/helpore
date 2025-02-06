@@ -12,6 +12,7 @@ import AdminAddAsset from '../pages/admin/AdminAddAsset';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminVolunteerDetails from '@/pages/admin/AdminVolunteerDetails';
 import AdminAssetDetails from '@/pages/admin/AdminAssetDetails';
+import AdminRequestManagement from '@/pages/admin/AdminRequestManagement ';
 
 const AdminRoutes = () => {
     return (
@@ -24,12 +25,17 @@ const AdminRoutes = () => {
                     <Route path="/userManagement" element={<AdminUserManagement />} />
                     <Route path="/addUser" element={<AdminAddUser />} />
                     <Route path="/userDetails/:id" element={<AdminUserDetails />} />
+
                     <Route path="/volunteerManagement" element={<AdminVolunteerManagement />} />
                     <Route path="/addVolunteer" element={<AdminAddVolunteer />} />
                     <Route path="/volunteerDetails/:id" element={<AdminVolunteerDetails />} />
+
                     <Route path="/assetManagement" element={<AdminAssetManagement />} />
                     <Route path="/addAsset" element={<AdminAddAsset />} />
                     <Route path="/assetDetails/:id" element={<AdminAssetDetails />} />
+
+                    <Route path="/requestManagement" element={<AdminRequestManagement />} />
+
                     <Route path="/404" element={<Admin404 />} />
                     <Route path="/*" element={<Admin404 />} />
                 </Route>

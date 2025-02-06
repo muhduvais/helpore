@@ -138,7 +138,7 @@ class AuthService {
 
     async generateAccessToken(userId: string, role: string): Promise<string> {
         try {
-            return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '20s' });
+            return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '5m' });
         } catch (error) {
             console.error('Error generating access token:', error);
             throw new Error('Failed to generate access token');
@@ -147,7 +147,7 @@ class AuthService {
 
     async generateRefreshToken(userId: string, role: string): Promise<string> {
         try {
-            return jwt.sign({ userId, role }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '1h' });
+            return jwt.sign({ userId, role }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '3h' });
         } catch (error) {
             console.error('Error generating refresh token:', error);
             throw new Error('Failed to generate refresh token');
@@ -160,6 +160,15 @@ class AuthService {
             return decoded as any;
         } catch (error) {
             console.error('Error verifying refresh token:', error);
+            return null;
+        }
+    }
+
+    async findIsBlocked(userId: string): Promise<boolean> {
+        try {
+            return await this.authRepository.findIsBlocked(userId);
+        } catch (error) {
+            console.error('Error authenticating user:', error);
             return null;
         }
     }
@@ -206,11 +215,12 @@ class AuthService {
             }
 
             const payload = { email };
-            const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: '1h' });
+            const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: '3h' });
             const tokenExpiry = new Date(Date.now() + 3600 * 1000);
             await this.authRepository.storeResetToken(email, resetToken, tokenExpiry);
 
-            const resetLink = `http://localhost:5173/user/resetPassword?token=${resetToken}`;
+            const CLIENT_URL = process.env.CLIENT_URL;
+            const resetLink = `${CLIENT_URL}/user/resetPassword?token=${resetToken}`;
             await sendResetEmail(email, "Password Reset", `Click here to reset your password: ${resetLink}`);
 
             console.log("Reset link sent:", resetLink);

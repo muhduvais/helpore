@@ -129,4 +129,32 @@ export const adminService = {
             throw error
         }
     },
+    fetchAssetRequests: async (page: number, limit: number, search: string, status: string, priority: string, user: string, sort: string) => {
+        try {
+            const response = await customAxios.get('/api/admin/assetRequests', {
+                params: {
+                    page,
+                    limit,
+                    search,
+                    status,
+                    priority,
+                    user,
+                    sort,
+                }
+            })
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
+    updateAssetRequestStatus: async (requestId: string, status: string, comment: string) => {
+        try {
+            console.log('reqId: ', requestId)
+            const response = await customAxios.patch(`/api/admin/assetRequests/${requestId}`, { status, comment });
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
+
 }

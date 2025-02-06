@@ -7,6 +7,8 @@ userRoutes.use(authenticateToken);
 userRoutes.use(authorizeRole('user'));
 
 userRoutes.get('/me', userController.getUserDetails);
+userRoutes.put('/me', userController.updateUserDetails);
+userRoutes.patch('/me', userController.updateProfilePicture);
 userRoutes.patch('/password', userController.changePassword);
 
 userRoutes.get('/assets', userController.getAssets);

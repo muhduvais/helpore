@@ -1,5 +1,6 @@
-import { ChangePasswordData } from '../interfaces/userInterface';
+import { ChangePasswordData, IAddress, IUser } from '../interfaces/userInterface';
 import { customAxios } from '../utils/apiClient';
+
 
 export const userService = {
     changePassword: async (data: ChangePasswordData) => {
@@ -13,11 +14,20 @@ export const userService = {
     fetchUserDetails: async () => {
         try {
             const response = await customAxios.get('/api/user/me')
+            console.log('response: ', response)
             return response;
         } catch (error) {
             throw error
         }
     },
+    updateUser: async (formData: any) => {
+            try {
+                const response = await customAxios.put('/api/user/me', { formData });
+                return response;
+            } catch (error) {
+                throw error;
+            }
+        },
     fetchAssets: async (page: number, limit: number, search: string, sortBy: string, filterByAvailability: string) => {
         try {
             const response = await customAxios.get('/api/user/assets', {
@@ -50,15 +60,24 @@ export const userService = {
             throw error
         }
     },
-    fetchAssetRequests: async (page: number, limit: number, search: string) => {
+    fetchAssetRequests: async (page: number, limit: number, search: string, filter: string) => {
         try {
             const response = await customAxios.get('/api/user/assetRequests', {
                 params: {
                     page,
                     limit,
                     search,
+                    filter
                 }
             })
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
+    updateProfilePicture: async (profilePicture: string) => {
+        try {
+            const response = await customAxios.patch('/api/user/me', { profilePicture })
             return response;
         } catch (error) {
             throw error

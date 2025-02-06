@@ -1,7 +1,9 @@
-import { IAddress, IUser, IAsset } from '../interfaces/userInterface';
+import { IAddress, IUser, IAsset, IAssetRequestResponse, BaseAssetRequest } from '../interfaces/userInterface';
 import Address from '../models/addressModel';
 import User from '../models/userModel';
 import Asset from '../models/assetModel';
+import AssetRequest from '../models/assetRequestModel';
+import mongoose, { FlattenMaps, SortOrder } from 'mongoose';
 
 class AdminRepository {
 
@@ -28,6 +30,15 @@ class AdminRepository {
             return await User.findById(id);
         } catch (error) {
             console.error('Error finding the user:', error);
+            return null;
+        }
+    }
+
+    async findAddress(id: string) {
+        try {
+            return await Address.findOne({ entity: id });
+        } catch (error) {
+            console.error('Error finding the address:', error);
             return null;
         }
     }
@@ -191,6 +202,115 @@ class AdminRepository {
         } catch (error) {
             console.error('Error updating the asset:', error);
             return null;
+        }
+    }
+
+    async countAssetRequests(query: object): Promise<number> {
+        try {
+            return await AssetRequest.countDocuments(query);
+        } catch (error) {
+            console.error('Error counting the asset requests:', error);
+            return 0;
+        }
+    }
+
+    async findAssetRequests(
+        search: string,
+        skip: number,
+        userId: string,
+        limit: number,
+        sort: string,
+        status: string,
+    ): Promise<IAssetRequestResponse[] | null> {
+        try {
+            let query: any = {};
+
+            if (userId !== "all") {
+                if (!mongoose.Types.ObjectId.isValid(userId)) {
+                    throw new Error("Invalid user ID format");
+                }
+                query.user = new mongoose.Types.ObjectId(userId);
+            }
+
+            if (search) {
+                query.$or = [
+                    { "asset.name": { $regex: search, $options: "i" } },
+                    { "user.name": { $regex: search, $options: "i" } }
+                ];
+            }
+
+            if (status !== 'all') {
+                query.status = status;
+            }
+
+            const sortOption = sort === "newest" ? -1 : 1;
+
+            const requests = await AssetRequest.aggregate([
+                {
+                    $lookup: {
+                        from: 'assets',
+                        localField: 'asset',
+                        foreignField: '_id',
+                        as: 'asset'
+                    }
+                },
+                { $unwind: '$asset' },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'user',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                { $unwind: '$user' },
+                { $match: query },
+                { $sort: { createdAt: sortOption } },
+                { $skip: skip },
+                { $limit: limit },
+                {
+                    $project: {
+                        _id: 1,
+                        asset: 1,
+                        user: 1,
+                        requestedDate: 1,
+                        quantity: 1,
+                        status: 1,
+                        comment: 1,
+                        createdAt: 1,
+                        updatedAt: 1
+                    }
+                }
+            ]);
+
+            return requests.map(request => ({
+                _id: request._id.toString(),
+                asset: request.asset,
+                user: request.user,
+                requestedDate: request.requestedDate.toISOString(),
+                quantity: request.quantity,
+                status: request.status,
+                comment: request.comment,
+                createdAt: request.createdAt.toISOString(),
+                updatedAt: request.updatedAt.toISOString(),
+            }));
+        } catch (error) {
+            console.error("Error finding asset requests:", error);
+            return null;
+        }
+    }
+
+    async updateStatus(requestId: string, status: string, comment: string) {
+        try {
+            const updatedRequest = await AssetRequest.findByIdAndUpdate(
+                requestId,
+                { status, comment }
+            );
+
+            return updatedRequest;
+        } catch (error) {
+            console.error('Error updating asset request status in repository:', error);
+            throw error;
         }
     }
 

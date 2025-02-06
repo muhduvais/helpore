@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useDebounce } from 'use-debounce';
@@ -23,6 +23,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from '@/components/ui/label';
 import { FaAngleLeft, FaAngleRight, FaBox, FaCalendar } from 'react-icons/fa';
 import { CiSearch } from 'react-icons/ci';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -31,6 +32,7 @@ import { IAsset } from '@/interfaces/adminInterface';
 import asset_picture from '../../assets/asset_picture.png';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { CalendarIcon, MinusCircle, PlusCircle } from 'lucide-react';
 
 const AssetListing = () => {
 
@@ -58,10 +60,10 @@ const AssetListing = () => {
     try {
       setIsLoading(true);
       const response = await userService.fetchAssets(
-        currentPage, 
-        8, 
-        debouncedSearchTerm.trim(), 
-        sortBy, 
+        currentPage,
+        8,
+        debouncedSearchTerm.trim(),
+        sortBy,
         filterByAvailability
       );
 
@@ -91,16 +93,20 @@ const AssetListing = () => {
     setIsRequestModalOpen(true);
   };
 
-  const handleRequest = async () => {
-    if (!selectedAsset || !selectedDate) return;
+  // Handle request
+  const handleRequest = async (qty: number) => {
+    if (!selectedDate) return;
 
     try {
       setIsSubmitting(true);
-      await userService.requestAsset(selectedAsset._id, {
-        requestedDate: format(selectedDate, 'yyyy-MM-dd')
+      const assetId = selectedAsset?._id || '';
+      await userService.requestAsset(assetId, {
+        requestedDate: format(selectedDate, 'yyyy-MM-dd'), quantity: qty
       });
       setIsRequestModalOpen(false);
-      toast.success('Asset requested successfully!');
+      toast.success('Asset requested successfully!', {
+        onClose: () => window.location.reload()
+      });
     } catch (error) {
       toast.success('Error requesting asset!');
       console.error('Error requesting asset:', error);
@@ -110,50 +116,117 @@ const AssetListing = () => {
   };
 
   // Request Modal Component
-  const RequestModal = () => (
-    <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Request Asset</DialogTitle>
-          <DialogDescription>
-            Select a date for when you need the {selectedAsset?.name}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="py-4">
-          <div className="flex flex-col space-y-4">
-            <div className="flex items-center space-x-2">
-              <FaCalendar className="text-gray-500" />
-              <span className="text-sm text-gray-600">
-                {selectedDate ? format(selectedDate, 'PPP') : 'Select a date'}
-              </span>
+  const RequestModal = () => {
+    const [qty, setQty] = React.useState(1);
+
+    const incrementQty = () => {
+      if (qty < 3) {
+        setQty(qty + 1);
+      }
+    };
+
+    const decrementQty = () => {
+      if (qty > 1) {
+        setQty(qty - 1);
+      }
+    };
+
+    const handleQtyChange = (e: any) => {
+      const value = parseInt(e.target.value);
+      if (!isNaN(value) && value >= 1 && value <= 3) {
+        setQty(value);
+      }
+    };
+
+    const maxStocks = selectedAsset && selectedAsset.stocks > 3 ? 3 : selectedAsset?.stocks || 0;
+
+    return (
+      <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Request Asset</DialogTitle>
+            <DialogDescription>
+              Select a date and quantity for when you need the {selectedAsset?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex flex-col space-y-6">
+
+              {/* Date Selection */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <CalendarIcon className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">
+                    {selectedDate ? format(selectedDate, "PPP") : "Select a date"}
+                  </span>
+                </div>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={(date) => date < new Date()}
+                  className="rounded-md border"
+                />
+              </div>
+
+              {/* Quantity Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="quantity">{`Quantity (Max: ${maxStocks} )`}</Label>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={decrementQty}
+                    disabled={qty <= 1}
+                    className="h-8 w-8"
+                  >
+                    <MinusCircle className="h-4 w-4" />
+                  </Button>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    min="1"
+                    max={maxStocks}
+                    value={qty}
+                    onChange={handleQtyChange}
+                    className="w-20 text-center"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={incrementQty}
+                    disabled={qty >= maxStocks}
+                    className="h-8 w-8"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
             </div>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              disabled={(date) => date < new Date()}
-              className="rounded-md border"
-            />
           </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setIsRequestModalOpen(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleRequest}
-            disabled={!selectedDate || isSubmitting}
-            className="bg-[#688D48] hover:bg-[#557239] text-white"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Request'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsRequestModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleRequest(qty)}
+              disabled={!selectedDate || isSubmitting}
+              className="bg-[#688D48] hover:bg-[#557239] text-white"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Request'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -241,9 +314,9 @@ const AssetListing = () => {
                   <h3 className="font-semibold text-lg text-gray-800 max-w-[200px] truncate">
                     {asset.name}
                   </h3>
-                  <Badge 
+                  <Badge
                     variant={asset.stocks > 5 ? "default" : asset.stocks > 0 ? "secondary" : "destructive"}
-                    className={asset.stocks > 0 ? "bg-[#688D48]"  : ""}
+                    className={`${asset.stocks > 0 ? "bg-[#688D48]" : ""}`}
                   >
                     {asset.stocks > 0 ? `${asset.stocks} available` : 'Out of stock'}
                   </Badge>
@@ -260,8 +333,8 @@ const AssetListing = () => {
                     Request Asset
                   </Button>
                   <Link to={`/user/assetDetails/${asset._id}`} className="w-full">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full text-[#688D48] hover:text-white hover:bg-[#688D48]"
                     >
                       View Details

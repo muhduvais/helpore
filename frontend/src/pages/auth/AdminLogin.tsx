@@ -29,9 +29,9 @@ const AdminLoginPage: React.FC = () => {
   const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
   const role = useSelector((state: any) => state.auth.role);
 
-  if (isLoggedIn && role === 'admin') {
-    return <Navigate to={'/admin/dashboard'} />
-  }
+  // if (isLoggedIn && role === 'admin') {
+  //   return <Navigate to={'/admin/dashboard'} />
+  // }
 
   // Toggle password eye
   const togglePasswordVisibility = () => {
@@ -56,7 +56,7 @@ const AdminLoginPage: React.FC = () => {
 
     Object.keys(formData).forEach((field: any) => {
       const validationResult = validateForm(field, formData[field]);
-      if (validationResult.error) {
+      if (validationResult?.error) {
         newFormErrors[field] = validationResult.error;
         hasError = true;
       } else {
@@ -76,9 +76,9 @@ const AdminLoginPage: React.FC = () => {
       }
 
       if (response.data) {
-        const { user, accessToken, refreshToken } = response.data;
+        const { user, accessToken } = response.data;
 
-        dispatch(login({ userId: user.id, accessToken, refreshToken, role: user.role }));
+        dispatch(login({ userId: user.id, accessToken, role: user.role }));
         
         navigate('/admin/dashboard');
         return;

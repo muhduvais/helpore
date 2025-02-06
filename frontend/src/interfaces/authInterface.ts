@@ -2,6 +2,7 @@
 export interface AuthState {
   userId: string | null;
   isLoggedIn: boolean;
+  isBlocked: boolean;
   role: string | null;
   accessToken: string;
 }
