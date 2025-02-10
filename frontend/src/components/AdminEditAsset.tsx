@@ -136,19 +136,13 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
         const finalFormData = {
             ...formData,
             image: uploadedImageUrl || file,
-            stocks: Number(formData.stocks),
+            stocks: Number(formData.stocks) ? Number(formData.stocks) : 0,
         };
 
-        const { errors } = validateAddAsset(finalFormData);
-        setFormErrors({...errors, ['image']: ''});
+        const { isValid, errors } = validateAddAsset(finalFormData);
+        setFormErrors(errors);
 
-        let isFormValid = false;
-
-        if (formErrors === initialErrorData) {
-            isFormValid = true;
-        }
-
-        if (!isFormValid) return;
+        if (!isValid) return;
 
         setIsLoading(true);
 
@@ -203,7 +197,6 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                 value={formData.name}
                                 onChange={handleInputChange}
                                 className={`${formErrors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
-                                required
                             />
                             {formErrors.name && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -224,7 +217,6 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                 value={formData.description}
                                 onChange={handleInputChange}
                                 className={`${formErrors.description ? 'border-red-500 focus:ring-red-500' : ''}`}
-                                required
                             />
                             {formErrors.description && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -278,7 +270,6 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                                 onChange={handleInputChange}
                                 className={`${formErrors.stocks ? 'border-red-500 focus:ring-red-500' : ''}`}
                                 min="0"
-                                required
                             />
                             {formErrors.stocks && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">

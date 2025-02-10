@@ -200,7 +200,7 @@ export const validateChangePassword = (formData: ChangePasswordFormData) => {
 }
 
 export const validateAddAsset = (formData: AddAssetFormData) => {
-  const errors: any = { name: '', description: '', stocks: '', image: '' };
+  const errors: any = { name: '', category: '', description: '', stocks: '', image: '' };
   let isValid = true
 
   if (!formData.name.trim()) {
@@ -211,24 +211,21 @@ export const validateAddAsset = (formData: AddAssetFormData) => {
     isValid = false
   }
 
+  if (!formData.category.trim()) {
+    errors.description = 'Category is required'
+    isValid = false
+  }
+
   if (!formData.description.trim()) {
     errors.description = 'Description is required'
     isValid = false
   }
 
-  if (!formData.stocks) {
+  if (formData.stocks === null || formData.stocks === undefined || formData.stocks === '') {
     errors.stocks = 'Stock is required'
-    isValid = false
-  } else if (Number(formData.stocks) <= 0) {
-    errors.stocks = 'Atleast one stock is needed!'
     isValid = false
   } else if (Number(formData.stocks) > 50) {
     errors.stocks = 'Maximum 50 stocks are allowed!'
-    isValid = false
-  }
-
-  if (!formData.image) {
-    errors.image = 'Image is required'
     isValid = false
   }
 

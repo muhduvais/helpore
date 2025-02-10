@@ -198,6 +198,7 @@ class AdminRepository {
 
     async updateAsset(id: string, submitData: any) {
         try {
+            console.log('submitdata: ', submitData)
             return await Asset.findByIdAndUpdate(id, submitData);
         } catch (error) {
             console.error('Error updating the asset:', error);

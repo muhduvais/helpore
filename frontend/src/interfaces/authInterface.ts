@@ -44,7 +44,7 @@ export interface AddAssetFormData {
   name: string;
   category: string;
   description: string;
-  stocks: Number | null;
+  stocks: number | string | null;
   image: File | null;
 }
 
