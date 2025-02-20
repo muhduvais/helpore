@@ -1,9 +1,10 @@
 import Address from '../models/addressModel';
 import User from '../models/userModel';
 import AssetRequest from '../models/assetRequestModel';
-import { BaseAssetRequest, IAsset, IAssetRequestResponse } from '../interfaces/userInterface';
+import { BaseAssetRequest, IAddress, IAsset, IAssetRequestResponse, IAssistanceRequest, IAssistanceRequestResponse } from '../interfaces/userInterface';
 import Asset from '../models/assetModel';
 import mongoose, { FlattenMaps } from 'mongoose';
+import AssistanceRequest from '../models/assistanceRequestModel';
 
 class AdminRepository {
 
@@ -25,9 +26,10 @@ class AdminRepository {
         }
     }
 
+    // Addresses
     async updateAddress(id: string, submitData: any) {
         try {
-            return await Address.findOneAndUpdate({ entity: id }, { $set: submitData} );
+            return await Address.findOneAndUpdate({ entity: id }, { $set: submitData });
         } catch (error) {
             console.error('Error updating the address:', error);
             return null;
@@ -39,6 +41,26 @@ class AdminRepository {
             return await Address.findOne({ entity: id });
         } catch (error) {
             console.error('Error finding the user:', error);
+            return null;
+        }
+    }
+
+    async findAddresses(id: string): Promise<IAddress[]> {
+        try {
+            return await Address.find({ entity: id });
+        } catch (error) {
+            console.error('Error finding addresses:', error);
+            return null;
+        }
+    }
+
+    async createAddress(addressData: IAddress): Promise<IAddress> {
+        try {
+            const newAddress = new Address(addressData);
+            await newAddress.save();
+            return newAddress;
+        } catch (error) {
+            console.error('Error finding addresses:', error);
             return null;
         }
     }
@@ -90,7 +112,7 @@ class AdminRepository {
         }
     }
 
-    // Request asset
+    // Asset requests
     async createAssetRequest(assetId: string, userId: string, requestedDate: Date, quantity: number) {
         try {
             console.log('qty: ', quantity)
@@ -148,9 +170,9 @@ class AdminRepository {
     }
 
 
-    async countAssetRequests(userId: string): Promise<number> {
+    async countAssetRequests(query: object): Promise<number> {
         try {
-            return await AssetRequest.countDocuments({ user: userId });
+            return await AssetRequest.countDocuments(query);
         } catch (error) {
             console.error('Error counting the assetRequests:', error);
             return 0;
@@ -176,6 +198,92 @@ class AdminRepository {
         }
     }
 
+    // Assistance requests
+    async createAssistanceRequest(formData: IAssistanceRequest) {
+        try {
+            const assistanceRequest = new AssistanceRequest(formData);
+            await assistanceRequest.save();
+            return true;
+        } catch (error) {
+            console.error('Error creating the request:', error);
+            return false;
+        }
+    }
+
+    async findAssistanceRequests(
+        search: string,
+        filter: string,
+        userId: string,
+        skip: number,
+        limit: number
+    ): Promise<IAssistanceRequestResponse[] | null> {
+        try {
+            const matchStage: any = { user: new mongoose.Types.ObjectId(userId) };
+            if (filter) {
+                matchStage.status = filter;
+            }
+
+            const requests = await AssistanceRequest.aggregate([
+                { $match: matchStage },
+
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'user',
+                        foreignField: '_id',
+                        as: 'user',
+                    },
+                },
+
+                { $unwind: '$user' },
+
+                ...(search
+                    ? [{ $match: { 'user.name': { $regex: search, $options: 'i' } } }]
+                    : []),
+
+                { $skip: skip },
+                { $limit: limit },
+
+                {
+                    $project: {
+                        _id: 1,
+                        requestedDate: 1,
+                        type: 1,
+                        status: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        'user.name': 1,
+                    },
+                },
+            ]);
+
+            return requests as IAssistanceRequestResponse[];
+        } catch (error) {
+            console.error('Error finding assistance requests:', error);
+            return null;
+        }
+    }
+
+    async countAssistanceRequests(query: object): Promise<number> {
+        try {
+            return await AssistanceRequest.countDocuments(query);
+        } catch (error) {
+            console.error('Error counting the assistance requests:', error);
+            return 0;
+        }
+    }
+
+    async findAssistanceRequestDetails(requestId: string) {
+        try {
+            return await AssistanceRequest.findOne({ _id: requestId })
+                .populate('volunteer')
+                .populate('address');
+        } catch (error) {
+            console.error('Error finding the request details:', error);
+            return null;
+        }
+    }
+    
 }
 
 export default AdminRepository;

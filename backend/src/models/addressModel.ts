@@ -25,18 +25,20 @@ const addressSchema = new Schema<IAddress>({
     },
     entity: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
     },
     type: {
         type: String,
         enum: ['user', 'volunteer'],
     },
     latitude: {
-        type: String,
+        type: Number,
+        required: true
     },
-    longtitude: {
-        type: String,
-    },
+    longitude: {
+        type: Number,
+        required: true
+    }
 }, {
     timestamps: true
 });

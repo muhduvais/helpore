@@ -40,6 +40,10 @@ const userSchema = new Schema<IUser>({
         type: String,
         enum: ['admin', 'volunteer', 'user'],
     },
+    tasks: {
+        type: Number,
+        default: 0,
+    },
     googleId: {
         type: String,
         default: null,

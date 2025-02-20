@@ -90,7 +90,7 @@ class AuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 60 * 60 * 1000
+                maxAge: 3 * 60 * 60 * 1000
             });
 
             res.status(200).json({
@@ -203,11 +203,13 @@ class AuthController {
             const decoded = jwt.verify(token, process.env.RESET_LINK_SECRET!) as JwtPayload;
             const { userId } = decoded;
             const user = await this.authService.findUserById(userId);
+            console.log('user: ', userId)
             const email = user.email;
 
             await this.authService.resetPassword(email, newPassword);
             res.status(200).json({ message: 'Password reset successful' });
         } catch (error) {
+            console.log('error: ', error)
             res.status(400).json({ message: 'Invalid or expired token' });
         }
     }

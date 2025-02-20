@@ -45,16 +45,6 @@ adminRoutes.post('/assetImage', (req, res, next) => {
 adminRoutes.use(authenticateToken);
 adminRoutes.use(authorizeRole('admin'));
 
-// Assets
-adminRoutes.get('/assets', adminController.getAssets);
-adminRoutes.get('/assets/:id', adminController.getAssetDetails);
-adminRoutes.post('/assets', adminController.addAsset);
-adminRoutes.put('/assets/:id', adminController.updateAsset);
-
-// Asset requests
-adminRoutes.get('/assetRequests', adminController.fetchAssetRequests);
-adminRoutes.patch('/assetRequests/:id', adminController.updateAssetRequestStatus);
-
 // Users
 adminRoutes.get('/users', adminController.getUsers);
 adminRoutes.post('/users', adminController.addUser);
@@ -66,5 +56,20 @@ adminRoutes.get('/volunteers', adminController.getVolunteers);
 adminRoutes.post('/volunteers', adminController.addVolunteer);
 adminRoutes.patch('/volunteers/:id/:action', adminController.volunteerToggleIsBlocked);
 adminRoutes.get('/volunteers/:id', adminController.getVolunteerDetails);
+
+// Assets
+adminRoutes.get('/assets', adminController.getAssets);
+adminRoutes.get('/assets/:id', adminController.getAssetDetails);
+adminRoutes.post('/assets', adminController.addAsset);
+adminRoutes.put('/assets/:id', adminController.updateAsset);
+
+// Asset requests
+adminRoutes.get('/assetRequests', adminController.fetchAssetRequests);
+adminRoutes.patch('/assetRequests/:id', adminController.updateAssetRequestStatus);
+
+//Assistance requests
+adminRoutes.get('/assistanceRequests', adminController.getAssistanceRequests);
+adminRoutes.get('/assistanceRequests/:id', adminController.getAssistanceRequestDetails);
+adminRoutes.patch('/assistanceRequests/:id', adminController.assignVolunteer);
 
 export default adminRoutes;

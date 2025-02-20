@@ -332,7 +332,7 @@ const AssetListing = () => {
                   >
                     Request Asset
                   </Button>
-                  <Link to={`/user/assetDetails/${asset._id}`} className="w-full">
+                  <Link to={`/user/assets/${asset._id}`} className="w-full">
                     <Button
                       variant="outline"
                       className="w-full text-[#688D48] hover:text-white hover:bg-[#688D48]"

@@ -15,9 +15,29 @@ export interface IAddUserForm {
     pincode: number;
 }
 
+export interface IAsset {
+    name: string;
+    category: string;
+    description: string;
+    stocks: number;
+    image: string;
+}
+
 export interface AddAssetData {
     name: string,
     description: string,
     stocks: Number | null,
     image: string | null,
 }
+
+export interface IAssetRequest {
+    _id: string;
+    asset: IAsset;
+    requestedDate: string;
+    quantity: number;
+    status: 'pending' | 'approved' | 'rejected';
+    comment?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+

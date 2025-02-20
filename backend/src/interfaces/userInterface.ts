@@ -13,6 +13,7 @@ export interface IUser extends Document {
     isBlocked: boolean;
     isVerified: boolean;
     role: string;
+    tasks: number;
     googleId: string;
     resetToken: string;
     resetTokenExpiry: Date;
@@ -20,17 +21,19 @@ export interface IUser extends Document {
 }
 
 export interface IAddress {
+    _id?: string;
     fname: string;
     lname: string;
     street: string;
     city: string;
     state: string;
+    
     country: string;
     pincode: number;
     entity?: Types.ObjectId;
     type?: string;
-    latitude?: string;
-    longtitude?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export interface IAsset {
@@ -48,6 +51,38 @@ export interface IAssetRequest {
     requestedDate: Date;
     quantity: Number;
     comment: string;
+}
+
+export interface IAssistanceRequest {
+    user: Types.ObjectId;
+    type: 'volunteer' | 'ambulance';
+    description?: string;
+    status: 'pending' | 'approved' | 'rejected';
+    requestedDate: Date;
+    requestedTime: string;
+    priority: 'urgent' | 'normal';
+    address?: IAddress;
+    volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
+    volunteer?: Types.ObjectId | string;
+    rejectedBy?: [string];
+}
+
+export interface IAssistanceRequestResponse {
+    _id: string;
+    user: Types.ObjectId;
+    type: 'volunteer' | 'ambulance';
+    description?: string;
+    status: 'pending' | 'approved' | 'rejected';
+    requestedDate: string;
+    requestedTime: string;
+    priority: 'urgent' | 'normal';
+    address?: Types.ObjectId;
+    useDefaultAddress: boolean;
+    volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
+    volunteer?: Types.ObjectId;
+    comment?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface IAssetRequestResponse {

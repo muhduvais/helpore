@@ -11,21 +11,29 @@ import UserRequestList from '../pages/user/UserRequestList';
 import UserAssetListing from '@/pages/user/UserAssetsList';
 import UserAssetDetails from '@/pages/user/UserAssetDetails';
 import { AuthErrorHandler } from '../utils/authErroHandler';
+import RequestAssistanceForm from '@/pages/user/AssistanceRequest';
+import AssistanceRequestDetails from '@/pages/user/AssistanceRequestDetails';
 
 const UserRoutes = () => {
   return (
     <Routes>
       {/* Protected Routes */}
       <Route element={<ProtectedRoute roleRequired="user" />}>
-        <Route element={<AuthErrorHandler />}>
+        <Route element={<AuthErrorHandler role='user' />}>
 
           <Route path="/" element={<Navigate to="/user/dashboard" />} />
 
           <Route path="/" element={<UserLayout />}>
             <Route index path="dashboard" element={<UserDashboard />} />
             <Route path="assets" element={<UserAssetListing />} />
-            <Route path="assetDetails/:id" element={<UserAssetDetails />} />
+            <Route path="assets/:id" element={<UserAssetDetails />} />
+
+            {/* Asset requests */}
             <Route path="requests" element={<UserRequestList />} />
+
+            {/* Assistance requests */}
+            <Route path="assistanceRequest" element={<RequestAssistanceForm />} />
+            <Route path="assistanceRequests/:id" element={<AssistanceRequestDetails />} />
 
             <Route path="/profile" element={<Navigate to="/user/profile/info" />} />
 

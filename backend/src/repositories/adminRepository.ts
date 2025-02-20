@@ -1,9 +1,10 @@
-import { IAddress, IUser, IAsset, IAssetRequestResponse, BaseAssetRequest } from '../interfaces/userInterface';
+import { IAddress, IUser, IAsset, IAssetRequestResponse, BaseAssetRequest, IAssistanceRequestResponse } from '../interfaces/userInterface';
 import Address from '../models/addressModel';
 import User from '../models/userModel';
 import Asset from '../models/assetModel';
 import AssetRequest from '../models/assetRequestModel';
 import mongoose, { FlattenMaps, SortOrder } from 'mongoose';
+import AssistanceRequest from '../models/assistanceRequestModel';
 
 class AdminRepository {
 
@@ -312,6 +313,134 @@ class AdminRepository {
         } catch (error) {
             console.error('Error updating asset request status in repository:', error);
             throw error;
+        }
+    }
+
+    // Assistance requests
+    async findAssistanceRequests(
+        search: string,
+        filter: string,
+        skip: number,
+        limit: number,
+        sort: string,
+        priority: string,
+    ): Promise<IAssistanceRequestResponse[] | null> {
+        try {
+            const matchStage: any = {};
+
+            if (filter) {
+                matchStage.status = filter;
+            }
+
+            if (priority && priority !== 'all') {
+                matchStage.priority = priority;
+            }
+
+            const sortOption = sort === "newest" ? -1 : 1;
+
+            const requests = await AssistanceRequest.aggregate([
+                { $match: matchStage },
+
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'user',
+                        foreignField: '_id',
+                        as: 'user',
+                    },
+                },
+
+                { $unwind: '$user' },
+
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'volunteer',
+                        foreignField: '_id',
+                        as: 'volunteer',
+                    },
+                },
+
+                {
+                    $unwind: {
+                        path: '$volunteer',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+
+                ...(search
+                    ? [{ $match: { 'user.name': { $regex: search, $options: 'i' } } }]
+                    : []),
+
+                { $sort: { createdAt: sortOption } },
+                { $skip: skip },
+                { $limit: limit },
+
+                {
+                    $project: {
+                        _id: 1,
+                        requestedDate: 1,
+                        type: 1,
+                        status: 1,
+                        priority: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        'user.name': 1,
+                        volunteer: 1,
+                    },
+                },
+            ]);
+
+            return requests as IAssistanceRequestResponse[];
+        } catch (error) {
+            console.error('Error finding assistance requests:', error);
+            return null;
+        }
+    }
+
+
+    async countAssistanceRequests(query: object): Promise<number> {
+        try {
+            return await AssistanceRequest.countDocuments(query);
+        } catch (error) {
+            console.error('Error counting the assistance requests:', error);
+            return 0;
+        }
+    }
+
+    async findAssistanceRequestDetails(requestId: string) {
+        try {
+            return await AssistanceRequest.findOne({ _id: requestId })
+                .populate('user')
+                .populate('volunteer')
+                .populate('address');
+        } catch (error) {
+            console.error('Error finding the request details:', error);
+            return null;
+        }
+    }
+
+    async checkTasksLimit(volunteerId: string) {
+        try {
+            const volunteer =  await User.findById(volunteerId);
+            if (volunteer && volunteer.tasks >= 5) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error finding the request details:', error);
+            return null;
+        }
+    }
+
+    async assignVolunteer(requestId: string, volunteerId: string) {
+        try {
+            const assigned =  await AssistanceRequest.findByIdAndUpdate(requestId, { volunteer: volunteerId, status: 'approved' });
+            if (assigned) await User.findByIdAndUpdate(volunteerId, { $inc: { tasks: 1 } });
+            return assigned;
+        } catch (error) {
+            console.error('Error finding the request details:', error);
+            return null;
         }
     }
 

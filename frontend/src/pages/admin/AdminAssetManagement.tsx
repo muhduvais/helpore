@@ -138,7 +138,7 @@ const AdminAssetManagement = () => {
                   <span className="text-sm text-gray-500">
                     Added {new Date(asset.createdAt).toLocaleDateString()}
                   </span>
-                  <Link to={`/admin/assetDetails/${asset._id}?page=${currentPage}`}>
+                  <Link to={`/admin/assets/${asset._id}?page=${currentPage}`}>
                     <Button variant="outline" size="sm" className="text-[#688D48] hover:text-white hover:bg-[#688D48]">
                       <FaEye className="mr-2" />
                       View Details

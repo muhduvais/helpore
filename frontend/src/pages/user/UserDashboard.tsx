@@ -5,7 +5,6 @@ import { userService } from '../../services/userService';
 import { Activity, DollarSign, FileText, Bell } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { blockToggle } from '@/redux/slices/authSlice';
-import { AuthErrorHandler } from '@/utils/authErroHandler';
 
 const UserDashboard: React.FC = () => {
 

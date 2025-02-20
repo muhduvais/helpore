@@ -1,5 +1,5 @@
 import AdminRepository from '../repositories/adminRepository';
-import { IAsset, IAssetRequestResponse, IUser } from '../interfaces/userInterface';
+import { IAsset, IAssetRequestResponse, IAssistanceRequestResponse, IUser } from '../interfaces/userInterface';
 import bcrypt from 'bcryptjs';
 import { IAddUserForm } from '../interfaces/adminInterface';
 import { IAddress } from '../interfaces/userInterface';
@@ -138,9 +138,15 @@ class AdminService {
     }
 
     // Volunteers
-    async fetchVolunteers(search: string, skip: number, limit: number): Promise<IUser[] | null> {
+    async fetchVolunteers(search: string, skip: number, limit: number, isActive: any): Promise<IUser[] | null> {
         try {
-            const query = search ? { name: { $regex: search, $options: 'i' }, role: 'volunteer' } : { role: 'volunteer' };
+            let query: any = { role: 'volunteer' };
+            if (search) query.name = { $regex: search, $options: 'i' };
+            if (isActive === 'true') {
+                query.isActive = isActive;
+                query.tasks = { $lt: 5 };
+            }
+
             return await this.adminRepository.findVolunteers(query, skip, limit);
         } catch (error) {
             console.error('Error finding the users:', error);
@@ -264,13 +270,21 @@ class AdminService {
         }
     }
 
-    async countAssetRequests(search: any): Promise<number> {
+    async countAssetRequests(
+        search: string,
+        status: string,
+    ): Promise<number> {
         try {
             let query: any = {};
 
             if (search) {
                 query["asset.name"] = { $regex: search, $options: "i" };
             }
+
+            if (status && status !== 'all') {
+                query.status = status;
+            }
+
             return await this.adminRepository.countAssetRequests(query);
         } catch (error) {
             console.error('Error counting the asset requests:', error);
@@ -303,6 +317,62 @@ class AdminService {
         } catch (error) {
             console.error('Error updating asset request status in service:', error);
             throw error;
+        }
+    }
+
+    // Assistance requests
+    async fetchAssistanceRequests(search: string, filter: string, skip: number, limit: number, sort: string, priority: string): Promise<IAssistanceRequestResponse[] | null> {
+        try {
+            const result = await this.adminRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority);
+            return result;
+        } catch (error) {
+            console.error('Error finding assistance requests:', error);
+            return null;
+        }
+    }
+
+    async countAssistanceRequests(search: string, filter: string, priority: string): Promise<number> {
+        try {
+            let query: any = {};
+
+            if (search) query["user.name"] = { $regex: search, $options: "i" };
+            if (priority && priority !== 'all') query.priority = priority;
+            if (filter && filter !== 'all') query.status = filter;
+
+            return await this.adminRepository.countAssistanceRequests(query);
+        } catch (error) {
+            console.error('Error counting assistance requests:', error);
+            return null;
+        }
+    }
+
+    async fetchAssistanceRequestDetails(requestId: string): Promise<any> {
+        try {
+            const assistanceRequest = await this.adminRepository.findAssistanceRequestDetails(requestId);
+            return assistanceRequest;
+        } catch (error) {
+            console.error('Error fetching assistance request details: ', error);
+            return null;
+        }
+    }
+
+    async checkTasksLimit(volunteerId: string): Promise<any> {
+        try {
+            const checkTasksLimit = await this.adminRepository.checkTasksLimit(volunteerId);
+            return checkTasksLimit;
+        } catch (error) {
+            console.error('Error assigning volunteer: ', error);
+            return null;
+        }
+    }
+
+    async assignVolunteer(requestId: string, volunteerId: string): Promise<any> {
+        try {
+            const assignVolunteer = await this.adminRepository.assignVolunteer(requestId, volunteerId);
+            return assignVolunteer;
+        } catch (error) {
+            console.error('Error assigning volunteer: ', error);
+            return null;
         }
     }
 

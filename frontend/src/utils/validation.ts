@@ -82,6 +82,51 @@ export const validateForm = (field: keyof Fields | string, value: string) => {
         return { error: 'Pincode must be 6 characters!' };
       }
       return { error: '' };
+
+    case 'type':
+      if (!value) return { isValid: false, error: 'Please select assistance type' };
+      if (!['volunteer', 'ambulance'].includes(value)) {
+        return { isValid: false, error: 'Invalid assistance type' };
+      }
+      return { isValid: true };
+
+    case 'volunteerType':
+      if (value === 'volunteer' && !['medical', 'eldercare', 'maintenance', 'transportation', 'general'].includes(value)) {
+        return { isValid: false, error: 'Please select volunteer type' };
+      }
+      return { isValid: true };
+
+    case 'priority':
+      if (!['urgent', 'normal'].includes(value)) {
+        return { isValid: false, error: 'Please select priority level' };
+      }
+      return { isValid: true };
+
+    case 'requestedDate':
+      if (!value) return { isValid: false, error: 'Please select a date' };
+      if (new Date(value) < new Date()) {
+        return { isValid: false, error: 'Date cannot be in the past' };
+      }
+      return { isValid: true };
+
+    case 'requestedTime':
+      if (!value) return { isValid: false, error: 'Please select a time' };
+      if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
+        return { isValid: false, error: 'Invalid time format' };
+      }
+      return { isValid: true };
+
+    case 'description':
+      if (!value?.trim()) return { isValid: false, error: 'Please provide a description' };
+      if (value.length > 500) return { isValid: false, error: 'Description too long (max 500 characters)' };
+      return { isValid: true };
+
+    case 'selectedAddressId':
+      if (!value?.trim()) return { isValid: false, error: 'Please select an address' };
+      return { isValid: true };
+
+    default:
+      return { isValid: true };
   }
 }
 

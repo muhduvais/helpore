@@ -22,7 +22,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ roleRequired }) => {
             try {
                 await authService.authenticateUser(userId);
             } catch (error) {
-                console.log('Error authenticating the user!');
                 throw error;
             }
         }

@@ -213,8 +213,8 @@ class AuthService {
             if (!existingUser) {
                 return false;
             }
-
-            const payload = { email };
+console.log('existing user: ', existingUser)
+            const payload = { userId: existingUser._id, email };
             const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: '3h' });
             const tokenExpiry = new Date(Date.now() + 3600 * 1000);
             await this.authRepository.storeResetToken(email, resetToken, tokenExpiry);

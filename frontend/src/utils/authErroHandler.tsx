@@ -3,13 +3,13 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 
-export const AuthErrorHandler = () => {
+export const AuthErrorHandler: React.FC<{ role: string }> = ({ role }) => {
     const navigate = useNavigate();
     const isAuthenticated = useSelector((state: RootState) => state.auth.isLoggedIn);
 
     useEffect(() => {
         if (!isAuthenticated) {
-            navigate('/user/login');
+            navigate(`/${role}/login`);
         }
     }, [isAuthenticated, navigate]);
 

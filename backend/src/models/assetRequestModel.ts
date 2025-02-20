@@ -21,7 +21,7 @@ const assetRequestSchema = new Schema<IAssetRequest>({
     },
     status: {
         type: String,
-        enum: ['pending', 'approved', 'rejected'],
+        enum: ['pending', 'approved', 'rejected', 'completed'],
     },
 }, {
     timestamps: true

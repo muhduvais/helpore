@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import adminRoutes from './routes/adminRoutes';
 import userRoutes from './routes/userRoutes';
+import volunteerRoutes from './routes/volunteerRoutes';
 import connectDB from './config/db';
 import dotenv from 'dotenv';
 import { handleError } from './middlewares/errorMiddleware';
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/volunteer', volunteerRoutes);
 
 // Error handling middleware
 app.use(handleError);

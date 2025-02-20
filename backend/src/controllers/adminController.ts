@@ -24,8 +24,12 @@ class AdminController {
         this.updateAsset = this.updateAsset.bind(this);
         this.fetchAssetRequests = this.fetchAssetRequests.bind(this);
         this.updateAssetRequestStatus = this.updateAssetRequestStatus.bind(this);
+        this.getAssistanceRequests = this.getAssistanceRequests.bind(this);
+        this.getAssistanceRequestDetails = this.getAssistanceRequestDetails.bind(this);
+        this.assignVolunteer = this.assignVolunteer.bind(this);
     }
 
+    // Profile - User
     async getUsers(req: Request, res: Response): Promise<void> {
 
         const page = parseInt(req.query.page as string, 10) || 1;
@@ -100,6 +104,7 @@ class AdminController {
         }
     }
 
+    // Profile - volunteer
     async volunteerToggleIsBlocked(req: Request, res: Response): Promise<void> {
         try {
             const volunteerId = req.params.id;
@@ -117,13 +122,17 @@ class AdminController {
 
     // Volunteers
     async getVolunteers(req: Request, res: Response): Promise<void> {
+
         const page = parseInt(req.query.page as string, 10) || 1;
         let limit = parseInt(req.query.limit as string, 10) || 5;
         const search = req.query.search as string;
         let skip = !search ? ((page - 1) * limit) : 0;
+        const isActive = req.query.isActive || 'all';
+
+        if (isActive !== 'all') limit = Infinity;
 
         try {
-            const volunteers = await this.adminService.fetchVolunteers(search, skip, limit);
+            const volunteers = await this.adminService.fetchVolunteers(search, skip, limit, isActive);
             const documentsCount = await this.adminService.countVolunteers(search);
             const totalPages = Math.ceil(documentsCount / limit);
 
@@ -282,14 +291,17 @@ class AdminController {
         }
     }
 
+    // Asset requests
     async fetchAssetRequests(req: Request, res: Response): Promise<void> {
         try {
             const { search, page = 1, limit = 10, sort = "desc", user, status = 'all' } = req.query;
-            console.log('req: ', req.query)
 
             const skip = (Number(page) - 1) * Number(limit);
 
-            const documentsCount = await this.adminService.countAssetRequests(search);
+            const documentsCount = await this.adminService.countAssetRequests(
+                search as string,
+                status as string,
+            );
             const totalPages = Math.ceil(documentsCount / Number(limit));
 
             const assetRequests = await this.adminService.fetchAssetRequests(
@@ -329,6 +341,73 @@ class AdminController {
         } catch (error) {
             console.error('Error updating asset request status:', error);
             res.status(500).json({ message: 'An error occurred while updating the asset request' });
+        }
+    }
+
+    // Assistance requests
+    async getAssistanceRequests(req: Request, res: Response): Promise<void> {
+
+        const page = parseInt(req.query.page as string, 10) || 1;
+        let limit = parseInt(req.query.limit as string, 10) || 5;
+        const search = req.query.search as string;
+        const filter = req.query.filter as string;
+        const priority = req.query.priority as string;
+        const sort = req.query.filter as string;
+        let skip = !search ? ((page - 1) * limit) : 0;
+
+        try {
+            const assistanceRequests = await this.adminService.fetchAssistanceRequests(search, filter, skip, limit, sort, priority);
+            const documentsCount = await this.adminService.countAssistanceRequests(search, filter, priority);
+            const totalPages = Math.ceil(documentsCount / limit);
+
+            if (assistanceRequests) {
+                res.status(200).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });
+            } else {
+                res.status(400).json({ success: false, message: 'Assistance requests not found!' });
+            }
+        } catch (error) {
+            console.error('Error fetching the assistance requests:', error);
+            res.status(500).json({ message: 'Error fetching the assistance requests', error });
+        }
+    }
+
+    async getAssistanceRequestDetails(req: Request, res: Response): Promise<void> {
+
+        const requestId = req.params.id;
+
+        try {
+            const requestDetails = await this.adminService.fetchAssistanceRequestDetails(requestId);
+            if (requestDetails) {
+                res.status(200).json({ success: true, requestDetails });
+            } else {
+                res.status(400).json({ success: false, message: 'Assistance request not found!' });
+            }
+        } catch (error) {
+            console.error('Error fetching the assistance request details:', error);
+            res.status(500).json({ message: 'Error fetching the assistance request details', error });
+        }
+    }
+
+    async assignVolunteer(req: Request, res: Response): Promise<void> {
+
+        const requestId = req.params.id;
+        const { volunteerId } = req.body;
+
+        try {
+            const isTasksLimit = await this.adminService.checkTasksLimit(volunteerId);
+            if (isTasksLimit) {
+                res.status(400).json({ success: false, message: 'Volunteer can process only 5 tasks at a time!' });
+                return;
+            }
+            const assignVolunteer = await this.adminService.assignVolunteer(requestId, volunteerId);
+            if (assignVolunteer) {
+                res.status(200).json({ success: true, message: 'Assigned volunteer successfully!' });
+            } else {
+                res.status(400).json({ success: false, message: 'Failed to assign volunteer!' });
+            }
+        } catch (error) {
+            console.error('Error assigning the volunteer:', error);
+            res.status(500).json({ message: 'Error assigning the volunteer:', error });
         }
     }
 

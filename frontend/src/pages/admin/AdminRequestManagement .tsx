@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useState, useEffect, ReactEventHandler } from 'react';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,8 @@ import {
   Shield,
   UserCheck,
   UserX,
-  Coffee
+  Coffee,
+  Ambulance
 } from 'lucide-react';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -60,10 +61,29 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useDebounce } from 'use-debounce';
 import asset_picture from '../../assets/asset_picture.png';
 import { adminService } from '@/services/adminService';
+import { IAssistanceRequest, IAssistanceRequestResponse } from '@/interfaces/adminInterface';
+import { AxiosError } from 'axios';
+import { IAssetRequest } from '@/interfaces/userInterface';
+
+interface IPaginatedResponse {
+  assetRequests: IAssetRequest[];
+  totalPages: number;
+  totalRequests: number;
+}
+
+interface IAssistancePaginatedResponse {
+  assistanceRequests: IAssistanceRequestResponse[];
+  totalPages: number;
+  totalRequests: number;
+}
 
 const limit = 4;
 
 const AdminRequests = () => {
+
+  const [queryParams] = useSearchParams();
+  const defaultTab = queryParams.get('tab') || 'assets';
+
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,6 +96,8 @@ const AdminRequests = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRequests, setTotalRequests] = useState(0);
   const [expandedCard, setExpandedCard] = useState(null);
+  const [totalDisplay, setTotalDisplay] = useState(totalRequests);
+  const [view, setView] = useState<'card' | 'table'>('card');
   const [actionDialog, setActionDialog] = useState<{
     open: boolean;
     type: 'approved' | 'rejected' | null;
@@ -93,7 +115,21 @@ const AdminRequests = () => {
   const [userDetails, setUserDetails] = useState<any | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
 
+  // Assistance request states
+  const [assistanceRequests, setAssistanceRequests] = useState<IAssistanceRequestResponse[]>([]);
+  const [isAssistanceLoading, setIsAssistanceLoading] = useState(true);
+  const [assistanceError, setAssistanceError] = useState<string | null>(null);
+  const [assistanceFilter, setAssistanceFilter] = useState<string>('all');
+  const [assistanceSearchQuery, setAssistanceSearchQuery] = useState<string>('');
+  const [assistancePriorityFilter, setAssistancePriorityFilter] = useState<string>('all');
+  const [assistanceSortBy, setAssistanceSortBy] = useState<string>('newest');
+  const [assistanceCurrentPage, setAssistanceCurrentPage] = useState(1);
+  const [assistanceTotalPages, setAssistanceTotalPages] = useState(1);
+  const [assistanceTotalRequests, setAssistanceTotalRequests] = useState(0);
+
   const [debouncedSearch] = useDebounce(searchQuery, 500);
+  const [debouncedAssistanceSearch] = useDebounce(assistanceSearchQuery, 500);
+
   const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
   if (!isLoggedIn) {
@@ -104,9 +140,14 @@ const AdminRequests = () => {
     fetchRequests();
   }, [currentPage, debouncedSearch, statusFilter, priorityFilter, userFilter, sortBy]);
 
+  useEffect(() => {
+    fetchAssistanceRequests();
+  }, [assistanceCurrentPage, debouncedAssistanceSearch, assistanceSortBy, assistanceFilter, assistancePriorityFilter]);
+
   const fetchRequests = async () => {
     setIsLoading(true);
     try {
+      console.log(sortBy)
       const response = await adminService.fetchAssetRequests(
         currentPage,
         limit,
@@ -120,6 +161,7 @@ const AdminRequests = () => {
       setRequests(data.assetRequests);
       setTotalPages(data.totalPages);
       setTotalRequests(data.totalRequests);
+      if (defaultTab !== 'assistance') setTotalDisplay(data.totalRequests);
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -127,12 +169,44 @@ const AdminRequests = () => {
     }
   };
 
+  const fetchAssistanceRequests = async () => {
+    try {
+      setIsAssistanceLoading(true);
+      const response = await adminService.fetchAssistanceRequests(
+        assistanceCurrentPage,
+        limit,
+        debouncedAssistanceSearch.trim(),
+        assistanceFilter !== 'all' ? assistanceFilter : '',
+        assistancePriorityFilter,
+        assistanceSortBy
+      );
+
+      if (response.status === 200) {
+        const data: IAssistancePaginatedResponse = response.data;
+        setAssistanceRequests(data.assistanceRequests);
+        setAssistanceTotalPages(data.totalPages);
+        setAssistanceTotalRequests(data.totalRequests);
+        if (defaultTab === 'assistance') setTotalDisplay(data.totalRequests);
+      }
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        setAssistanceError(error.response?.data.message || 'Error fetching assistance requests. Please try again.');
+      } else {
+        setAssistanceError('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsAssistanceLoading(false);
+    }
+  };
+
   const fetchUserDetails = async (userId: string) => {
     setIsLoadingUser(true);
     try {
-      const response = await fetch(`/api/admin/users/${userId}`);
-      const data = await response.json();
-      setUserDetails(data);
+      const response = await adminService.fetchUserDetails(userId);
+
+      if (response.status === 200) {
+        setUserDetails(response.data.user);
+      }
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -143,16 +217,7 @@ const AdminRequests = () => {
   const handleAction = async (type: any, request: any) => {
     if (!type || !request) return;
     try {
-      await fetch(`/api/admin/requests/${request._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: type,
-          comment: actionComment
-        }),
-      });
+      await adminService.updateAssetRequestStatus(request._id, type, actionComment)
       setActionDialog({ open: false, type: null, request: null });
       setActionComment('');
       fetchRequests();
@@ -170,14 +235,35 @@ const AdminRequests = () => {
     return styles[priority] || "bg-gray-100 text-gray-800";
   };
 
+  const getAssistancePriorityBadge = (priority: 'normal' | 'urgent') => {
+    const styles = {
+      normal: "bg-blue-100 text-blue-800",
+      urgent: "bg-red-100 text-red-800",
+    };
+    return styles[priority] || "bg-gray-100 text-gray-800";
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
       case 'approved':
         return <CheckCircle2 className="h-4 w-4 mr-1 text-green-600" />;
       case 'rejected':
         return <XCircle className="h-4 w-4 mr-1 text-red-600" />;
+      case 'completed':
+        return <CheckCircle2 className="h-4 w-4 mr-1 text-blue-600" />;
       default:
         return <Clock className="h-4 w-4 mr-1 text-yellow-600" />;
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'ambulance':
+        return <Ambulance className="h-6 w-6" />;
+      case 'volunteer':
+        return <HandHeart className="h-6 w-6" />;
+      default:
+        return <HandHeart className="h-6 w-6" />;
     }
   };
 
@@ -185,10 +271,32 @@ const AdminRequests = () => {
     switch (status.toLowerCase()) {
       case 'approved': return 'bg-green-100 text-green-800';
       case 'rejected': return 'bg-red-100 text-red-800';
+      case 'completed': return 'bg-blue-100 text-blue-800';
       default: return 'bg-yellow-100 text-yellow-800';
     }
   };
 
+  const handleAssistanceSearch = (value: string) => {
+    setAssistanceSearchQuery(value);
+  };
+
+  const handleAssistanceFilterChange = (value: string) => {
+    console.log('value: ', value)
+    setAssistanceFilter(value);
+  };
+
+  const handleAssistanceSortChange = (value: string) => {
+    setAssistanceSortBy(value);
+  };
+
+  const handleAssistancePriorityChange = (value: string) => {
+    setAssistancePriorityFilter(value);
+  };
+
+  const handleTotalRequests = (value: number) => {
+    setTotalDisplay(value);
+  };
+ 
   const UserDetailsModal = () => {
     const user = userDetails?.user;
     const address = userDetails?.address;
@@ -511,22 +619,103 @@ const AdminRequests = () => {
     );
   };
 
+  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequestResponse }> = ({ request }) => {
+    const navigate = useNavigate();
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <div className="p-4">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                  {getTypeIcon(request.type)}
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-800">
+                    {request.type.charAt(0).toUpperCase() + request.type.slice(1)} Assistance
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {request.description && request.description.length > 50
+                      ? `${request.description.substring(0, 50)}...`
+                      : request.description}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 items-end">
+                <Badge className={getStatusColor(request.status)}>
+                  {getStatusIcon(request.status)}
+                  {request.status}
+                </Badge>
+                <Badge className={getAssistancePriorityBadge(request.priority)}>
+                  {request.priority}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center gap-2 text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <div>
+                  <p className="font-medium">Requested For</p>
+                  <p>{format(new Date(request.requestedDate), 'PPP')}</p>
+                </div>
+              </div>
+              {request.volunteer ? (
+                <div className="flex items-center gap-2 text-gray-600">
+                  <User className="h-4 w-4" />
+                  <div>
+                    <p className="font-medium">Assigned Volunteer</p>
+                    <p className='font-semibold'>{request.volunteer.name}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-gray-600">
+                  <User className="h-4 w-4" />
+                  <div>
+                    <p className="font-medium">Assigned Volunteer</p>
+                    <p className='text-gray-400'>{'Not assigned yet!'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* View More */}
+            <div className="mt-4 flex justify-end">
+              <Button
+                variant="outline"
+                className="text-[#688D48] border-[#688d4855] hover:bg-[#688D48] opacity-80 hover:opacity-100 hover:text-white transition-colors"
+                onClick={() => navigate(`/admin/assistanceRequests/${request._id}`)}
+              >
+                View More
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    );
+  };
+
   return (
     <div className="p-4 sm:p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Asset Requests</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Requests</h1>
         <div className="text-sm text-gray-500">
-          Total Requests: {totalRequests}
+          Total Requests: {totalDisplay}
         </div>
       </div>
 
-      <Tabs defaultValue="assets" className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="assets" className="flex items-center gap-2">
+          <TabsTrigger value="assets" className="flex items-center gap-2" >
             <Package className="h-4 w-4" />
             Asset Requests
           </TabsTrigger>
-          <TabsTrigger value="assistance" className="flex items-center gap-2">
+          <TabsTrigger value="assistance" className="flex items-center gap-2" >
             <HandHeart className="h-4 w-4" />
             Assistance Requests
           </TabsTrigger>
@@ -548,7 +737,7 @@ const AdminRequests = () => {
               </div>
 
               <div className="flex flex-wrap gap-4">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value)}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
@@ -557,10 +746,11 @@ const AdminRequests = () => {
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
                   </SelectContent>
                 </Select>
 
-                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(value)}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="Priority" />
                   </SelectTrigger>
@@ -572,7 +762,7 @@ const AdminRequests = () => {
                   </SelectContent>
                 </Select>
 
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -664,11 +854,150 @@ const AdminRequests = () => {
         </TabsContent>
 
         <TabsContent value="assistance" className="space-y-6">
-          <Card className="p-8 text-center">
-            <HandHeart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">Coming Soon</h3>
-            <p className="text-gray-500">Assistance requests feature will be available soon.</p>
+          {/* Filters */}
+          <Card className="p-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by user, or ID..."
+                    value={assistanceSearchQuery}
+                    onChange={(e) => handleAssistanceSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <Select value={assistanceFilter} onValueChange={(value) => handleAssistanceFilterChange(value)}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={assistancePriorityFilter} onValueChange={(value) => handleAssistancePriorityChange(value)}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Priority</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={assistanceSortBy} onValueChange={(value) => handleAssistanceSortChange(value)}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="priority">Priority</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </Card>
+
+          {/* Results Summary */}
+          {!isAssistanceLoading && assistanceRequests.length > 0 && (
+            <div className="text-sm text-gray-500">
+              Showing {((assistanceCurrentPage - 1) * limit) + 1} to {Math.min(assistanceCurrentPage * limit, assistanceTotalRequests)} of {assistanceTotalRequests} requests
+            </div>
+          )}
+
+          {/* Error Message */}
+          {assistanceError && (
+            <div className="text-red-500 text-center p-4">
+              {assistanceError}
+            </div>
+          )}
+
+          {/* Assistance Requests List */}
+          {isAssistanceLoading ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <DotLottieReact
+                src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
+                loop
+                autoplay
+                style={{ width: '100px', height: '100px' }}
+              />
+            </div>
+          ) : assistanceRequests.length === 0 ? (
+            <Card className="p-8 text-center">
+              <HandHeart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Assistance Requests Found</h3>
+              <p className="text-gray-500 mb-4">
+                {assistanceSearchQuery || assistanceFilter !== 'all'
+                  ? 'No requests match your search criteria'
+                  : "You haven't made any assistance requests yet."}
+              </p>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {assistanceRequests.map((request: IAssistanceRequestResponse) => (
+                  <AssistanceRequestCard key={request._id} request={request} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {assistanceTotalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 pt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAssistanceCurrentPage(assistanceCurrentPage - 1)}
+                    disabled={assistanceCurrentPage === 1}
+                    className="flex items-center gap-1"
+                  >
+                    <FaAngleLeft />
+                    Prev
+                  </Button>
+
+                  <div className="flex gap-2">
+                    {[...Array(assistanceTotalPages)].map((_, index) => (
+                      <Button
+                        key={index}
+                        variant={assistanceCurrentPage === index + 1 ? "default" : "outline"}
+                        onClick={() => setAssistanceCurrentPage(index + 1)}
+                        className={
+                          assistanceCurrentPage === index + 1
+                            ? "bg-[#688D48] hover:bg-[#557239]"
+                            : "hover:bg-gray-100"
+                        }
+                      >
+                        {index + 1}
+                      </Button>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setAssistanceCurrentPage(assistanceCurrentPage + 1)}
+                    disabled={assistanceCurrentPage === assistanceTotalPages}
+                    className="flex items-center gap-1"
+                  >
+                    Next
+                    <FaAngleRight />
+                  </Button>
+                </div>
+              )}
+
+              {/* Total Count */}
+              <div className="text-center text-sm text-gray-500">
+                Showing {assistanceRequests.length} assistance requests
+              </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 

@@ -1,4 +1,4 @@
-import { IAddress, IAsset, IAssetRequest, IAssetRequestResponse, IUser } from '../interfaces/userInterface';
+import { IAddress, IAsset, IAssetRequest, IAssetRequestResponse, IAssistanceRequest, IAssistanceRequestResponse, IUser } from '../interfaces/userInterface';
 import UserRepository from '../repositories/userRepository';
 import bcrypt from 'bcryptjs';
 
@@ -9,6 +9,7 @@ class UserService {
         this.userRepository = new UserRepository();
     }
 
+    // Profle
     async fetchUserDetails(userId: string): Promise<any> {
         try {
             const user = await this.userRepository.findUserDetails(userId);
@@ -52,6 +53,16 @@ class UserService {
         }
     }
 
+    async changeProfilePicture(userId: string, profilePicture: string): Promise<any> {
+        try {
+            await this.userRepository.updateProfilePicture(userId, profilePicture);
+            return true;
+        } catch (error) {
+            console.error('Error updating the profile picture: ', error);
+            return false;
+        }
+    }
+
     async verifyCurrentPassword(userId: string, currentPassword: string): Promise<any> {
         try {
             const password = await this.userRepository.findPassword(userId);
@@ -73,17 +84,27 @@ class UserService {
         }
     }
 
-    // Request asset
-    async createAssetRequest(assetId: string, userId: string, requestedDate: Date, quantity: number): Promise<any> {
+    // Addresses
+    async createAddress(addressData: IAddress): Promise<string> {
         try {
-            await this.userRepository.createAssetRequest(assetId, userId, requestedDate, quantity);
-            return true;
+            const newAddress = await this.userRepository.createAddress(addressData);
+            return newAddress._id;
         } catch (error) {
-            console.error('Error creating the request: ', error);
-            return false;
+            console.error('Error creating the address: ', error);
+            return null;
         }
     }
 
+    async fetchAddresses(userId: string): Promise<IAddress[]> {
+        try {
+            return await this.userRepository.findAddresses(userId);
+        } catch (error) {
+            console.error('Error fetching the addresses: ', error);
+            return null;
+        }
+    }
+
+    // Assets
     async fetchAssets(search: string, skip: number, limit: number, sortBy: string, filterByAvailability: string): Promise<IAsset[] | null> {
         try {
 
@@ -151,6 +172,17 @@ class UserService {
         }
     }
 
+    // Asset requests
+    async createAssetRequest(assetId: string, userId: string, requestedDate: Date, quantity: number): Promise<any> {
+        try {
+            await this.userRepository.createAssetRequest(assetId, userId, requestedDate, quantity);
+            return true;
+        } catch (error) {
+            console.error('Error creating the request: ', error);
+            return false;
+        }
+    }
+
     async fetchAssetRequests(search: string, filter: string, skip: number, limit: number, userId: string): Promise<IAssetRequestResponse[] | null> {
         try {
             const result = await this.userRepository.findAssetRequests(search, filter, userId, skip, limit);
@@ -161,9 +193,21 @@ class UserService {
         }
     }
 
-    async countAssetRequests(userId: string): Promise<number> {
+    async countAssetRequests(userId: string, search: string, filter: string): Promise<number> {
         try {
-            return await this.userRepository.countAssetRequests(userId);
+            let query: any = {};
+
+            if (search) {
+                query["asset.name"] = { $regex: search, $options: "i" };
+            }
+
+            if (filter && filter !== 'all') {
+                query.status = filter;
+            }
+
+            query.user = userId;
+
+            return await this.userRepository.countAssetRequests(query);
         } catch (error) {
             console.error('Error counting the asset requests:', error);
             return null;
@@ -180,13 +224,53 @@ class UserService {
         }
     }
 
-    async changeProfilePicture(userId: string, profilePicture: string): Promise<any> {
+    // Assistance requests
+    async createAssistanceRequest(formData: IAssistanceRequest): Promise<boolean> {
         try {
-            await this.userRepository.updateProfilePicture(userId, profilePicture);
+            await this.userRepository.createAssistanceRequest(formData);
             return true;
         } catch (error) {
-            console.error('Error updating the profile picture: ', error);
+            console.error('Error creating the request: ', error);
             return false;
+        }
+    }
+
+    async fetchAssistanceRequests(search: string, filter: string, skip: number, limit: number, userId: string): Promise<IAssistanceRequestResponse[] | null> {
+        try {
+            const result = await this.userRepository.findAssistanceRequests(search, filter, userId, skip, limit);
+            return result;
+        } catch (error) {
+            console.error('Error finding assistance requests:', error);
+            return null;
+        }
+    }
+
+    async countAssistanceRequests(userId: string, search: string, filter: string): Promise<number> {
+        try {
+            let query: any = { user: userId };
+
+            if (search) {
+                query["user.name"] = { $regex: search, $options: "i" };
+            }
+
+            if (filter && filter !== 'all') {
+                query.status = filter;
+            }
+
+            return await this.userRepository.countAssistanceRequests(query);
+        } catch (error) {
+            console.error('Error counting assistance requests:', error);
+            return null;
+        }
+    }
+
+    async fetchAssistanceRequestDetails(requestId: string): Promise<any> {
+        try {
+            const assistanceRequest = await this.userRepository.findAssistanceRequestDetails(requestId);
+            return assistanceRequest;
+        } catch (error) {
+            console.error('Error fetching assistance request details: ', error);
+            return null;
         }
     }
 }
