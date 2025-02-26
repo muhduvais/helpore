@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
-import { IAddress } from "../interfaces/userInterface";
+import { IAddress, IAddressDocument } from "../interfaces/userInterface";
 
-const addressSchema = new Schema<IAddress>({
+const addressSchema = new Schema<IAddressDocument>({
     fname: {
         type: String,
     },
@@ -43,5 +43,5 @@ const addressSchema = new Schema<IAddress>({
     timestamps: true
 });
 
-const Address = mongoose.model<IAddress>('addresses', addressSchema);
+const Address = mongoose.model<IAddressDocument>('addresses', addressSchema);
 export default Address;

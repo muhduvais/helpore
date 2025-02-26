@@ -1,15 +1,18 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import authRoutes from './routes/authRoutes';
-import adminRoutes from './routes/adminRoutes';
-import userRoutes from './routes/userRoutes';
+import router from './routes/routes';
 import volunteerRoutes from './routes/volunteerRoutes';
 import connectDB from './config/db';
 import dotenv from 'dotenv';
 import { handleError } from './middlewares/errorMiddleware';
 import cookieParser from 'cookie-parser';
+import "reflect-metadata";
+import { registerDependencies } from "./container";
 
 dotenv.config();
+
+// Initializing dependency injection
+registerDependencies();
 
 const app = express();
 
@@ -24,10 +27,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/volunteer', volunteerRoutes);
+app.use('/api', router);
 
 // Error handling middleware
 app.use(handleError);

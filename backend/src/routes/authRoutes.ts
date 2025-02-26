@@ -1,19 +1,21 @@
 import express from 'express';
+import { container } from 'tsyringe';
+import { IAuthController } from '../controllers/interfaces/IAuthController';
+
 const router = express.Router();
-import authController from '../controllers/authController';
 
-router.get('/authenticateUser/:id', authController.authenticateUser);
+const authController = container.resolve<IAuthController>('AuthController');
 
-router.post('/admin/login', authController.loginUser);
+router.get('/authenticateUser/:id', authController.authenticateUser.bind(authController));
 
-router.post('/register', authController.registerUser);
-router.post('/verifyOtp', authController.verifyOtp);
-router.post('/resendOtp', authController.resendOtp);
-router.post('/login', authController.loginUser);
-router.post('/refreshToken', authController.refreshToken);
-router.post('/forgotPassword', authController.forgotPassword);
-router.post('/resetPassword', authController.resetPassword);
-
-router.post('/google-login', authController.googleLogin);
+router.post('/admin/login', authController.loginUser.bind(authController));
+router.post('/login', authController.loginUser.bind(authController));
+router.post('/register', authController.registerUser.bind(authController));
+router.post('/verifyOtp', authController.verifyOtp.bind(authController));
+router.post('/resendOtp', authController.resendOtp.bind(authController));
+router.post('/refreshToken', authController.refreshToken.bind(authController));
+router.post('/forgotPassword', authController.forgotPassword.bind(authController));
+router.post('/resetPassword', authController.resetPassword.bind(authController));
+router.post('/google-login', authController.googleLogin.bind(authController));
 
 export default router;

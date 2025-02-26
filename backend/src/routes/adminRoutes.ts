@@ -31,7 +31,7 @@ const upload = multer({
 });
 
 // Asset image uploading
-adminRoutes.post('/assetImage', (req, res, next) => {
+adminRoutes.post('/uploadImage', (req, res, next) => {
     upload.single('file')(req, res, (err) => {
         if (err instanceof multer.MulterError) {
             return res.status(400).json({ success: false, message: err.message });

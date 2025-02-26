@@ -1,33 +1,18 @@
-import express from "express";
-import userController from "../controllers/userController";
-import { authenticateToken, authorizeRole } from "../middlewares/authMiddleware";
-const userRoutes = express.Router();
+import express from 'express';
+import { container } from 'tsyringe';
+import { IUserController } from '../controllers/interfaces/IUserController';
+import { authorizeRole } from '../middlewares/authMiddleware';
 
-userRoutes.use(authenticateToken);
-userRoutes.use(authorizeRole('user'));
+const router = express.Router();
 
-//Profile
-userRoutes.get('/me', userController.getUserDetails);
-userRoutes.put('/me', userController.updateUserDetails);
-userRoutes.patch('/me', userController.updateProfilePicture);
-userRoutes.patch('/password', userController.changePassword);
+const userController = container.resolve<IUserController>('userController');
 
-// Addresses
-userRoutes.get('/addresses', userController.getAddresses);
-userRoutes.post('/addresses', userController.createAddress);
+router.use(authorizeRole('admin'));
 
-//Assets
-userRoutes.get('/assets', userController.getAssets);
-userRoutes.get('/assets/:id', userController.getAssetDetails);
+router.get('/', userController.getUsers);
+router.post('/', userController.addUser);
+router.patch('/:id/:action', userController.toggleIsBlocked);
+router.get('/:id', userController.getUserDetails);
 
-//Asset requests
-userRoutes.get('/assetRequests', userController.getAssetRequests);
-userRoutes.get('/assetRequests/:id', userController.getAssetRequestDetails);
-userRoutes.post('/assetRequests/:id', userController.requestAsset);
 
-//Assistance requests
-userRoutes.get('/assistanceRequests', userController.getAssistanceRequests);
-userRoutes.get('/assistanceRequests/:id', userController.getAssistanceRequestDetails);
-userRoutes.post('/assistanceRequests', userController.requestAssistance);
-
-export default userRoutes;
+export default router;

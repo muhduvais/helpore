@@ -1,23 +1,18 @@
-import express from "express";
-import volunteerController from "../controllers/volunteerController";
-import { authenticateToken, authorizeRole } from "../middlewares/authMiddleware";
-const volunteerRoutes = express.Router();
+import express from 'express';
+import { container } from 'tsyringe';
+import { IVolunteerController } from '../controllers/interfaces/IVolunteerController';
+import { authorizeRole } from '../middlewares/authMiddleware';
 
-volunteerRoutes.use(authenticateToken);
-volunteerRoutes.use(authorizeRole('volunteer'));
+const router = express.Router();
 
-//Profile
-volunteerRoutes.get('/me', volunteerController.getVolunteerDetails);
-volunteerRoutes.put('/me', volunteerController.updateVolunteerDetails);
-volunteerRoutes.patch('/me', volunteerController.updateProfilePicture);
-volunteerRoutes.patch('/password', volunteerController.changePassword);
+const volunteerController = container.resolve<IVolunteerController>('volunteerController');
 
-// Addresses
-volunteerRoutes.get('/addresses', volunteerController.getAddresses);
-volunteerRoutes.post('/addresses', volunteerController.createAddress);
+router.use(authorizeRole('admin'));
 
-//Assistance requests
-volunteerRoutes.get('/assistanceRequests', volunteerController.getNearbyRequests);
-volunteerRoutes.patch('/assistanceRequests/:id', volunteerController.updateRequestStatus);
+router.get('/', volunteerController.getVolunteers);
+router.post('/', volunteerController.addVolunteer);
+router.patch('/:id/:action', volunteerController.toggleIsBlocked);
+router.get('/:id', volunteerController.getVolunteerDetails);
 
-export default volunteerRoutes;
+
+export default router;

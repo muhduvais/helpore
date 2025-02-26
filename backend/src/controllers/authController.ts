@@ -1,26 +1,16 @@
 import { Request, Response } from 'express';
-import AuthService from '../services/authService';
-import { JwtPayload } from '../interfaces/authInterface';
-import jwt from 'jsonwebtoken';
+import { injectable, inject } from 'tsyringe';
+import { IAuthService, IUserService } from '../services/interfaces/ServiceInterface';
+import { IAuthController } from './interfaces/IAuthController';
 import { firebaseAdmin } from '../config/firebase.config';
-import dotenv from 'dotenv';
-dotenv.config();
+import { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
-class AuthController {
-    private authService: AuthService;
-
-    constructor() {
-        this.authService = new AuthService();
-        this.registerUser = this.registerUser.bind(this);
-        this.resendOtp = this.resendOtp.bind(this);
-        this.verifyOtp = this.verifyOtp.bind(this);
-        this.loginUser = this.loginUser.bind(this);
-        this.refreshToken = this.refreshToken.bind(this);
-        this.googleLogin = this.googleLogin.bind(this);
-        this.forgotPassword = this.forgotPassword.bind(this);
-        this.resetPassword = this.resetPassword.bind(this);
-        this.authenticateUser = this.authenticateUser.bind(this);
-    }
+@injectable()
+export class AuthController implements IAuthController {
+    constructor(
+        @inject('IAuthService') private readonly authService: IAuthService,
+    ) { }
 
     async registerUser(req: Request, res: Response): Promise<void> {
         try {
@@ -110,7 +100,7 @@ class AuthController {
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
             const refreshToken = req.cookies.refreshToken;
-            
+
             if (!refreshToken) {
                 console.log(' Refresh token is missing!');
                 res.status(403).json({ message: 'Refresh token is missing!' });
@@ -225,5 +215,3 @@ class AuthController {
         }
     }
 }
-
-export default new AuthController();

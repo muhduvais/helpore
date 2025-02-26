@@ -108,7 +108,7 @@ export const adminService = {
     },
     uploadAssetImage: async (formData: any) => {
         try {
-            const response = await customAxios.post('/api/admin/assetImage', formData, {
+            const response = await customAxios.post('/api/assets/uploadImage', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }

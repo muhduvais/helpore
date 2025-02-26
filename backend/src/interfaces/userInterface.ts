@@ -1,6 +1,6 @@
 import mongoose, { Document, Types } from "mongoose";
 
-export interface IUser extends Document {
+export interface IUser {
     userId?: string;
     name: string;
     age: number;
@@ -20,14 +20,33 @@ export interface IUser extends Document {
     uid?: string;
 }
 
+export interface IUserDocument extends Document {
+    userId: string;
+    name: string;
+    age: number;
+    gender: string;
+    phone: number;
+    email: string;
+    password: string;
+    profilePicture: string;
+    isActive: boolean;
+    isBlocked: boolean;
+    isVerified: boolean;
+    role: string;
+    tasks: number;
+    googleId: string;
+    resetToken: string;
+    resetTokenExpiry: Date;
+    uid?: string;
+}
+
 export interface IAddress {
-    _id?: string;
+    _id?: Types.ObjectId;
     fname: string;
     lname: string;
     street: string;
     city: string;
     state: string;
-    
     country: string;
     pincode: number;
     entity?: Types.ObjectId;
@@ -36,7 +55,22 @@ export interface IAddress {
     longitude?: number;
 }
 
-export interface IAsset {
+export interface IAddressDocument extends Document {
+    _id: Types.ObjectId;
+    fname: string;
+    lname: string;
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    pincode: number;
+    entity?: Types.ObjectId;
+    type?: string;
+    latitude?: number;
+    longitude?: number;
+}
+
+export interface IAsset extends Document {
     name: string;
     category: string;
     description: string;
@@ -44,7 +78,7 @@ export interface IAsset {
     image: string;
 }
 
-export interface IAssetRequest {
+export interface IAssetRequest extends Document {
     asset: Types.ObjectId;
     user: Types.ObjectId;
     status: string;
@@ -54,6 +88,21 @@ export interface IAssetRequest {
 }
 
 export interface IAssistanceRequest {
+    user: Types.ObjectId;
+    type: 'volunteer' | 'ambulance';
+    description?: string;
+    status: 'pending' | 'approved' | 'rejected';
+    requestedDate: Date;
+    requestedTime: string;
+    priority: 'urgent' | 'normal';
+    address?: IAddress;
+    volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
+    volunteer?: Types.ObjectId | string;
+    rejectedBy?: [string];
+}
+
+export interface IAssistanceRequestDocument extends Document {
+    _id: Types.ObjectId;
     user: Types.ObjectId;
     type: 'volunteer' | 'ambulance';
     description?: string;
