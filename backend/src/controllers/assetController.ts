@@ -7,7 +7,13 @@ import { IAssetController } from './interfaces/IAssetController';
 export class AssetController implements IAssetController {
     constructor(
         @inject('IAssetService') private assetService: IAssetService
-    ) { }
+    ) {
+        this.addAsset = this.addAsset.bind(this);
+        this.uploadAssetImage = this.uploadAssetImage.bind(this);
+        this.getAssets = this.getAssets.bind(this);
+        this.getAssetDetails = this.getAssetDetails.bind(this);
+        this.updateAsset = this.updateAsset.bind(this);
+    }
 
     async addAsset(req: Request, res: Response): Promise<void> {
         try {

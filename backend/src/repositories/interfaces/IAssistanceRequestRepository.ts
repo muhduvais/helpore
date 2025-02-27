@@ -1,6 +1,6 @@
 import { IAssistanceRequest, IAssistanceRequestDocument, IAssistanceRequestResponse } from "../../interfaces/userInterface";
 
-export interface IAssistanceRepository {
+export interface IAssistanceRequestRepository {
   createAssistanceRequest(formData: IAssistanceRequest): Promise<boolean>;
   findAssistanceRequests(search: string, filter: string, skip: number, limit: number, sort: string, priority: string): Promise<IAssistanceRequestResponse[] | null>;
   countAssistanceRequests(search: string, filter: string, priority: string): Promise<number>;

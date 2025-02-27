@@ -1,15 +1,22 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from "tsyringe";
-import { IAssistanceRequestController } from './interfaces/IAssistanceRequesController';
+import { IAssistanceRequestController } from './interfaces/IAssistanceRequestController';
 import { IAssistanceRequestService } from '../services/interfaces/ServiceInterface';
 
 @injectable()
 export class AssistanceRequestController implements IAssistanceRequestController {
     constructor(
-        @inject("IAssistanceRequestService") private readonly assistanceRequestService: IAssistanceRequestService) { }
+        @inject("IAssistanceRequestService") private readonly assistanceRequestService: IAssistanceRequestService) {
+            this.requestAssistance = this.requestAssistance.bind(this);
+            this.getNearbyRequests = this.getNearbyRequests.bind(this);
+            this.updateRequestStatus = this.updateRequestStatus.bind(this);
+            this.getAssistanceRequests = this.getAssistanceRequests.bind(this);
+            this.getAssistanceRequestDetails = this.getAssistanceRequestDetails.bind(this);
+            this.assignVolunteer = this.assignVolunteer.bind(this);
+        }
 
     async requestAssistance(req: Request, res: Response): Promise<void> {
-        const userId = req.user.userId;
+        const userId = req.user?.userId;
         const { formData } = req.body;
 
         formData.user = userId;
@@ -29,7 +36,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
 
     async getNearbyRequests(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user.userId;
+            const volunteerId = req.user?.userId;
             const page = parseInt(req.query.page as string, 10) || 1;
             const search = req.query.search as string;
             const filter = req.query.filter as string;
@@ -57,7 +64,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
 
     async updateRequestStatus(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user.userId;
+            const volunteerId = req.user?.userId;
             const requestId = req.params.id;
             const { action } = req.body;
 

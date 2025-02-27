@@ -1,7 +1,6 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import cors from 'cors';
 import router from './routes/routes';
-import volunteerRoutes from './routes/volunteerRoutes';
 import connectDB from './config/db';
 import dotenv from 'dotenv';
 import { handleError } from './middlewares/errorMiddleware';

@@ -6,7 +6,7 @@ import { IAssetController } from '../controllers/interfaces/IAssetController';
 
 const router = express.Router();
 
-const assetController = container.resolve<IAssetController>('AssetController');
+const assetController = container.resolve<IAssetController>('IAssetController');
 
 const storage = multer.diskStorage({
     destination: 'uploads/',

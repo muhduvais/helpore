@@ -5,7 +5,7 @@ import { authorizeRole } from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
-const volunteerController = container.resolve<IVolunteerController>('volunteerController');
+const volunteerController = container.resolve<IVolunteerController>('IVolunteerController');
 
 router.use(authorizeRole('admin'));
 

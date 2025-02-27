@@ -5,7 +5,7 @@ import { authorizeRole } from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
-const userController = container.resolve<IUserController>('userController');
+const userController = container.resolve<IUserController>('IUserController');
 
 router.use(authorizeRole('admin'));
 

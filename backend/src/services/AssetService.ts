@@ -1,5 +1,5 @@
 import { injectable, inject } from 'tsyringe';
-import { BaseService } from './base/BaseService';
+import { BaseService } from './BaseService';
 import { IAssetService } from './interfaces/ServiceInterface';
 import { IAsset, IAssetRequestResponse } from '../interfaces/userInterface';
 import cloudinary from 'cloudinary';

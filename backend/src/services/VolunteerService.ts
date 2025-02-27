@@ -1,0 +1,155 @@
+import { injectable, inject } from 'tsyringe';
+import { BaseService } from './BaseService';
+import { IUserService, IVolunteerService, IAssetService, IAssistanceRequestService } from './interfaces/ServiceInterface';
+import { IUser, IAddress, IAsset, IAssetRequestResponse, IAssistanceRequestResponse, IUserDocument } from '../interfaces/userInterface';
+import { IAddUserForm } from '../interfaces/adminInterface';
+import bcrypt from 'bcryptjs';
+import cloudinary from 'cloudinary';
+import { IUserRepository } from '../repositories/interfaces/IUserRepository';
+import { IAddressRepository } from '../repositories/interfaces/IAddressRepository';
+import { Types } from 'mongoose';
+import { IAssistanceRequestRepository } from '../repositories/interfaces/IAssistanceRequestRepository';
+
+// Configure cloudinary
+cloudinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+@injectable()
+export class VolunteerService extends BaseService<IUserDocument> implements IVolunteerService {
+    constructor(
+        @inject('IUserRepository') private userRepository: IUserRepository,
+        @inject('IAddressRepository') private addressRepository: IAddressRepository,
+        @inject('IAssistanceRequestRepository') private assistanceRepository: IAssistanceRequestRepository,
+    ) {
+        super(userRepository);
+    }
+
+    async addVolunteer(formData: IAddUserForm): Promise<string | boolean | null> {
+        try {
+            const { name, age, gender, phone, email, password, fname, lname, street, city, state, country, pincode } = formData;
+            const existingUser = await this.userRepository.findUserByEmail(email);
+            if (existingUser) {
+                return false;
+            }
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            const newUser: Partial<IUser> = {
+                name,
+                age,
+                gender,
+                phone,
+                email,
+                googleId: null,
+                password: hashedPassword,
+            };
+
+            const newAddress: IAddress = {
+                fname,
+                lname,
+                street,
+                city,
+                state,
+                country,
+                pincode,
+            };
+
+            const user = await this.userRepository.createUser(newUser);
+            newAddress.entity = user._id as Types.ObjectId;
+            await this.addressRepository.addAddress(newAddress);
+            const registeredMail = user.email;
+
+            return registeredMail;
+        } catch (error) {
+            console.error('Error registering the volunteer', error);
+            return null;
+        }
+    }
+
+    async fetchVolunteers(search: string, skip: number, limit: number, isActive: string): Promise<IUser[] | null> {
+        try {
+            let query: any = { role: 'volunteer' };
+            if (search) query.name = { $regex: search, $options: 'i' };
+            if (isActive === 'true') {
+                query.isActive = isActive;
+                query.tasks = { $lt: 5 };
+            }
+            return await this.userRepository.findUsers(query, skip, limit);
+        } catch (error) {
+            console.error('Error finding volunteers:', error);
+            throw error;
+        }
+    }
+
+    async fetchVolunteerDetails(volunteerId: string): Promise<IUser> {
+        try {
+            return await this.userRepository.findUserDetails(volunteerId);
+        } catch (error) {
+            console.error('Error fetching the volunteer details: ', error);
+            return null;
+        }
+    }
+
+    async countVolunteers(search: string): Promise<number> {
+        try {
+            const query = search ? { name: { $regex: search, $options: 'i' }, role: 'volunteer' } : { role: 'volunteer' };
+            return await this.userRepository.countUsers(query);
+        } catch (error) {
+            console.error('Error counting volunteers:', error);
+            throw error;
+        }
+    }
+
+    async changeProfilePicture(volunteerId: string, profilePicture: string): Promise<boolean> {
+        try {
+            await this.userRepository.updateProfilePicture(volunteerId, profilePicture);
+            return true;
+        } catch (error) {
+            console.error('Error updating the profile picture: ', error);
+            return false;
+        }
+    }
+
+    async verifyCurrentPassword(volunteerId: string, currentPassword: string): Promise<boolean | null> {
+        try {
+            const password = await this.userRepository.findPassword(volunteerId);
+            return bcrypt.compare(currentPassword, password);
+        } catch (error) {
+            console.error('Error updating the password: ', error);
+            return null;
+        }
+    }
+
+    async changePassword(volunteerId: string, newPassword: string): Promise<boolean> {
+        try {
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            await this.userRepository.updatePassword(volunteerId, hashedPassword);
+            return true;
+        } catch (error) {
+            console.error('Error updating the password: ', error);
+            return false;
+        }
+    }
+
+    async toggleIsBlocked(action: boolean, userId: string): Promise<boolean> {
+        try {
+            await this.userRepository.findByIdAndUpdate(userId, { isBlocked: action });
+            return true;
+        } catch (error) {
+            console.error('Error updating block status:', error);
+            throw error;
+        }
+    }
+
+    async checkTasksLimit(volunteerId: string): Promise<any> {
+        try {
+            const checkTasksLimit = await this.assistanceRepository.checkTasksLimit(volunteerId);
+            return checkTasksLimit;
+        } catch (error) {
+            console.error('Error assigning volunteer: ', error);
+            return null;
+        }
+    }
+}

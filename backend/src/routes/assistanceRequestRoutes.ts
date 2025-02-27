@@ -1,10 +1,10 @@
 import express from 'express';
 import { container } from 'tsyringe';
-import { IAssistanceRequestController } from '../controllers/interfaces/IAssistanceRequesController';
+import { IAssistanceRequestController } from '../controllers/interfaces/IAssistanceRequestController';
 
 const router = express.Router();
 
-const assistanceRequestController = container.resolve<IAssistanceRequestController>('assistanceRequestController');
+const assistanceRequestController = container.resolve<IAssistanceRequestController>('IAssistanceRequestController');
 
 router.get('/', assistanceRequestController.getAssistanceRequests);
 router.get('/:id', assistanceRequestController.getAssistanceRequestDetails);

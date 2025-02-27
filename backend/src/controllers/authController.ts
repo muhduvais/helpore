@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
-import { IAuthService, IUserService } from '../services/interfaces/ServiceInterface';
+import { IAuthService } from '../services/interfaces/ServiceInterface';
 import { IAuthController } from './interfaces/IAuthController';
 import { firebaseAdmin } from '../config/firebase.config';
 import { JwtPayload } from 'jsonwebtoken';
@@ -10,7 +10,17 @@ import jwt from 'jsonwebtoken';
 export class AuthController implements IAuthController {
     constructor(
         @inject('IAuthService') private readonly authService: IAuthService,
-    ) { }
+    ) {
+        this.registerUser = this.registerUser.bind(this);
+        this.resendOtp = this.resendOtp.bind(this);
+        this.verifyOtp = this.verifyOtp.bind(this);
+        this.loginUser = this.loginUser.bind(this);
+        this.refreshToken = this.refreshToken.bind(this);
+        this.googleLogin = this.googleLogin.bind(this);
+        this.forgotPassword = this.forgotPassword.bind(this);
+        this.resetPassword = this.resetPassword.bind(this);
+        this.authenticateUser = this.authenticateUser.bind(this);
+    }
 
     async registerUser(req: Request, res: Response): Promise<void> {
         try {
@@ -130,6 +140,15 @@ export class AuthController implements IAuthController {
         try {
             const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
             const user = await this.authService.findOrCreateUser(decodedToken);
+
+            if (!user) {
+                res.status(401).json({
+                    success: false,
+                    message: "You are not registered as a volunteer!"
+                });
+                return;
+            }
+
             const userId = user._id as string;
             const role = user.role as string;
 

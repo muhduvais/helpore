@@ -8,7 +8,14 @@ export class VolunteerController implements IVolunteerController {
     constructor(
         @inject('IVolunteerService') private volunteerService: IVolunteerService,
         @inject('IAdminService') private adminService: IAdminService,
-    ) { }
+    ) {
+        this.addVolunteer = this.addVolunteer.bind(this);
+        this.getVolunteers = this.getVolunteers.bind(this);
+        this.getVolunteerDetails = this.getVolunteerDetails.bind(this);
+        this.updateProfilePicture = this.updateProfilePicture.bind(this);
+        this.changePassword = this.changePassword.bind(this);
+        this.toggleIsBlocked = this.toggleIsBlocked.bind(this);
+    }
 
     async addVolunteer(req: Request, res: Response): Promise<void> {
         try {
@@ -54,7 +61,7 @@ export class VolunteerController implements IVolunteerController {
 
     async getVolunteerDetails(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user.userId;
+            const volunteerId = req.user?.userId;
             const VolunteerDetails = await this.volunteerService.fetchVolunteerDetails(volunteerId);
 
             if (!VolunteerDetails) {
@@ -71,7 +78,7 @@ export class VolunteerController implements IVolunteerController {
 
     async updateProfilePicture(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user.userId;
+            const volunteerId = req.user?.userId;
             const { profilePicture } = req.body;
 
             const updated = await this.volunteerService.changeProfilePicture(volunteerId, profilePicture);
@@ -90,7 +97,7 @@ export class VolunteerController implements IVolunteerController {
 
     async changePassword(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user.userId;
+            const volunteerId = req.user?.userId;
             const { currentPassword, newPassword } = req.body;
 
             const isValid = await this.volunteerService.verifyCurrentPassword(volunteerId, currentPassword);

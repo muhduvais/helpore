@@ -1,21 +1,25 @@
+import 'reflect-metadata';
 import express from 'express';
 import { container } from 'tsyringe';
 import { IAuthController } from '../controllers/interfaces/IAuthController';
+import { registerDependencies } from '../container';
+
+registerDependencies();
 
 const router = express.Router();
 
-const authController = container.resolve<IAuthController>('AuthController');
+const authController = container.resolve<IAuthController>('IAuthController');
 
-router.get('/authenticateUser/:id', authController.authenticateUser.bind(authController));
+router.get('/authenticateUser/:id', (req,res,next) => authController.authenticateUser(req,res));
 
-router.post('/admin/login', authController.loginUser.bind(authController));
-router.post('/login', authController.loginUser.bind(authController));
-router.post('/register', authController.registerUser.bind(authController));
-router.post('/verifyOtp', authController.verifyOtp.bind(authController));
-router.post('/resendOtp', authController.resendOtp.bind(authController));
-router.post('/refreshToken', authController.refreshToken.bind(authController));
-router.post('/forgotPassword', authController.forgotPassword.bind(authController));
-router.post('/resetPassword', authController.resetPassword.bind(authController));
-router.post('/google-login', authController.googleLogin.bind(authController));
+router.post('/admin/login', (req,res,next) =>  authController.loginUser(req,res));
+router.post('/login', (req, res, next) => authController.loginUser(req, res));
+router.post('/register', (req, res, next) => authController.registerUser(req, res));
+router.post('/verifyOtp', (req, res, next) => authController.verifyOtp(req, res));
+router.post('/resendOtp', (req, res, next) => authController.resendOtp(req, res));
+router.post('/refreshToken', (req, res, next) => authController.refreshToken(req, res));
+router.post('/forgotPassword', (req, res, next) => authController.forgotPassword(req, res));
+router.post('/resetPassword', (req, res, next) => authController.resetPassword(req, res));
+router.post('/google-login', (req, res, next) => authController.googleLogin(req, res));
 
 export default router;

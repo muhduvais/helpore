@@ -8,7 +8,15 @@ export class UserController implements IUserController {
   constructor(
     @inject('IUserService') private readonly userService: IUserService,
     @inject('IAdminService') private readonly adminService: IAdminService,
-  ) { }
+  ) {
+    this.addUser = this.addUser.bind(this);
+    this.getUsers = this.getUsers.bind(this);
+    this.getUserDetails = this.getUserDetails.bind(this);
+    this.updateUserDetails = this.updateUserDetails.bind(this);
+    this.updateProfilePicture = this.updateProfilePicture.bind(this);
+    this.changePassword = this.changePassword.bind(this);
+    this.toggleIsBlocked = this.toggleIsBlocked.bind(this);
+  }
 
   async addUser(req: Request, res: Response): Promise<void> {
     try {
@@ -101,7 +109,7 @@ export class UserController implements IUserController {
 
   async updateUserDetails(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user.userId;
+      const userId = req.user?.userId;
       const { formData } = req.body;
       const registeredMail = await this.userService.editUser(userId, formData);
 
@@ -116,7 +124,7 @@ export class UserController implements IUserController {
 
   async updateProfilePicture(req: Request, res: Response): Promise<void> {
 
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
 
     const { profilePicture } = req.body;
 
@@ -137,7 +145,7 @@ export class UserController implements IUserController {
 
   async changePassword(req: Request, res: Response): Promise<void> {
 
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
 
     const data = req.body;
 

@@ -4,7 +4,7 @@ import { IAddressController } from '../controllers/interfaces/IAddressController
 
 const router = express.Router();
 
-const addressController = container.resolve<IAddressController>('addressController');
+const addressController = container.resolve<IAddressController>('IAddressController');
 
 router.get('/', addressController.getAddresses);
 router.post('/', addressController.createAddress);

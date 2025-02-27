@@ -1,12 +1,12 @@
 import { injectable } from "tsyringe";
 import { IAssistanceRequest, IAssistanceRequestDocument, IAssistanceRequestResponse } from "../interfaces/userInterface";
-import { IAssistanceRepository } from "../repositories/interfaces/IAssistanceRequestRepository";
+import { IAssistanceRequestRepository } from "../repositories/interfaces/IAssistanceRequestRepository";
 import AssistanceRequest from "../models/assistanceRequestModel";
 import User from "../models/userModel";
 import { BaseRepository } from "./BaseRepository";
 
 @injectable()
-export class AssistanceRequestRepository extends BaseRepository<IAssistanceRequestDocument> implements IAssistanceRepository {
+export class AssistanceRequestRepository extends BaseRepository<IAssistanceRequestDocument> implements IAssistanceRequestRepository {
 
   async findRequestById(requestId: string): Promise<IAssistanceRequestDocument> {
     return await this.findById(requestId);

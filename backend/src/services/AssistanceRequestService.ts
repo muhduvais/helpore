@@ -4,12 +4,12 @@ import { IAssistanceRequest, IAssistanceRequestResponse } from "../interfaces/us
 import { Types } from "mongoose";
 import { IAddressRepository } from "../repositories/interfaces/IAddressRepository";
 import { calculateDistance, GeocodingService, MAX_DISTANCE, MIN_DISTANCE } from '../utils/geoUtils';
-import { IAssistanceRepository } from "../repositories/interfaces/IAssistanceRequestRepository";
+import { IAssistanceRequestRepository } from "../repositories/interfaces/IAssistanceRequestRepository";
 
 @injectable()
 export class AssistanceRequestService implements IAssistanceRequestService {
     constructor(
-        @inject('IassistanceRepository') private assistanceRepository: IAssistanceRepository,
+        @inject('IAssistanceRequestRepository') private assistanceRepository: IAssistanceRequestRepository,
         @inject('IAddressRepository') private addressRepository: IAddressRepository,
     ) { }
 

@@ -7,10 +7,14 @@ import { IAddressController } from './interfaces/IAddressController';
 export class AddressController implements IAddressController {
     constructor(
         @inject('IUserService') private userService: IUserService,
-    ) {}
+    ) {
+        this.createAddress = this.createAddress.bind(this);
+        this.getAddresses = this.getAddresses.bind(this);
+    }
 
     async createAddress (req: Request, res: Response): Promise<void> {
-        const entity = req.user.userId;
+        const entity = req.user?.userId;
+        
         const type = 'user';
         const { addressData } = req.body;
         addressData.entity = entity;
@@ -30,7 +34,7 @@ export class AddressController implements IAddressController {
     }
 
     async getAddresses (req: Request, res: Response): Promise<void> {
-        const userId = req.user.userId;
+        const userId = req.user?.userId;
         try {
             const addresses = await this.userService.fetchAddresses(userId);
             if (addresses) {

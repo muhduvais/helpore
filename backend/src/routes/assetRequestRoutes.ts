@@ -4,7 +4,7 @@ import { IAssetRequestController } from '../controllers/interfaces/IAssetRequest
 
 const router = express.Router();
 
-const assetRequestController = container.resolve<IAssetRequestController>('AssetRequestController');
+const assetRequestController = container.resolve<IAssetRequestController>('IAssetRequestController');
 
 router.get('/', assetRequestController.getAssetRequests);
 router.get('/:id', assetRequestController.getAssetRequestDetails);

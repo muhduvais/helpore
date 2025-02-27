@@ -1,6 +1,7 @@
-import { IBaseRepository } from '../../repositories/interfaces/IBaseRepository';
-import { IBaseService } from '../../services/base/IBaseService';
+
 import { Document, FilterQuery, UpdateWriteOpResult } from 'mongoose';
+import { IBaseRepository } from '../repositories/interfaces/IBaseRepository';
+import { IBaseService } from './interfaces/IBaseService';
 
 export abstract class BaseService<T extends Document> implements IBaseService<T> {
     constructor(

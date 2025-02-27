@@ -7,11 +7,16 @@ import { IAssetService } from '../services/interfaces/ServiceInterface';
 export class AssetRequestController implements IAssetRequestController {
     constructor(
         @inject('IAssetService') private assetService: IAssetService,
-    ) { }
+    ) {
+    this.requestAsset = this.requestAsset.bind(this);
+    this.getAssetRequests = this.getAssetRequests.bind(this);
+    this.getAssetRequestDetails = this.getAssetRequestDetails.bind(this);
+    this.updateAssetRequestStatus = this.updateAssetRequestStatus.bind(this);
+    }
 
     async requestAsset(req: Request, res: Response): Promise<void> {
         const assetId = req.params.id;
-        const userId = req.user.userId;
+        const userId = req.user?.userId;
         const { requestedDate, quantity } = req.body;
 
         try {
@@ -60,7 +65,7 @@ export class AssetRequestController implements IAssetRequestController {
     }
 
     async getAssetRequestDetails(req: Request, res: Response): Promise<void> {
-        const userId = req.user.userId;
+        const userId = req.user?.userId;
         const assetId = req.params.id;
 
         try {
