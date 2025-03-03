@@ -6,8 +6,8 @@ import { IVolunteerController } from './interfaces/IVolunteerController';
 @injectable()
 export class VolunteerController implements IVolunteerController {
     constructor(
-        @inject('IVolunteerService') private volunteerService: IVolunteerService,
-        @inject('IAdminService') private adminService: IAdminService,
+        @inject('IVolunteerService') private readonly volunteerService: IVolunteerService,
+        @inject('IAdminService') private readonly adminService: IAdminService,
     ) {
         this.addVolunteer = this.addVolunteer.bind(this);
         this.getVolunteers = this.getVolunteers.bind(this);
@@ -61,15 +61,15 @@ export class VolunteerController implements IVolunteerController {
 
     async getVolunteerDetails(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user?.userId;
-            const VolunteerDetails = await this.volunteerService.fetchVolunteerDetails(volunteerId);
+            const volunteerId = req.params.id;
+            const volunteerDetails = await this.volunteerService.fetchVolunteerDetails(volunteerId);
 
-            if (!VolunteerDetails) {
+            if (!volunteerDetails) {
                 res.status(404).json({ success: false, message: 'Volunteer not found!' });
                 return;
             }
 
-            res.status(200).json({ success: true, VolunteerDetails });
+            res.status(200).json({ success: true, volunteerDetails });
         } catch (error) {
             console.error('Error fetching Volunteer details:', error);
             res.status(500).json({ success: false, message: 'Error fetching Volunteer details' });

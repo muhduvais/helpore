@@ -43,7 +43,7 @@ const AdminVolunteerDetails = () => {
             setError('');
             const response = await adminService.fetchVolunteerDetails(volunteerId);
             if (response.status === 200) {
-                setVolunteer(response.data.volunteer);
+                setVolunteer(response.data.volunteerDetails);
             }
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -75,7 +75,7 @@ const AdminVolunteerDetails = () => {
         fetchVolunteerDetails();
     }, [volunteerId]);
 
-    const VolunteerInfoField = ({ icon: Icon, label, value }: { icon: any, label: string, value: string | undefined }) => (
+    const VolunteerInfoField = ({ icon: Icon, label, value }: { icon: any, label: string, value: string | number | undefined }) => (
         <div className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg">
             <Icon className="text-gray-500" size={20} />
             <div className="flex flex-col">
@@ -204,7 +204,7 @@ const AdminVolunteerDetails = () => {
                                 <VolunteerInfoField
                                     icon={FaPhone}
                                     label="Phone Number"
-                                    value={'9855896542'}
+                                    value={volunteer?.phone || 'N/A'}
                                 />
                             </div>
                         </div>

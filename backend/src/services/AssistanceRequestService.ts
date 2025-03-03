@@ -9,8 +9,8 @@ import { IAssistanceRequestRepository } from "../repositories/interfaces/IAssist
 @injectable()
 export class AssistanceRequestService implements IAssistanceRequestService {
     constructor(
-        @inject('IAssistanceRequestRepository') private assistanceRepository: IAssistanceRequestRepository,
-        @inject('IAddressRepository') private addressRepository: IAddressRepository,
+        @inject('IAssistanceRequestRepository') private readonly assistanceRepository: IAssistanceRequestRepository,
+        @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
     ) { }
 
     async createAssistanceRequest(formData: IAssistanceRequest): Promise<boolean> {
@@ -23,6 +23,20 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         }
     }
 
+    async calculateEstimatedTravelTime(distanceInKm: number): Promise<string> {
+
+        const timeInHours = distanceInKm / 30;
+        const timeInMinutes = Math.round(timeInHours * 60);
+
+        if (timeInMinutes < 60) {
+            return `${timeInMinutes} minutes`;
+        }
+
+        const hours = Math.floor(timeInHours);
+        const minutes = Math.round((timeInHours - hours) * 60);
+        return `${hours}h ${minutes}m`;
+    }
+
     async getNearbyRequests(volunteerId: string, page: number, search: string, filter: string): Promise<any> {
         try {
             let query: any = {
@@ -30,7 +44,6 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 type: 'volunteer',
                 rejectedBy: { $nin: [volunteerId] }
             };
-            console.log('query data: ', search, filter);
 
             const volunteerAddress = await this.addressRepository.findAddressesByQuery(query);
 
@@ -60,7 +73,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 return [];
             }
 
-            const nearbyRequests = pendingRequests
+            const requestsWithPromises = pendingRequests
                 .map(request => {
                     if (!request.address || !request.address.latitude || !request.address.longitude) {
                         console.warn(`Request ${request._id} has invalid address`);
@@ -79,18 +92,30 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                     }
 
                     return {
-                        ...request.toObject(),
+                        request: request.toObject(),
                         distance: Number(distance.toFixed(1)),
-                        estimatedTravelTime: this.assistanceRepository.calculateEstimatedTravelTime(distance)
+                        travelTimePromise: this.calculateEstimatedTravelTime(distance)
                     };
                 })
                 .filter((request): request is NonNullable<typeof request> => request !== null)
-                .sort((a, b) => a.distance - b.distance);
+
+            const nearbyRequests = await Promise.all(
+                requestsWithPromises.map(async (item) => {
+                    const travelTime = await item.travelTimePromise;
+                    return {
+                        ...item.request,
+                        distance: item.distance,
+                        estimatedTravelTime: travelTime
+                    };
+                })
+            );
+
+            const sortedRequests = nearbyRequests.sort((a, b) => a.distance - b.distance);
 
             return {
-                requests: nearbyRequests,
+                requests: sortedRequests,
                 metadata: {
-                    total: nearbyRequests.length,
+                    total: sortedRequests.length,
                     volunteerLocation: {
                         latitude: volunteerAddress.latitude,
                         longitude: volunteerAddress.longitude
@@ -134,7 +159,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async fetchAssistanceRequests(
         search: string, filter: string, skip: number, limit: number, sort: string, priority: string
-    ): Promise<IAssistanceRequest[] | null> {
+    ): Promise<IAssistanceRequestResponse[] | null> {
         try {
             const results = await this.assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority);
 
@@ -142,7 +167,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
             return results.map((request: IAssistanceRequestResponse) => ({
                 ...request,
-                requestedDate: new Date(request.requestedDate),
+                requestedDate: new Date(request.requestedDate).toISOString(),
                 address: request.address instanceof Types.ObjectId ? undefined : request.address,
             }));
         } catch (error) {

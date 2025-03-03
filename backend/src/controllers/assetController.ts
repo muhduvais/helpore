@@ -6,7 +6,7 @@ import { IAssetController } from './interfaces/IAssetController';
 @injectable()
 export class AssetController implements IAssetController {
     constructor(
-        @inject('IAssetService') private assetService: IAssetService
+        @inject('IAssetService') private readonly assetService: IAssetService
     ) {
         this.addAsset = this.addAsset.bind(this);
         this.uploadAssetImage = this.uploadAssetImage.bind(this);
@@ -32,12 +32,21 @@ export class AssetController implements IAssetController {
     async uploadAssetImage(req: Request, res: Response): Promise<void> {
         try {
             const file = req.file;
+            console.log('in controller!')
+            console.log('File: ', file)
             if (!file) {
                 res.status(400).json({ message: 'No image uploaded' });
                 return;
             }
 
+            console.log('Received file:', {
+                path: file.path,
+                mimetype: file.mimetype,
+                filename: file.filename
+            });
+
             const uploadResponse = await this.assetService.uploadAssetImage(file);
+
             if (!uploadResponse) {
                 res.status(500).json({ message: 'Failed to upload image to Cloudinary' });
                 return;
@@ -54,13 +63,17 @@ export class AssetController implements IAssetController {
     }
 
     async getAssets(req: Request, res: Response): Promise<void> {
+        
         const page = parseInt(req.query.page as string, 10) || 1;
         let limit = parseInt(req.query.limit as string, 10) || 5;
         const search = req.query.search as string;
-        let skip = !search ? ((page - 1) * limit) : 0;
+        const sortBy = req.query.sortBy as string;
+        const filterByAvailability = req.query.filterByAvailability as string;
+
+        let skip = (page - 1) * limit;
 
         try {
-            const assets = await this.assetService.fetchAssets(search, skip, limit);
+            const assets = await this.assetService.fetchAssets(search, skip, limit, sortBy, filterByAvailability);
             const documentsCount = await this.assetService.countAssets(search);
             const totalPages = Math.ceil(documentsCount / limit);
 

@@ -40,9 +40,8 @@ const Profile = () => {
             const response = await userService.fetchUserDetails();
 
             if (response.status === 200) {
-                const { userDetails } = response.data;
-                setUser(userDetails.user);
-                setAddress(userDetails.address);
+                setUser(response.data.user);
+                setAddress(response.data.address);
                 setFile(user?.profilePicture || null)
             }
         } catch (error) {

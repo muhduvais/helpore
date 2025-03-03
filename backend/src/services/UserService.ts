@@ -10,8 +10,8 @@ import { IAddressRepository } from '../repositories/interfaces/IAddressRepositor
 @injectable()
 export class UserService extends BaseService<IUserDocument> implements IUserService {
     constructor(
-        @inject('IUserRepository') private userRepository: IUserRepository,
-        @inject('IAddressRepository') private addressRepository: IAddressRepository
+        @inject('IUserRepository') private readonly userRepository: IUserRepository,
+        @inject('IAddressRepository') private readonly addressRepository: IAddressRepository
     ) {
         super(userRepository);
     }

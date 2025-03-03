@@ -16,7 +16,7 @@ import { validateAddAsset } from "@/utils/validation";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { adminService } from "@/services/adminService";
-import { FormField } from "@/components/formField";
+import { FormField } from "@/components/FormField";
 import { AddAssetFormData, AddAssetFormErrors } from "@/interfaces/authInterface";
 
 const AddAsset = () => {

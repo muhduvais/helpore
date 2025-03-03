@@ -32,11 +32,11 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/userService';
 import asset_picture from '../../assets/asset_picture.png';
-import { FaCalendar } from 'react-icons/fa';
+import { FaCalendar, FaTimes } from 'react-icons/fa';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -72,6 +72,7 @@ const UserAssetDetails: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
     const [currentRequest, setCurrentRequest] = useState<IRequest | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
@@ -331,6 +332,43 @@ const UserAssetDetails: React.FC = () => {
 
     return (
         <>
+            {/* Image Expansion Modal */}
+            <AnimatePresence>
+                {
+                    expandedImage && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+                            onClick={() => setExpandedImage(null)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9 }}
+                                animate={{ scale: 1 }}
+                                exit={{ scale: 0.9 }}
+                                className="relative max-w-[40vw] max-h-[40vw]"
+                            >
+                                <motion.img
+                                    src={expandedImage}
+                                    alt="Expanded Asset"
+                                    className="max-w-full max-h-full object-contain"
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className="absolute top-4 right-4 text-white text-2xl bg-gray-300 hover:bg-gray-400 p-1 rounded-md"
+                                    onClick={() => setExpandedImage(null)}
+                                >
+                                    <FaTimes />
+                                </motion.button>
+                            </motion.div>
+                        </motion.div>
+                    )
+                }
+            </AnimatePresence >
+
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -372,7 +410,9 @@ const UserAssetDetails: React.FC = () => {
                         className="lg:col-span-1 space-y-6"
                     >
                         <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                            <div className="aspect-video w-full overflow-hidden bg-gray-100 relative">
+                            <div
+                                className="aspect-video w-full overflow-hidden bg-gray-100 relative cursor-pointer"
+                                onClick={() => setExpandedImage(asset?.image || asset_picture)}>
                                 <motion.img
                                     whileHover={{ scale: 1.05 }}
                                     transition={{ duration: 0.3 }}

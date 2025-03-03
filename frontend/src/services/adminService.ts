@@ -6,7 +6,7 @@ export const adminService = {
     // Users
     addUser: async (formData: SignUpFormData) => {
         try {
-            const response = await customAxios.post<SignupResponse>('/api/admin/users', { formData });
+            const response = await customAxios.post<SignupResponse>('/api/users', { formData });
             return response;
         } catch (error) {
             throw error;
@@ -14,7 +14,7 @@ export const adminService = {
     },
     fetchUsers: async (page: number, limit: number, search: string) => {
         try {
-            const response = await customAxios.get('/api/admin/users', {
+            const response = await customAxios.get('/api/users', {
                 params: {
                     page,
                     limit,
@@ -28,7 +28,7 @@ export const adminService = {
     },
     fetchUserDetails: async (userId: string) => {
         try {
-            const response = await customAxios.get(`/api/admin/users/${userId}`);
+            const response = await customAxios.get(`/api/users/${userId}`);
             return response;
         } catch (error) {
             throw error
@@ -36,7 +36,7 @@ export const adminService = {
     },
     userBlockToggle: async (userId: string, action: string) => {
         try {
-            const response = await customAxios.patch(`/api/admin/users/${userId}/${action}`);
+            const response = await customAxios.patch(`/api/users/${userId}/${action}`);
             return response;
         } catch (error) {
             throw error
@@ -46,7 +46,7 @@ export const adminService = {
     // Volunteers
     addVolunteer: async (formData: SignUpFormData) => {
         try {
-            const response = await customAxios.post<SignupResponse>('/api/admin/volunteers', { formData });
+            const response = await customAxios.post<SignupResponse>('/api/volunteers', { formData });
             return response;
         } catch (error) {
             throw error;
@@ -54,7 +54,7 @@ export const adminService = {
     },
     fetchVolunteers: async (page: number, limit: number, search: string) => {
         try {
-            const response = await customAxios.get('/api/admin/volunteers', {
+            const response = await customAxios.get('/api/volunteers', {
                 params: {
                     page,
                     limit,
@@ -68,7 +68,7 @@ export const adminService = {
     },
     fetchVolunteersList: async (page: number, search: string, isActive: boolean) => {
         try {
-            const response = await customAxios.get('/api/admin/volunteers', {
+            const response = await customAxios.get('/api/volunteers', {
                 params: {
                     page,
                     search,
@@ -82,7 +82,7 @@ export const adminService = {
     },
     fetchVolunteerDetails: async (volunteerId: string) => {
         try {
-            const response = await customAxios.get(`/api/admin/volunteers/${volunteerId}`);
+            const response = await customAxios.get(`/api/volunteers/${volunteerId}`);
             return response;
         } catch (error) {
             throw error
@@ -90,7 +90,7 @@ export const adminService = {
     },
     volunteerBlockToggle: async (volunteerId: string, action: string) => {
         try {
-            const response = await customAxios.patch(`/api/admin/volunteers/${volunteerId}/${action}`);
+            const response = await customAxios.patch(`/api/volunteers/${volunteerId}/${action}`);
             return response;
         } catch (error) {
             throw error
@@ -100,7 +100,7 @@ export const adminService = {
     // Assets
     addAsset: async (formData: AddAssetFormData) => {
         try {
-            const response = await customAxios.post('/api/admin/assets', { formData })
+            const response = await customAxios.post('/api/assets', { formData })
             return response;
         } catch (error) {
             throw error
@@ -108,7 +108,7 @@ export const adminService = {
     },
     uploadAssetImage: async (formData: any) => {
         try {
-            const response = await customAxios.post('/api/assets/uploadImage', formData, {
+            const response = await customAxios.post('/api/assets/image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
@@ -120,7 +120,7 @@ export const adminService = {
     },
     fetchAssets: async (page: number, limit: number, search: string) => {
         try {
-            const response = await customAxios.get('/api/admin/assets', {
+            const response = await customAxios.get('/api/assets', {
                 params: {
                     page,
                     limit,
@@ -134,7 +134,7 @@ export const adminService = {
     },
     fetchAssetDetails: async (assetId: string) => {
         try {
-            const response = await customAxios.get(`/api/admin/assets/${assetId}`);
+            const response = await customAxios.get(`/api/assets/${assetId}`);
             return response;
         } catch (error) {
             throw error
@@ -142,7 +142,7 @@ export const adminService = {
     },
     updateAsset: async (assetId: string, submitData: any) => {
         try {
-            const response = await customAxios.put(`/api/admin/assets/${assetId}`, { submitData });
+            const response = await customAxios.put(`/api/assets/${assetId}`, { submitData });
             return response;
         } catch (error) {
             throw error
@@ -152,7 +152,7 @@ export const adminService = {
     // Asset requests
     fetchAssetRequests: async (page: number, limit: number, search: string, status: string, priority: string, user: string, sort: string) => {
         try {
-            const response = await customAxios.get('/api/admin/assetRequests', {
+            const response = await customAxios.get('/api/assetRequests', {
                 params: {
                     page,
                     limit,
@@ -171,7 +171,7 @@ export const adminService = {
     updateAssetRequestStatus: async (requestId: string, status: string, comment: string) => {
         try {
             console.log('reqId: ', requestId)
-            const response = await customAxios.patch(`/api/admin/assetRequests/${requestId}`, { status, comment });
+            const response = await customAxios.patch(`/api/assetRequests/${requestId}`, { status, comment });
             return response;
         } catch (error) {
             throw error
@@ -181,7 +181,7 @@ export const adminService = {
     // Assistance requests
     fetchAssistanceRequests: async (page: number, limit: number, search: string, filter: string, priority: string, sort: string,) => {
         try {
-            const response = await customAxios.get('/api/admin/assistanceRequests', {
+            const response = await customAxios.get('/api/assistanceRequests', {
                 params: {
                     page,
                     limit,
@@ -198,7 +198,7 @@ export const adminService = {
     },
     fetchAssistanceRequestDetails: async (requestId: string) => {
         try {
-            const response = await customAxios.get(`/api/admin/assistanceRequests/${requestId}`)
+            const response = await customAxios.get(`/api/assistanceRequests/${requestId}`)
             return response;
         } catch (error) {
             throw error
@@ -206,7 +206,7 @@ export const adminService = {
     },
     assignVolunteer: async (requestId: string, volunteerId: string) => {
         try {
-            const response = await customAxios.patch(`/api/admin/assistanceRequests/${requestId}`, { volunteerId })
+            const response = await customAxios.patch(`/api/assistanceRequests/${requestId}/assignVolunteer`, { volunteerId })
             return response;
         } catch (error) {
             throw error

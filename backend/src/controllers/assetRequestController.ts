@@ -6,12 +6,13 @@ import { IAssetService } from '../services/interfaces/ServiceInterface';
 @injectable()
 export class AssetRequestController implements IAssetRequestController {
     constructor(
-        @inject('IAssetService') private assetService: IAssetService,
+        @inject('IAssetService') private readonly assetService: IAssetService,
     ) {
-    this.requestAsset = this.requestAsset.bind(this);
-    this.getAssetRequests = this.getAssetRequests.bind(this);
-    this.getAssetRequestDetails = this.getAssetRequestDetails.bind(this);
-    this.updateAssetRequestStatus = this.updateAssetRequestStatus.bind(this);
+        this.requestAsset = this.requestAsset.bind(this);
+        this.getAssetRequests = this.getAssetRequests.bind(this);
+        this.getMyAssetRequests = this.getMyAssetRequests.bind(this);
+        this.getAssetRequestDetails = this.getAssetRequestDetails.bind(this);
+        this.updateAssetRequestStatus = this.updateAssetRequestStatus.bind(this);
     }
 
     async requestAsset(req: Request, res: Response): Promise<void> {
@@ -20,7 +21,7 @@ export class AssetRequestController implements IAssetRequestController {
         const { requestedDate, quantity } = req.body;
 
         try {
-            const createAssetRequest = await this.assetService.createAssetRequest(
+            const createAssetRequest = await this.assetService.createRequest(
                 assetId, userId, requestedDate, quantity
             );
             if (createAssetRequest) {
@@ -35,9 +36,10 @@ export class AssetRequestController implements IAssetRequestController {
     async getAssetRequests(req: Request, res: Response): Promise<void> {
         try {
             const { search, page = 1, limit = 10, sort = "desc", user, status = 'all' } = req.query;
+
             const skip = (Number(page) - 1) * Number(limit);
 
-            const documentsCount = await this.assetService.countAssetRequests(
+            const documentsCount = await this.assetService.countRequests(
                 search as string,
                 status as string,
             );
@@ -61,6 +63,32 @@ export class AssetRequestController implements IAssetRequestController {
         } catch (error) {
             console.error("Error getting asset requests:", error);
             res.status(500).json({ message: "Server error" });
+        }
+    }
+
+    async getMyAssetRequests(req: Request, res: Response): Promise<void> {
+        const page = parseInt(req.query.page as string, 10) || 1;
+        let limit = parseInt(req.query.limit as string, 10) || 5;
+        const search = req.query.search as string;
+        const filter = req.query.filter as string;
+
+        let skip = (page - 1) * limit;
+
+        const userId = req.user.userId;
+
+        try {
+            const assetRequests = await this.assetService.fetchMyAssetRequests(search, filter, skip, limit, userId);
+            const documentsCount = await this.assetService.countMyAssetRequests(userId, search, filter);
+            const totalPages = Math.ceil(documentsCount / limit);
+
+            if (assetRequests) {
+                res.status(200).json({ success: true, assetRequests, totalPages, totalRequests: documentsCount });
+            } else {
+                res.status(400).json({ success: false, message: 'Asset requests not found!' });
+            }
+        } catch (error) {
+            console.error('Error fetching the asset requests:', error);
+            res.status(500).json({ message: 'Error fetching the asset requests', error });
         }
     }
 

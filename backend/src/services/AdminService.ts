@@ -21,7 +21,7 @@ export class AdminService implements IAdminService {
     try {
       const { name, age, gender, phone, email, password, fname, lname, street, city, state, country, pincode } = formData;
       const existingUser = await this.userRepository.findUserByEmail(email);
-      console.log('Existing user: ', existingUser)
+      
       if (existingUser) {
         return false;
       }
@@ -35,6 +35,7 @@ export class AdminService implements IAdminService {
         email,
         googleId: null,
         password: hashedPassword,
+        role: 'user'
       };
 
       const newAddress: IAddress = {
@@ -150,6 +151,7 @@ export class AdminService implements IAdminService {
         email,
         googleId: null,
         password: hashedPassword,
+        role: 'volunteer',
       };
 
       const newAddress: IAddress = {
@@ -160,6 +162,7 @@ export class AdminService implements IAdminService {
         state,
         country,
         pincode,
+        type: 'volunteer',
       };
 
       const user = await this.userRepository.createUser(newUser);

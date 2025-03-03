@@ -7,8 +7,7 @@ export const volunteerService = {
     // Profile
     fetchUserDetails: async () => {
         try {
-            const response = await customAxios.get('/api/user/me')
-            console.log('response: ', response)
+            const response = await customAxios.get('/api/users')
             return response;
         } catch (error) {
             throw error
@@ -16,7 +15,7 @@ export const volunteerService = {
     },
     updateUser: async (formData: any) => {
         try {
-            const response = await customAxios.put('/api/user/me', { formData });
+            const response = await customAxios.put('/api/users', { formData });
             return response;
         } catch (error) {
             throw error;
@@ -24,7 +23,7 @@ export const volunteerService = {
     },
     updateProfilePicture: async (profilePicture: string) => {
         try {
-            const response = await customAxios.patch('/api/user/me', { profilePicture })
+            const response = await customAxios.patch('/api/users/profilePicture', { profilePicture })
             return response;
         } catch (error) {
             throw error
@@ -32,7 +31,7 @@ export const volunteerService = {
     },
     changePassword: async (data: ChangePasswordData) => {
         try {
-            const response = await customAxios.patch('/api/user/password', data)
+            const response = await customAxios.patch('/api/users/password', data)
             return response;
         } catch (error) {
             throw error
@@ -42,7 +41,7 @@ export const volunteerService = {
     // Addresses
     createAddress: async (addressData: IAddress) => {
         try {
-            const createdAddressId = await customAxios.post('/api/user/addresses', { addressData });
+            const createdAddressId = await customAxios.post('/api/addresses', { addressData });
             return createdAddressId;
         } catch (error) {
             throw error
@@ -50,7 +49,7 @@ export const volunteerService = {
     },
     getUserAddresses: async () => {
         try {
-            const response = await customAxios.get('/api/user/addresses');
+            const response = await customAxios.get('/api/addresses');
             console.log('addresses: ', response)
             return response;
         } catch (error) {
@@ -61,7 +60,7 @@ export const volunteerService = {
     // Assistance requests
     fetchAssistanceRequests: async (page: number, limit: number, search: string, filter: string) => {
         try {
-            const response = await customAxios.get('/api/volunteer/assistanceRequests', {
+            const response = await customAxios.get('/api/assistanceRequests/nearBy', {
                 params: {
                     page,
                     limit,
@@ -76,7 +75,7 @@ export const volunteerService = {
     },
     updateRequestStatus: async (requestId: string, action: string) => {
         try {
-            const response = await customAxios.patch(`/api/volunteer/assistanceRequests/${requestId}`, { action });
+            const response = await customAxios.patch(`/api/assistanceRequests/${requestId}/status`, { action });
             return response;
         } catch (error) {
             throw error
@@ -85,7 +84,7 @@ export const volunteerService = {
 
     fetchAssistanceRequestDetails: async (requestId: string) => {
         try {
-            const response = await customAxios.get(`/api/user/assistanceRequests/${requestId}`)
+            const response = await customAxios.get(`/api/assistanceRequests/${requestId}`)
             return response;
         } catch (error) {
             throw error

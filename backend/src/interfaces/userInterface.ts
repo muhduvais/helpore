@@ -128,7 +128,7 @@ export interface IAssistanceRequestResponse {
     address?: Types.ObjectId;
     useDefaultAddress: boolean;
     volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
-    volunteer?: Types.ObjectId;
+    volunteer?: Types.ObjectId | IUser;
     comment?: string;
     createdAt: string;
     updatedAt: string;

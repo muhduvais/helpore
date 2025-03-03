@@ -41,13 +41,14 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const search = req.query.search as string;
             const filter = req.query.filter as string;
 
-            const { requests, total } = await this.assistanceRequestService.getNearbyRequests(
+            const { requests, metadata } = await this.assistanceRequestService.getNearbyRequests(
                 volunteerId,
                 page,
                 search,
                 filter
             );
 
+            const total = metadata.total;
             const totalPages = Math.ceil(total / 4);
 
             res.status(200).json({

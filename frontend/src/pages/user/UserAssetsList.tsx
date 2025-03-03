@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from '@/components/ui/label';
-import { FaAngleLeft, FaAngleRight, FaBox, FaCalendar } from 'react-icons/fa';
+import { FaAngleLeft, FaAngleRight, FaBox } from 'react-icons/fa';
 import { CiSearch } from 'react-icons/ci';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/userService';

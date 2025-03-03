@@ -83,7 +83,7 @@ export class UserController implements IUserController {
 
   async getUserDetails(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.params.id;
+      const userId = req.params.id ? req.params.id : req.user?.userId;
 
       const [user, address] = await Promise.all([
         this.userService.fetchUserDetails(userId),
@@ -172,7 +172,7 @@ export class UserController implements IUserController {
   async toggleIsBlocked(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.id;
-      const action = req.params.action === 'block';
+      const action = req.params.blockAction === 'block';
       const toggleResponse = await this.userService.toggleIsBlocked(action, userId);
 
       if (toggleResponse) {

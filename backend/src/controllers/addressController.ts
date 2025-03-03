@@ -6,7 +6,7 @@ import { IAddressController } from './interfaces/IAddressController';
 @injectable()
 export class AddressController implements IAddressController {
     constructor(
-        @inject('IUserService') private userService: IUserService,
+        @inject('IUserService') private readonly userService: IUserService,
     ) {
         this.createAddress = this.createAddress.bind(this);
         this.getAddresses = this.getAddresses.bind(this);

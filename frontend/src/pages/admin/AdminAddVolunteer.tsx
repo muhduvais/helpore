@@ -11,7 +11,9 @@ import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { AxiosError } from "axios";
 import { AddUserFormData } from "@/types/adminTypes";
-import { FormField } from "@/components/formField";
+import { FormField } from "@/components/FormField";
+import { FormSelect } from "@/components/FormSelect";
+import { countries } from 'countries-list';
 
 
 const AdminAddVolunteer = () => {
@@ -86,7 +88,7 @@ const AdminAddVolunteer = () => {
       }
 
       if (response.data) {
-        toast.success('Successfully created the user!', {
+        toast.success('Successfully added the volunteer!', {
           onClose: () => navigate('/admin/volunteerManagement')
         });
       }
@@ -173,6 +175,7 @@ const AdminAddVolunteer = () => {
                 <FormField
                   name="age"
                   label="Age"
+                  type="number"
                   icon={FaUser}
                   value={formData.age}
                   onChange={handleChange}
@@ -180,15 +183,25 @@ const AdminAddVolunteer = () => {
                   error={formErrors.age}
                   disabled={isLoading}
                 />
-                <FormField
+                <FormSelect
                   name="gender"
                   label="Gender"
                   icon={FaUser}
                   value={formData.gender}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={(value) => {
+                    setFormData((prev) => ({ ...prev, gender: value }));
+                    setFormErrors((prev) => ({ ...prev, gender: "" }));
+                  }}
                   error={formErrors.gender}
                   disabled={isLoading}
+                  options={
+                    [
+                      { label: 'Male', value: 'Male' },
+                      { label: 'Female', value: 'Female' },
+                      { label: 'Other', value: 'Other' },
+                    ]
+                  }
+                  placeholder=""
                 />
                 <FormField
                   name="phone"
@@ -288,15 +301,24 @@ const AdminAddVolunteer = () => {
                   error={formErrors.state}
                   disabled={isLoading}
                 />
-                <FormField
+                <FormSelect
                   name="country"
                   label="Country"
                   icon={FaFlag}
                   value={formData.country}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={(value) => {
+                    setFormData((prev) => ({ ...prev, country: value }));
+                    setFormErrors((prev) => ({ ...prev, country: "" }));
+                  }}
                   error={formErrors.country}
                   disabled={isLoading}
+                  options={
+                    Object.entries(countries).map(([code, country]) => ({
+                      label: country.name,
+                      value: country.name,
+                    }))
+                  }
+                  placeholder=""
                 />
                 <FormField
                   name="pincode"

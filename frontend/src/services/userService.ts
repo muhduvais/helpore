@@ -7,8 +7,7 @@ export const userService = {
     // Profile
     fetchUserDetails: async () => {
         try {
-            const response = await customAxios.get('/api/user/me')
-            console.log('response: ', response)
+            const response = await customAxios.get('/api/users/me')
             return response;
         } catch (error) {
             throw error
@@ -16,7 +15,7 @@ export const userService = {
     },
     updateUser: async (formData: any) => {
         try {
-            const response = await customAxios.put('/api/user/me', { formData });
+            const response = await customAxios.put('/api/users', { formData });
             return response;
         } catch (error) {
             throw error;
@@ -24,7 +23,7 @@ export const userService = {
     },
     updateProfilePicture: async (profilePicture: string) => {
         try {
-            const response = await customAxios.patch('/api/user/me', { profilePicture })
+            const response = await customAxios.patch('/api/users/profilePicture', { profilePicture })
             return response;
         } catch (error) {
             throw error
@@ -32,7 +31,7 @@ export const userService = {
     },
     changePassword: async (data: ChangePasswordData) => {
         try {
-            const response = await customAxios.patch('/api/user/password', data)
+            const response = await customAxios.patch('/api/users/password', data)
             return response;
         } catch (error) {
             throw error
@@ -42,7 +41,7 @@ export const userService = {
     // Addresses
     createAddress: async (addressData: IAddress) => {
         try {
-            const createdAddressId = await customAxios.post('/api/user/addresses', { addressData });
+            const createdAddressId = await customAxios.post('/api/addresses', { addressData });
             return createdAddressId;
         } catch (error) {
             throw error
@@ -50,7 +49,7 @@ export const userService = {
     },
     getUserAddresses: async () => {
         try {
-            const response = await customAxios.get('/api/user/addresses');
+            const response = await customAxios.get('/api/addresses');
             console.log('addresses: ', response)
             return response;
         } catch (error) {
@@ -61,7 +60,7 @@ export const userService = {
     // Assets
     fetchAssets: async (page: number, limit: number, search: string, sortBy: string, filterByAvailability: string) => {
         try {
-            const response = await customAxios.get('/api/user/assets', {
+            const response = await customAxios.get('/api/assets', {
                 params: {
                     page,
                     limit,
@@ -77,7 +76,7 @@ export const userService = {
     },
     fetchAssetDetails: async (assetId: string) => {
         try {
-            const response = await customAxios.get(`/api/user/assets/${assetId}`);
+            const response = await customAxios.get(`/api/assets/${assetId}`);
             return response;
         } catch (error) {
             throw error
@@ -87,15 +86,15 @@ export const userService = {
     // Asset requests
     requestAsset: async (assetId: string, requestedDate: object) => {
         try {
-            const response = await customAxios.post(`/api/user/assetRequests/${assetId}`, requestedDate)
+            const response = await customAxios.post(`/api/assetRequests/${assetId}`, requestedDate)
             return response;
         } catch (error) {
             throw error
         }
     },
-    fetchAssetRequests: async (page: number, limit: number, search: string, filter: string) => {
+    fetchMyAssetRequests: async (page: number, limit: number, search: string, filter: string) => {
         try {
-            const response = await customAxios.get('/api/user/assetRequests', {
+            const response = await customAxios.get('/api/assetRequests/me', {
                 params: {
                     page,
                     limit,
@@ -112,7 +111,7 @@ export const userService = {
     // Assistance requests
     requestAssistance: async (formData: object) => {
         try {
-            const response = await customAxios.post(`/api/user/assistanceRequests`, { formData })
+            const response = await customAxios.post(`/api/assistanceRequests`, { formData })
             return response;
         } catch (error) {
             throw error
@@ -120,7 +119,7 @@ export const userService = {
     },
     fetchAssistanceRequests: async (page: number, limit: number, search: string, filter: string) => {
         try {
-            const response = await customAxios.get('/api/user/assistanceRequests', {
+            const response = await customAxios.get('/api/assistanceRequests', {
                 params: {
                     page,
                     limit,
@@ -135,7 +134,7 @@ export const userService = {
     },
     fetchAssistanceRequestDetails: async (requestId: string) => {
         try {
-            const response = await customAxios.get(`/api/user/assistanceRequests/${requestId}`)
+            const response = await customAxios.get(`/api/assistanceRequests/${requestId}`)
             return response;
         } catch (error) {
             throw error

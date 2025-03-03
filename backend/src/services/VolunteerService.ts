@@ -20,9 +20,9 @@ cloudinary.v2.config({
 @injectable()
 export class VolunteerService extends BaseService<IUserDocument> implements IVolunteerService {
     constructor(
-        @inject('IUserRepository') private userRepository: IUserRepository,
-        @inject('IAddressRepository') private addressRepository: IAddressRepository,
-        @inject('IAssistanceRequestRepository') private assistanceRepository: IAssistanceRequestRepository,
+        @inject('IUserRepository') private readonly userRepository: IUserRepository,
+        @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
+        @inject('IAssistanceRequestRepository') private readonly assistanceRepository: IAssistanceRequestRepository,
     ) {
         super(userRepository);
     }

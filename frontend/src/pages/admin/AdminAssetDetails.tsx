@@ -144,7 +144,7 @@ const AdminAssetDetails = () => {
                             <motion.button
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
-                                className="absolute top-4 right-4 text-white text-3xl"
+                                className="absolute top-4 right-4 text-white text-2xl bg-gray-300 hover:bg-gray-400 p-1 rounded-md"
                                 onClick={() => setExpandedImage(null)}
                             >
                                 <FaTimes />
@@ -216,7 +216,7 @@ const AdminAssetDetails = () => {
                     >
                         <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                             <div
-                                className="aspect-video w-full overflow-hidden bg-gray-100 relative cursor-pointer"
+                                className="aspect-video w-full overflow-hidden bg-gray-100 relative cursor-pointer "
                                 onClick={() => setExpandedImage(asset?.image || asset_picture)}
                             >
                                 <motion.img

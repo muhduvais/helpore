@@ -6,7 +6,6 @@ export interface IAssistanceRequestRepository {
   countAssistanceRequests(search: string, filter: string, priority: string): Promise<number>;
   findPendingRequests(requestQuery: object, skip: number): Promise<IAssistanceRequestDocument[]> | null;
   findRequestById(requestId: string): Promise<IAssistanceRequestDocument>;
-  calculateEstimatedTravelTime(distanceInKm: number): Promise<string>;
   findAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequestDocument>;
   incrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument>;
   updateRequest(request: Partial<IAssistanceRequestDocument>): Promise<IAssistanceRequestDocument>;

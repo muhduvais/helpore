@@ -2,7 +2,7 @@ import { IAsset } from "../../interfaces/userInterface";
 import { IBaseRepository } from "./IBaseRepository";
 
 export interface IAssetRepository extends IBaseRepository<IAsset> {
-  findAssets(query: object, skip: number, limit: number): Promise<IAsset[]>;
+  findAssets(query: object, skip: number, limit: number, sortQuery: { [key: string]: 1 | -1 }): Promise<IAsset[]> | null;
   findAssetDetails(assetId: string): Promise<IAsset>;
   addAsset(assetData: IAsset): Promise<IAsset>;
   countAssets(query: object): Promise<number>;

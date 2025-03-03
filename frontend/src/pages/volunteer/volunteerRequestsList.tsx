@@ -52,14 +52,6 @@ const VolunteerRequests = () => {
 
     const debouncedSearch = useDebounce(searchQuery, 500);
 
-    if (!isLoggedIn) {
-        return <Navigate to="/login" />;
-    }
-
-    useEffect(() => {
-        fetchNearbyRequests();
-    }, [currentPage, searchQuery, filter]);
-
     const fetchNearbyRequests = async () => {
         try {
             setLoading(true);
@@ -70,7 +62,7 @@ const VolunteerRequests = () => {
                 filter !== 'all' ? filter : ''
             );
 
-            setRequests(response.data.nearbyRequests.requests || []);
+            setRequests(response.data.nearbyRequests || []);
             setTotalPages(response.data.totalPages);
             setTotalRequests(response.data.documentsCount);
         } catch (error: any) {
@@ -79,6 +71,14 @@ const VolunteerRequests = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchNearbyRequests();
+    }, [currentPage, searchQuery, filter]);
+
+    if (!isLoggedIn) {
+        return <Navigate to="/login" />;
+    }
 
     const handleRequestAction = async (requestId: string, action: string) => {
         try {
@@ -264,7 +264,7 @@ const VolunteerRequests = () => {
             ) : (
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {requests.map((request: any) => (
+                        {requests && requests.map((request: any) => (
                             <RequestCard key={request._id} request={request} />
                         ))}
                     </div>

@@ -38,7 +38,7 @@ import { userService } from '@/services/userService';
 import asset_picture from '../../assets/asset_picture.png';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from 'use-debounce';
-import { IAssetRequest, IAssistanceRequest } from '@/interfaces/userInterface';
+import { IAssetRequest, IAssistanceRequestResponse } from '@/interfaces/userInterface';
 
 interface IPaginatedResponse {
   assetRequests: IAssetRequest[];
@@ -47,7 +47,7 @@ interface IPaginatedResponse {
 }
 
 interface IAssistancePaginatedResponse {
-  assistanceRequests: IAssistanceRequest[];
+  assistanceRequests: IAssistanceRequestResponse[];
   totalPages: number;
   totalRequests: number;
 }
@@ -71,7 +71,7 @@ const UserRequests: React.FC = () => {
   const [totalRequests, setTotalRequests] = useState(0);
 
   // Assistance request states
-  const [assistanceRequests, setAssistanceRequests] = useState<IAssistanceRequest[]>([]);
+  const [assistanceRequests, setAssistanceRequests] = useState<IAssistanceRequestResponse[]>([]);
   const [isAssistanceLoading, setIsAssistanceLoading] = useState(true);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const [assistanceFilter, setAssistanceFilter] = useState<string>('all');
@@ -100,7 +100,7 @@ const UserRequests: React.FC = () => {
   const fetchRequests = async () => {
     try {
       setIsLoading(true);
-      const response = await userService.fetchAssetRequests(
+      const response = await userService.fetchMyAssetRequests(
         currentPage,
         limit,
         debouncedSearch.trim(),
@@ -273,7 +273,7 @@ const UserRequests: React.FC = () => {
     </motion.div>
   );
 
-  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequest }> = ({ request }) => {
+  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequestResponse }> = ({ request }) => {
     const navigate = useNavigate();
 
     return (
@@ -321,7 +321,7 @@ const UserRequests: React.FC = () => {
                   <User className="h-4 w-4" />
                   <div>
                     <p className="font-medium">Assigned Volunteer</p>
-                    <p>{'volunteer name'}</p>
+                    <p>{ request.volunteer.name || 'volunteer name' }</p>
                   </div>
                 </div>
               )}
@@ -595,7 +595,7 @@ const UserRequests: React.FC = () => {
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {assistanceRequests.map((request: IAssistanceRequest) => (
+                {assistanceRequests.map((request: IAssistanceRequestResponse) => (
                   <AssistanceRequestCard key={request._id} request={request} />
                 ))}
               </div>

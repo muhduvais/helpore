@@ -1,4 +1,4 @@
-import { IUser, IAddress, IAsset, IAssetRequestResponse, IAssetRequest, IUserDocument } from '../../interfaces/userInterface';
+import { IUser, IAddress, IAsset, IAssetRequestResponse, IAssetRequest, IUserDocument, IAssistanceRequestResponse } from '../../interfaces/userInterface';
 import { IAddUserForm } from '../../interfaces/adminInterface';
 import { IAssistanceRequest } from '../../interfaces/userInterface';
 
@@ -64,26 +64,43 @@ export interface IVolunteerService {
 export interface IAssetService {
     addAsset(data: IAsset): Promise<any>;
     uploadAssetImage(file: Express.Multer.File): Promise<string>;
-    fetchAssets(search: string, skip: number, limit: number): Promise<IAsset[] | null>;
+    fetchAssets(search: string, skip: number, limit: number, sortBy: string, filterByAvailability: string): Promise<IAsset[] | null>;
     fetchAssetDetails(assetId: string): Promise<IAsset>;
     updateAsset(assetId: string, submitData: any): Promise<IAsset>;
     countAssets(search: string): Promise<number>;
-    createAssetRequest(assetId: string, userId: string, requestedDate: Date, quantity: number): Promise<boolean>;
-    countAssetRequests(search: string, status: string): Promise<number>;
-    fetchAssetRequests(search: string, skip: number, limit: number, userId: string, sort: string, status: string): Promise<IAssetRequestResponse[] | null>;
+    createRequest(assetId: string, userId: string, requestedDate: Date, quantity: number): Promise<boolean>;
+    countRequests(userId: string, search: string): Promise<number>;
+    fetchAssetRequests(
+        search: string,
+        skip: number,
+        limit: number,
+        userId: string,
+        sort: string,
+        status: string,
+    ): Promise<IAssetRequestResponse[] | null>;
+    fetchMyAssetRequests(search: string, filter: string, skip: number, limit: number, userId: string): Promise<IAssetRequestResponse[] | null>;
+    countMyAssetRequests(userId: string, search: string, filter: string): Promise<number>;
     findRequestDetails(userId: string, assetId: string): Promise<IAssetRequest[]>
     updateStatus(requestId: string, status: string, comment: string): Promise<any>;
 }
 
 export interface IAssistanceRequestService {
     createAssistanceRequest(formData: IAssistanceRequest): Promise<boolean>;
-    fetchAssistanceRequests(search?: string, filter?: string, skip?: number, limit?: number, sort?: string, priority?: string): Promise<IAssistanceRequest[]>;
+    fetchAssistanceRequests(search?: string, filter?: string, skip?: number, limit?: number, sort?: string, priority?: string): Promise<IAssistanceRequestResponse[]>;
     countAssistanceRequests(search?: string, filter?: string, priority?: string): Promise<number>;
     getNearbyRequests(volunteerId: string, page: number, search: string, filter: string): Promise<any>;
     updateRequestStatus(requestId: string, volunteerId: string, action: string): Promise<string>;
     fetchAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequest | null>;
     checkTasksLimit(volunteerId: string): Promise<boolean>;
     assignVolunteer(requestId: string, volunteerId: string): Promise<boolean>;
+}
+
+export interface IDonationService {
+    createCheckoutSession(donationData: any): Promise<any>;
+    verifySession(sessionId: string): Promise<any>;
+    handleWebhookEvent(event): Promise<any>;
+    getUserDonationHistory(userId: string): Promise<any>;
+    constructEvent(payload: any, signature: any, secret: any): Promise<any>;
 }
 
 export interface IOtpService {

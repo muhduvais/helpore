@@ -11,8 +11,9 @@ import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { AxiosError } from "axios";
 import { AddUserFormData } from "@/types/adminTypes";
-import { FormField } from "@/components/formField";
-
+import { FormField } from "@/components/FormField";
+import { FormSelect } from "@/components/FormSelect";
+import { countries } from 'countries-list';
 
 const AdminAddUser = () => {
   const navigate = useNavigate();
@@ -70,6 +71,7 @@ const AdminAddUser = () => {
     e.preventDefault();
 
     setErrorMessage('');
+    setFormErrors(initialData);
 
     const { newFormErrors, hasError } = validateAllFields();
     setFormErrors(newFormErrors);
@@ -95,7 +97,7 @@ const AdminAddUser = () => {
       if (error instanceof AxiosError) {
         const errorMessage = error.response?.data?.message || 'An error occurred';
         if (error.response?.data?.existingMail) {
-          setFormErrors({ ...formErrors, ['email']: 'Email Address' });
+          setFormErrors({ ...initialData, ['email']: 'Email Address' });
         }
         setErrorMessage(errorMessage);
       } else {
@@ -131,12 +133,6 @@ const AdminAddUser = () => {
   return (
     <div className="p-8 space-y-6 max-w-7xl mx-auto">
 
-      {errorMessage && (
-        <Alert variant="destructive" className="animate-slideDown">
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
-
       {/* Breadcrumps */}
       <div className="flex items-center gap-2 text-sm">
         <Link
@@ -149,6 +145,12 @@ const AdminAddUser = () => {
         <FaAngleRight className="text-gray-500" />
         <span className="text-[#688D48] font-medium">Add New User</span>
       </div>
+
+      {errorMessage && (
+        <Alert variant="destructive" className="animate-slideDown">
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Form Card */}
       <Card className="shadow-lg transition-shadow hover:shadow-xl h-[80vh] overflow-y-scroll">
@@ -173,6 +175,7 @@ const AdminAddUser = () => {
                 <FormField
                   name="age"
                   label="Age"
+                  type="number"
                   icon={FaUser}
                   value={formData.age}
                   onChange={handleChange}
@@ -180,16 +183,27 @@ const AdminAddUser = () => {
                   error={formErrors.age}
                   disabled={isLoading}
                 />
-                <FormField
+                <FormSelect
                   name="gender"
                   label="Gender"
                   icon={FaUser}
                   value={formData.gender}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={(value) => {
+                    setFormData((prev) => ({ ...prev, gender: value }));
+                    setFormErrors((prev) => ({ ...prev, gender: "" }));
+                  }}
                   error={formErrors.gender}
                   disabled={isLoading}
+                  options={
+                    [
+                      { label: 'Male', value: 'Male' },
+                      { label: 'Female', value: 'Female' },
+                      { label: 'Other', value: 'Other' },
+                    ]
+                  }
+                  placeholder=""
                 />
+
                 <FormField
                   name="phone"
                   label="Phone Number"
@@ -288,15 +302,24 @@ const AdminAddUser = () => {
                   error={formErrors.state}
                   disabled={isLoading}
                 />
-                <FormField
+                <FormSelect
                   name="country"
                   label="Country"
                   icon={FaFlag}
                   value={formData.country}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={(value) => {
+                    setFormData((prev) => ({ ...prev, country: value }));
+                    setFormErrors((prev) => ({ ...prev, country: "" }));
+                  }}
                   error={formErrors.country}
                   disabled={isLoading}
+                  options={
+                    Object.entries(countries).map(([code, country]) => ({
+                      label: country.name,
+                      value: country.name,
+                    }))
+                  }
+                  placeholder=""
                 />
                 <FormField
                   name="pincode"
