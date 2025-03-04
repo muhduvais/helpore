@@ -1,6 +1,7 @@
 import { IUser, IAddress, IAsset, IAssetRequestResponse, IAssetRequest, IUserDocument, IAssistanceRequestResponse } from '../../interfaces/userInterface';
 import { IAddUserForm } from '../../interfaces/adminInterface';
 import { IAssistanceRequest } from '../../interfaces/userInterface';
+import { IConversationDocument, IMessageDocument } from '../../interfaces/chatInterface';
 
 export interface IAuthService {
     registerUser(name: string, email: string, password: string): Promise<string | boolean>;
@@ -87,7 +88,10 @@ export interface IAssetService {
 export interface IAssistanceRequestService {
     createAssistanceRequest(formData: IAssistanceRequest): Promise<boolean>;
     fetchAssistanceRequests(search?: string, filter?: string, skip?: number, limit?: number, sort?: string, priority?: string): Promise<IAssistanceRequestResponse[]>;
+    fetchProcessingRequests(search: string, filter: string, skip: number, limit: number, volunteerId: string
+    ): Promise<IAssistanceRequestResponse[] | null>;
     countAssistanceRequests(search?: string, filter?: string, priority?: string): Promise<number>;
+    countProcessingRequests(search?: string, filter?: string, volunteerId?: string): Promise<number>;
     getNearbyRequests(volunteerId: string, page: number, search: string, filter: string): Promise<any>;
     updateRequestStatus(requestId: string, volunteerId: string, action: string): Promise<string>;
     fetchAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequest | null>;
@@ -103,6 +107,13 @@ export interface IDonationService {
     constructEvent(payload: any, signature: any, secret: any): Promise<any>;
 }
 
+export interface IChatService {
+    sendMessage(senderId: string, receiverId: string, content: string, requestId: string, senderType: 'users' | 'volunteers', receiverType: 'users' | 'volunteers'): Promise<IMessageDocument>;
+    getConversationMessages(requestId: string): Promise<IMessageDocument[]>;
+    getUserConversations(userId: string): Promise<IConversationDocument[]>;
+    markConversationAsRead(conversationId: string, userId: string): Promise<void>;
+}
+
 export interface IOtpService {
-    sendOtpEmail(email: string, otp: string): Promise<boolean>;
+    sendOtpEmail(email: string, otp: string): Promise<boolean>
 }

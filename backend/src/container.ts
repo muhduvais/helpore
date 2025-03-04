@@ -9,6 +9,7 @@ import { IAssistanceRequestRepository } from "./repositories/interfaces/IAssista
 import { IAuthRepository } from "./repositories/interfaces/IAuthRepository";
 import { IOtpRepository } from "./repositories/interfaces/IOtpRepository";
 import { IDonationRepository } from "./repositories/interfaces/IDonationRepository";
+import { IChatRepository } from "./repositories/interfaces/IChatRepository";
 
 // Services - Interfaces
 import { IAdminService } from './services/interfaces/ServiceInterface';
@@ -18,6 +19,7 @@ import { IAssetService } from "./services/interfaces/ServiceInterface";
 import { IAssistanceRequestService } from "./services/interfaces/ServiceInterface";
 import { IAuthService } from "./services/interfaces/ServiceInterface";
 import { IDonationService } from "./services/interfaces/ServiceInterface";
+import { IChatService } from "./services/interfaces/ServiceInterface";
 
 // Controllers - Interfaces
 import { IAuthController } from './controllers/interfaces/IAuthController';
@@ -28,6 +30,7 @@ import { IAssetRequestController } from "./controllers/interfaces/IAssetRequestC
 import { IAssistanceRequestController } from "./controllers/interfaces/IAssistanceRequestController";
 import { IAddressController } from "./controllers/interfaces/IAddressController";
 import { IDonationController } from "./controllers/interfaces/IDonationController";
+import { IChatController } from "./controllers/interfaces/IChatController";
 
 // Repositories
 import { UserRepository } from "./repositories/userRepository";
@@ -38,6 +41,7 @@ import { AssistanceRequestRepository } from "./repositories/assistanceRequestRep
 import { AuthRepository } from "./repositories/authRepository";
 import { OtpRepository } from "./repositories/otpRepository";
 import { DonationRepository } from "./repositories/donationRepository";
+import { ChatRepository } from "./repositories/chatRepository";
 
 // Services
 import { AdminService } from './services/AdminService';
@@ -47,6 +51,7 @@ import { AssetService } from './services/AssetService';
 import { AssistanceRequestService } from './services/AssistanceRequestService';
 import { AuthService } from './services/AuthService';
 import { DonationService } from "./services/DonationService";
+import { ChatService } from "./services/chatService";
 
 // Controllers
 import { AuthController } from "./controllers/authController";
@@ -57,6 +62,7 @@ import { AssetRequestController } from "./controllers/assetRequestController";
 import { AssistanceRequestController } from "./controllers/assistanceRequestController";
 import { AddressController } from "./controllers/addressController";
 import { DonationController } from "./controllers/donationController";
+import { ChatController } from "./controllers/chatController";
 
 export function registerDependencies() {
     try {
@@ -69,6 +75,7 @@ export function registerDependencies() {
         container.register<IAuthRepository>("IAuthRepository", { useClass: AuthRepository });
         container.register<IOtpRepository>("IOtpRepository", { useClass: OtpRepository });
         container.register<IDonationRepository>("IDonationRepository", { useClass: DonationRepository });
+        container.register<IChatRepository>("IChatRepository", { useClass: ChatRepository });
 
         // Register Services
         container.register<IAdminService>('IAdminService', { useClass: AdminService });
@@ -78,6 +85,7 @@ export function registerDependencies() {
         container.register<IAssistanceRequestService>('IAssistanceRequestService', { useClass: AssistanceRequestService });
         container.register<IAuthService>('IAuthService', { useClass: AuthService });
         container.register<IDonationService>('IDonationService', { useClass: DonationService });
+        container.register<IChatService>('IChatService', { useClass: ChatService });
 
         // Register Controllers
         container.register<IAuthController>("IAuthController", { useClass: AuthController });
@@ -88,6 +96,7 @@ export function registerDependencies() {
         container.register<IAssetRequestController>("IAssetRequestController", { useClass: AssetRequestController });
         container.register<IAssistanceRequestController>("IAssistanceRequestController", { useClass: AssistanceRequestController });
         container.register<IDonationController>("IDonationController", { useClass: DonationController });
+        container.register<IChatController>("IChatController", { useClass: ChatController });
     } catch (error) {
         console.error("Error registering dependencies:", error);
         throw error;

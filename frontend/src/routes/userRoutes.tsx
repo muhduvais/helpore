@@ -28,7 +28,7 @@ const UserRoutes = () => {
             <Route path="assets" element={<UserAssetListing />} />
             <Route path="assets/:id" element={<UserAssetDetails />} />
 
-            {/* Asset requests */}
+            {/* Asset & assistance requests */}
             <Route path="requests" element={<UserRequestList />} />
 
             {/* Assistance requests */}

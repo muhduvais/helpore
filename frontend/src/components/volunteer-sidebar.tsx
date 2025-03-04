@@ -83,6 +83,13 @@ const VolunteerSidebar = () => {
                         <span className={`${sidebarState ? 'block' : 'hidden'}`}>Request List</span>
                     </li>
                 </Link>
+
+                <Link ref={threeRef} className={`${currentPage === "requests" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/volunteer/requests">
+                    <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
+                        <FileText size={20} />
+                        <span className={`${sidebarState ? 'block' : 'hidden'}`}>Processing Requests</span>
+                    </li>
+                </Link>
             </ul>
         </div>
     )

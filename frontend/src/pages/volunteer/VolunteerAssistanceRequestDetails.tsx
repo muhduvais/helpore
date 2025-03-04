@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import profile_pic from '../../assets/profile_pic.png';
@@ -46,9 +47,9 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { toast } from "react-toastify";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { userService } from '@/services/userService';
 import { chatService } from '@/services/chatService';
 import { IMessageDocument } from '@/interfaces/chatInterface';
+import { volunteerService } from '@/services/volunteerService';
 import { io, Socket } from 'socket.io-client';
 
 interface IAssistanceRequest {
@@ -61,6 +62,13 @@ interface IAssistanceRequest {
     priority: 'urgent' | 'normal';
     volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
     volunteer?: {
+        _id: string;
+        name: string;
+        phone: string;
+        email: string;
+        profilePicture: string;
+    };
+    user?: {
         _id: string;
         name: string;
         phone: string;
@@ -100,7 +108,6 @@ const AssistanceRequestDetails: React.FC = () => {
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const socketRef = useRef<Socket | null>(null);
-
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const userId = useSelector((state: any) => state.auth.userId);
@@ -116,7 +123,7 @@ const AssistanceRequestDetails: React.FC = () => {
             try {
                 setIsLoading(true);
                 const requestId = id || '';
-                const response = await userService.fetchAssistanceRequestDetails(requestId);
+                const response = await volunteerService.fetchAssistanceRequestDetails(requestId);
 
                 if (response.status === 200) {
                     setRequest(response.data.requestDetails);
@@ -174,8 +181,6 @@ const AssistanceRequestDetails: React.FC = () => {
         }
     }, [request, authToken, userId, activeTab]);
 
-
-
     useEffect(() => {
         if (activeTab === 'chat' && request?.status === 'approved' && socketRef.current && id) {
             chatService.joinConversation(socketRef.current, id);
@@ -184,7 +189,7 @@ const AssistanceRequestDetails: React.FC = () => {
                 try {
                     setIsLoadingMessages(true);
                     const response = await chatService.getConversationMessages(id);
-                    
+
                     if (response.status === 200) {
                         setMessages(response.data.data);
                     }
@@ -213,10 +218,10 @@ const AssistanceRequestDetails: React.FC = () => {
     }, [messages]);
 
     const handleSendMessage = async () => {
-        if (!messageInput.trim() || !request?.volunteer?._id || !id) return;
+        if (!messageInput.trim() || !request?.user?._id || !id) return;
 
         try {
-            await chatService.sendMessage(request.volunteer._id, messageInput, id, 'volunteers', 'users');
+            await chatService.sendMessage(request.user._id, messageInput, id, 'volunteers', 'users');
             setMessageInput('');
         } catch (error) {
             console.error('Error sending message:', error);
@@ -227,13 +232,16 @@ const AssistanceRequestDetails: React.FC = () => {
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setMessageInput(e.target.value);
 
+        // Send typing indicator
         if (socketRef.current && id) {
             chatService.sendTypingStatus(socketRef.current, id, true);
 
+            // Clear previous timeout
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
             }
 
+            // Set new timeout to stop typing indicator after 2 seconds
             typingTimeoutRef.current = setTimeout(() => {
                 if (socketRef.current && id) {
                     chatService.sendTypingStatus(socketRef.current, id, false);
@@ -404,15 +412,6 @@ const AssistanceRequestDetails: React.FC = () => {
                     </div>
 
                     <div className="flex gap-2">
-                        {(request?.status === 'pending' || request?.status === 'approved') && (
-                            <Button
-                                onClick={() => setIsCancelModalOpen(true)}
-                                variant="destructive"
-                                className="bg-red-500 hover:bg-red-600"
-                            >
-                                Cancel Request
-                            </Button>
-                        )}
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             <Button
                                 onClick={handleShareRequest}
@@ -470,28 +469,28 @@ const AssistanceRequestDetails: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {request?.volunteer && (
+                                {request?.user && (
                                     <div className="border-t pt-4 flex items justify-between">
                                         <div className="left">
-                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Assigned Volunteer</h3>
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Requester Details</h3>
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-2">
                                                     <UserCheck className="h-4 w-4 text-gray-500" />
-                                                    <span className="text-gray-700">{request.volunteer.name}</span>
+                                                    <span className="text-gray-700">{request.user.name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <Phone className="h-4 w-4 text-gray-500" />
-                                                    <span className="text-gray-700">{request.volunteer.phone}</span>
+                                                    <span className="text-gray-700">{request.user.phone}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <Mail className="h-4 w-4 text-gray-500" />
-                                                    <span className="text-gray-700">{request.volunteer.email}</span>
+                                                    <span className="text-gray-700">{request.user.email}</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="right flex items-start justify-end">
-                                            <img src={request.volunteer.profilePicture || profile_pic} alt="pic" width="120px" />
+                                            <img src={request.user.profilePicture || profile_pic} alt="pic" width="120px" />
                                         </div>
                                     </div>
                                 )}
@@ -660,16 +659,16 @@ const AssistanceRequestDetails: React.FC = () => {
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-10 w-10">
                                                     <AvatarImage
-                                                        src={request?.volunteer?.profilePicture || profile_pic}
-                                                        alt={request?.volunteer?.name}
+                                                        src={request?.user?.profilePicture || profile_pic}
+                                                        alt={request?.user?.name}
                                                     />
                                                     <AvatarFallback>
-                                                        {request?.volunteer?.name?.charAt(0) || 'V'}
+                                                        {request?.user?.name?.charAt(0) || 'V'}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div>
                                                     <h3 className="font-medium text-gray-800">
-                                                        {request?.volunteer?.name || 'Volunteer'}
+                                                        {request?.user?.name || 'User'}
                                                     </h3>
                                                     <p className="text-xs text-gray-500">
                                                         {isTyping ? 'Typing...' : 'Available to chat'}
@@ -694,7 +693,7 @@ const AssistanceRequestDetails: React.FC = () => {
                                                     <MessageSquare className="h-12 w-12 text-gray-300 mb-2" />
                                                     <h4 className="text-lg font-medium text-gray-600">No messages yet</h4>
                                                     <p className="text-sm text-gray-500">
-                                                        Start a conversation with {request?.volunteer?.name || 'your requester'}
+                                                        Start a conversation with {request?.user?.name || 'your requester'}
                                                     </p>
                                                 </div>
                                             ) : (
@@ -733,7 +732,6 @@ const AssistanceRequestDetails: React.FC = () => {
                                                         </div>
                                                     )}
 
-                                                    {/* Reference for scrolling to bottom */}
                                                     <div ref={messagesEndRef} />
                                                 </>
                                             )}
@@ -745,7 +743,7 @@ const AssistanceRequestDetails: React.FC = () => {
                                                 <Textarea
                                                     value={messageInput}
                                                     onChange={handleInputChange}
-                                                    placeholder={`Message ${request?.volunteer?.name || 'Requester'}...`}
+                                                    placeholder={`Message ${request?.user?.name || 'Requester'}...`}
                                                     className="flex-1 resize-none"
                                                     rows={1}
                                                     onKeyDown={(e) => {
@@ -768,7 +766,6 @@ const AssistanceRequestDetails: React.FC = () => {
                                     </Card>
                                 </TabsContent>
                             )}
-
                         </Tabs>
                     </motion.div>
                 </div>

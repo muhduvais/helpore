@@ -8,6 +8,7 @@ const assistanceRequestController = container.resolve<IAssistanceRequestControll
 
 router.get('/', assistanceRequestController.getAssistanceRequests);
 router.get('/nearBy', assistanceRequestController.getNearbyRequests);
+router.get('/processing', assistanceRequestController.getProcessingRequests);
 router.get('/:id', assistanceRequestController.getAssistanceRequestDetails);
 router.post('/', assistanceRequestController.requestAssistance);
 router.patch('/:id/assignVolunteer', assistanceRequestController.assignVolunteer);

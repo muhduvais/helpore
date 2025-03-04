@@ -4,6 +4,7 @@ import { IAssistanceRequestRepository } from "./interfaces/IAssistanceRequestRep
 import AssistanceRequest from "../models/assistanceRequestModel";
 import User from "../models/userModel";
 import { BaseRepository } from "./baseRepository";
+import mongoose from "mongoose";
 
 @injectable()
 export class AssistanceRequestRepository extends BaseRepository<IAssistanceRequestDocument> implements IAssistanceRequestRepository {
@@ -94,6 +95,71 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
     }
   }
 
+  async findProcessingRequests(
+    search: string, filter: string, skip: number, limit: number, volunteerId: string
+  ): Promise<IAssistanceRequestResponse[] | null> {
+    try {
+      const matchStage: any = {
+        status: 'approved',
+        volunteer: new mongoose.Types.ObjectId(volunteerId),
+      };
+
+      if (filter && filter === "ambulance") {
+        matchStage.type = filter;
+      } else if (filter && filter !== "all") {
+        matchStage.volunteerType = filter;
+      }
+
+      const requests = await AssistanceRequest.aggregate([
+        { $match: matchStage },
+        {
+          $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        { $unwind: "$user" },
+        {
+          $lookup: {
+            from: "users",
+            localField: "volunteer",
+            foreignField: "_id",
+            as: "volunteer",
+          },
+        },
+        {
+          $unwind: {
+            path: "$volunteer",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        ...(search ? [{ $match: { "user.name": { $regex: search, $options: "i" } } }] : []),
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $project: {
+            _id: 1,
+            requestedDate: 1,
+            type: 1,
+            status: 1,
+            priority: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            "user.name": 1,
+            volunteer: 1,
+          },
+        },
+      ]);
+
+      return requests as IAssistanceRequestResponse[];
+    } catch (error) {
+      console.error("Error finding assistance requests:", error);
+      return null;
+    }
+  }
+
   async findPendingRequests(requestQuery: object, skip: number): Promise<IAssistanceRequestDocument[]> {
     return await AssistanceRequest.find(requestQuery).skip(skip)
       .populate('address')
@@ -107,6 +173,27 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
       if (search) query["user.name"] = { $regex: search, $options: "i" };
       if (priority && priority !== "all") query.priority = priority;
       if (filter && filter !== "all") query.status = filter;
+
+      return await AssistanceRequest.countDocuments(query);
+    } catch (error) {
+      console.error("Error counting assistance requests:", error);
+      return 0;
+    }
+  }
+
+  async countProcessingRequests(search: string, filter: string, volunteerId: string): Promise<number> {
+    try {
+      let query: any = {
+        status: 'approved',
+        volunteer: volunteerId,
+      };
+
+      if (search) query["user.name"] = { $regex: search, $options: "i" };
+      if (filter && filter === "ambulance") {
+        query.type = filter;
+      } else if (filter && filter !== "all") {
+        query.volunteerType = filter;
+      }
 
       return await AssistanceRequest.countDocuments(query);
     } catch (error) {

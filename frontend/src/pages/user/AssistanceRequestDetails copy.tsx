@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AxiosError } from 'axios';
@@ -6,8 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
 import profile_pic from '../../assets/profile_pic.png';
 import {
     ArrowLeft,
@@ -16,7 +14,7 @@ import {
     CheckCircle2,
     XCircle,
     AlertCircle,
-    Calendar,
+    Calendar, 
     MapPin,
     Mail,
     Phone,
@@ -25,9 +23,7 @@ import {
     History as HistoryIcon,
     FileText,
     Ambulance,
-    HeartHandshake,
-    Send,
-    MessageSquare
+    HeartHandshake
 } from 'lucide-react';
 import {
     Dialog,
@@ -47,9 +43,6 @@ import { format } from 'date-fns';
 import { toast } from "react-toastify";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/userService';
-import { chatService } from '@/services/chatService';
-import { IMessageDocument } from '@/interfaces/chatInterface';
-import { io, Socket } from 'socket.io-client';
 
 interface IAssistanceRequest {
     _id: string;
@@ -91,20 +84,7 @@ const AssistanceRequestDetails: React.FC = () => {
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
-    const [activeTab, setActiveTab] = useState('details');
 
-    // Chat state
-    const [messages, setMessages] = useState<IMessageDocument[]>([]);
-    const [messageInput, setMessageInput] = useState('');
-    const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-    const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const socketRef = useRef<Socket | null>(null);
-
-    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    const userId = useSelector((state: any) => state.auth.userId);
-    const authToken = useSelector((state: any) => state.auth.accessToken);
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
     if (!isLoggedIn) {
@@ -132,10 +112,6 @@ const AssistanceRequestDetails: React.FC = () => {
                             details: 'Assistance request submitted'
                         }
                     ]);
-
-                    if (response.data.requestDetails.status === 'approved') {
-                        setActiveTab('details');
-                    }
                 }
             } catch (error) {
                 if (error instanceof AxiosError) {
@@ -150,97 +126,6 @@ const AssistanceRequestDetails: React.FC = () => {
 
         fetchData();
     }, [id]);
-
-    useEffect(() => {
-        if (request?.status === 'approved' && authToken) {
-            socketRef.current = chatService.connectSocket(authToken);
-
-            chatService.setupListeners(
-                socketRef.current,
-                (message) => {
-                    console.log('Message received in state update:', message);
-                    setMessages((prevMessages) => [...prevMessages, message]);
-                },
-                (data) => {
-                    setIsTyping(data.isTyping && data.userId !== userId);
-                }
-            );
-
-            return () => {
-                if (socketRef.current) {
-                    chatService.disconnectSocket(socketRef.current);
-                }
-            };
-        }
-    }, [request, authToken, userId, activeTab]);
-
-
-
-    useEffect(() => {
-        if (activeTab === 'chat' && request?.status === 'approved' && socketRef.current && id) {
-            chatService.joinConversation(socketRef.current, id);
-
-            const fetchMessages = async () => {
-                try {
-                    setIsLoadingMessages(true);
-                    const response = await chatService.getConversationMessages(id);
-                    
-                    if (response.status === 200) {
-                        setMessages(response.data.data);
-                    }
-                } catch (error) {
-                    console.error('Error fetching messages:', error);
-                    toast.error('Failed to load messages');
-                } finally {
-                    setIsLoadingMessages(false);
-                }
-            };
-
-            fetchMessages();
-
-            return () => {
-                if (socketRef.current) {
-                    chatService.leaveConversation(socketRef.current, id);
-                }
-            };
-        }
-    }, [activeTab, request, id]);
-
-    useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [messages]);
-
-    const handleSendMessage = async () => {
-        if (!messageInput.trim() || !request?.volunteer?._id || !id) return;
-
-        try {
-            await chatService.sendMessage(request.volunteer._id, messageInput, id, 'volunteers', 'users');
-            setMessageInput('');
-        } catch (error) {
-            console.error('Error sending message:', error);
-            toast.error('Failed to send message');
-        }
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setMessageInput(e.target.value);
-
-        if (socketRef.current && id) {
-            chatService.sendTypingStatus(socketRef.current, id, true);
-
-            if (typingTimeoutRef.current) {
-                clearTimeout(typingTimeoutRef.current);
-            }
-
-            typingTimeoutRef.current = setTimeout(() => {
-                if (socketRef.current && id) {
-                    chatService.sendTypingStatus(socketRef.current, id, false);
-                }
-            }, 2000);
-        }
-    };
 
     const handleShareRequest = () => {
         if (navigator.share) {
@@ -309,10 +194,6 @@ const AssistanceRequestDetails: React.FC = () => {
         return type === 'ambulance'
             ? <Ambulance className="h-5 w-5 text-red-500" />
             : <HeartHandshake className="h-5 w-5 text-green-500" />;
-    };
-
-    const formatMessageTime = (dateString: string) => {
-        return format(new Date(dateString), 'h:mm a');
     };
 
     if (isLoading) {
@@ -489,9 +370,9 @@ const AssistanceRequestDetails: React.FC = () => {
                                                 </div>
                                             </div>
                                         </div>
-
+                                        
                                         <div className="right flex items-start justify-end">
-                                            <img src={request.volunteer.profilePicture || profile_pic} alt="pic" width="120px" />
+                                            <img src={request.volunteer.profilePicture || profile_pic } alt="pic" width="120px" />
                                         </div>
                                     </div>
                                 )}
@@ -521,12 +402,8 @@ const AssistanceRequestDetails: React.FC = () => {
                         transition={{ delay: 0.3 }}
                         className="lg:col-span-2"
                     >
-                        <Tabs
-                            value={activeTab}
-                            onValueChange={setActiveTab}
-                            className="w-full"
-                        >
-                            <TabsList className={`grid w-full ${request?.status === 'approved' ? 'grid-cols-3' : 'grid-cols-2'} bg-gray-100 p-1 rounded-xl`}>
+                        <Tabs defaultValue="details" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-xl">
                                 <TabsTrigger
                                     value="details"
                                     className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
@@ -541,17 +418,6 @@ const AssistanceRequestDetails: React.FC = () => {
                                     <HistoryIcon className="h-4 w-4" />
                                     History
                                 </TabsTrigger>
-
-                                {/* Show Chat tab only if request is approved */}
-                                {request?.status === 'approved' && (
-                                    <TabsTrigger
-                                        value="chat"
-                                        className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
-                                    >
-                                        <MessageSquare className="h-4 w-4" />
-                                        Chat
-                                    </TabsTrigger>
-                                )}
                             </TabsList>
 
                             <TabsContent value="details">
@@ -650,133 +516,15 @@ const AssistanceRequestDetails: React.FC = () => {
                                     </div>
                                 </Card>
                             </TabsContent>
-
-                            {/* Chat Tab Content */}
-                            {request?.status === 'approved' && (
-                                <TabsContent value="chat">
-                                    <Card className="flex flex-col h-[600px]">
-                                        {/* Chat Header */}
-                                        <div className="p-4 border-b flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-10 w-10">
-                                                    <AvatarImage
-                                                        src={request?.volunteer?.profilePicture || profile_pic}
-                                                        alt={request?.volunteer?.name}
-                                                    />
-                                                    <AvatarFallback>
-                                                        {request?.volunteer?.name?.charAt(0) || 'V'}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <h3 className="font-medium text-gray-800">
-                                                        {request?.volunteer?.name || 'Volunteer'}
-                                                    </h3>
-                                                    <p className="text-xs text-gray-500">
-                                                        {isTyping ? 'Typing...' : 'Available to chat'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Messages Container */}
-                                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                            {isLoadingMessages ? (
-                                                <div className="flex justify-center items-center h-full">
-                                                    <DotLottieReact
-                                                        src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
-                                                        loop
-                                                        autoplay
-                                                        style={{ width: '50px', height: '50px' }}
-                                                    />
-                                                </div>
-                                            ) : messages.length === 0 ? (
-                                                <div className="flex flex-col items-center justify-center h-full text-center">
-                                                    <MessageSquare className="h-12 w-12 text-gray-300 mb-2" />
-                                                    <h4 className="text-lg font-medium text-gray-600">No messages yet</h4>
-                                                    <p className="text-sm text-gray-500">
-                                                        Start a conversation with {request?.volunteer?.name || 'your requester'}
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    {messages.map((message, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className={`flex ${message.sender === userId ? 'justify-end' : 'justify-start'}`}
-                                                        >
-                                                            <div
-                                                                className={`rounded-2xl px-4 py-2 max-w-[80%] ${message.sender === userId
-
-                                                                    ? 'bg-[#688D48] text-white'
-                                                                    : 'bg-gray-100 text-gray-800'
-                                                                    }`}
-                                                            >
-                                                                <p>{message.content}</p>
-                                                                <div className={`text-xs mt-1 ${message.sender === userId ? 'text-gray-200' : 'text-gray-500'
-                                                                    }`}>
-                                                                    {formatMessageTime(message.createdAt.toString())}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    {/* Typing indicator */}
-                                                    {isTyping && (
-                                                        <div className="flex justify-start">
-                                                            <div className="bg-gray-100 text-gray-800 rounded-2xl px-4 py-2">
-                                                                <div className="flex space-x-1">
-                                                                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                                                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                                                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Reference for scrolling to bottom */}
-                                                    <div ref={messagesEndRef} />
-                                                </>
-                                            )}
-                                        </div>
-
-                                        {/* Message Input */}
-                                        <div className="p-4 border-t">
-                                            <div className="flex items-center gap-2">
-                                                <Textarea
-                                                    value={messageInput}
-                                                    onChange={handleInputChange}
-                                                    placeholder={`Message ${request?.volunteer?.name || 'Requester'}...`}
-                                                    className="flex-1 resize-none"
-                                                    rows={1}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                                            e.preventDefault();
-                                                            handleSendMessage();
-                                                        }
-                                                    }}
-                                                />
-                                                <Button
-                                                    onClick={handleSendMessage}
-                                                    size="icon"
-                                                    disabled={!messageInput.trim()}
-                                                    className="bg-[#688D48] hover:bg-[#5a7a3e] text-white"
-                                                >
-                                                    <Send className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                </TabsContent>
-                            )}
-
                         </Tabs>
                     </motion.div>
-                </div>
-            </motion.div>
+                </div >
+            </motion.div >
 
-            <CancelDialog />
+            {/* Cancel Request Modal */}
+            < CancelDialog />
         </>
-    )
-}
+    );
+};
 
 export default AssistanceRequestDetails;

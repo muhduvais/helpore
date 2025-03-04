@@ -73,6 +73,22 @@ export const volunteerService = {
             throw error
         }
     },
+    fetchProcessingRequests: async (page: number, limit: number, search: string, filter: string) => {
+        try {
+            const response = await customAxios.get('/api/assistanceRequests/processing', {
+                params: {
+                    page,
+                    limit,
+                    search,
+                    filter
+                }
+            });
+            console.log('response: ', response)
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
     updateRequestStatus: async (requestId: string, action: string) => {
         try {
             const response = await customAxios.patch(`/api/assistanceRequests/${requestId}/status`, { action });

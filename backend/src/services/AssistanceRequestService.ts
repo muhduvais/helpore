@@ -176,10 +176,37 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         }
     }
 
+    async fetchProcessingRequests(
+        search: string, filter: string, skip: number, limit: number, volunteerId: string
+    ): Promise<IAssistanceRequestResponse[] | null> {
+        try {
+            const results = await this.assistanceRepository.findProcessingRequests(search, filter, skip, limit, volunteerId);
+            if (!results) return null;
+
+            return results.map((request: IAssistanceRequestResponse) => ({
+                ...request,
+                requestedDate: new Date(request.requestedDate).toISOString(),
+                address: request.address instanceof Types.ObjectId ? undefined : request.address,
+            }));
+        } catch (error) {
+            console.error("Error finding assistance requests:", error);
+            return null;
+        }
+    }
 
     async countAssistanceRequests(search: string, filter: string, priority: string): Promise<number> {
         try {
             return await this.assistanceRepository.countAssistanceRequests(search, filter, priority);
+        } catch (error) {
+            console.error("Error counting assistance requests:", error);
+            return 0;
+        }
+    }
+
+    
+    async countProcessingRequests(search: string, filter: string, volunteerId: string): Promise<number> {
+        try {
+            return await this.assistanceRepository.countProcessingRequests(search, filter, volunteerId);
         } catch (error) {
             console.error("Error counting assistance requests:", error);
             return 0;

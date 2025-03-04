@@ -7,13 +7,14 @@ import { IAssistanceRequestService } from '../services/interfaces/ServiceInterfa
 export class AssistanceRequestController implements IAssistanceRequestController {
     constructor(
         @inject("IAssistanceRequestService") private readonly assistanceRequestService: IAssistanceRequestService) {
-            this.requestAssistance = this.requestAssistance.bind(this);
-            this.getNearbyRequests = this.getNearbyRequests.bind(this);
-            this.updateRequestStatus = this.updateRequestStatus.bind(this);
-            this.getAssistanceRequests = this.getAssistanceRequests.bind(this);
-            this.getAssistanceRequestDetails = this.getAssistanceRequestDetails.bind(this);
-            this.assignVolunteer = this.assignVolunteer.bind(this);
-        }
+        this.requestAssistance = this.requestAssistance.bind(this);
+        this.getNearbyRequests = this.getNearbyRequests.bind(this);
+        this.updateRequestStatus = this.updateRequestStatus.bind(this);
+        this.getAssistanceRequests = this.getAssistanceRequests.bind(this);
+        this.getProcessingRequests = this.getProcessingRequests.bind(this);
+        this.getAssistanceRequestDetails = this.getAssistanceRequestDetails.bind(this);
+        this.assignVolunteer = this.assignVolunteer.bind(this);
+    }
 
     async requestAssistance(req: Request, res: Response): Promise<void> {
         const userId = req.user?.userId;
@@ -118,6 +119,27 @@ export class AssistanceRequestController implements IAssistanceRequestController
         } catch (error) {
             console.error('Error fetching assistance requests:', error);
             res.status(500).json({ message: 'Error fetching assistance requests', error });
+        }
+    }
+
+    async getProcessingRequests(req: Request, res: Response): Promise<void> {
+        const volunteerId = req.user.userId;
+
+        const page = parseInt(req.query.page as string, 10) || 1;
+        let limit = parseInt(req.query.limit as string, 10) || 5;
+        const search = req.query.search as string;
+        const filter = req.query.filter as string;
+        let skip = !search ? (page - 1) * limit : 0;
+
+        try {
+            const processingRequests = await this.assistanceRequestService.fetchProcessingRequests(search, filter, skip, limit, volunteerId);
+            const documentsCount = await this.assistanceRequestService.countProcessingRequests(search, filter, volunteerId);
+            const totalPages = Math.ceil(documentsCount / limit);
+
+            res.status(200).json({ success: true, processingRequests, totalPages, totalRequests: documentsCount });
+        } catch (error) {
+            console.error('Error fetching processing requests:', error);
+            res.status(500).json({ message: 'Error fetching processing requests', error });
         }
     }
 
