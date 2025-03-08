@@ -21,6 +21,13 @@ export class AssetRequestController implements IAssetRequestController {
         const { requestedDate, quantity } = req.body;
 
         try {
+            const isLimit = await this.assetService.checkIsRequestLimit(userId, quantity);
+
+            if (isLimit) {
+                res.status(400).json({ success: false, isRequestLimit: true, message: 'You cannot have more than 3 requests at a time! Try requesting lesser quantity.' });
+                return;
+            }
+
             const createAssetRequest = await this.assetService.createRequest(
                 assetId, userId, requestedDate, quantity
             );

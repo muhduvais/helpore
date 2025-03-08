@@ -208,6 +208,21 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         }
     }
 
+    async checkIsRequestLimit(userId: string, quantity: number): Promise<boolean | null> {
+        try {
+            const assetRequests = await this.assetRequestRepository.findMyAllRequests(userId);
+            const count = assetRequests.reduce((accu, request) => {
+                const quantity = Number(request.quantity) || 0;
+                return accu + quantity;
+            }, 0);
+            console.log('count: ', count)
+            return (count + quantity) > 3;
+        } catch (error) {
+            console.error('Error finding the asset requests:', error);
+            return null;
+        }
+    }
+
     async countMyAssetRequests(userId: string, search: string, filter: string): Promise<number> {
         try {
             let query: any = {};

@@ -16,4 +16,5 @@ export interface IAssetRequestRepository extends IBaseRepository<IAssetRequest> 
   countMyRequests(query: object): Promise<number>;
   countRequests(query: object): Promise<number>;
   updateStatus(requestId: string, status: string, comment: string): Promise<IAssetRequest>;
+  findMyAllRequests(userId: string): Promise<IAssetRequest[] | null>;
 }

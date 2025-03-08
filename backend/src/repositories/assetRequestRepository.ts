@@ -194,4 +194,13 @@ export class AssetRequestRepository extends BaseRepository<IAssetRequest> implem
       throw error;
     }
   }
+
+  async findMyAllRequests(userId: string): Promise<IAssetRequest[] | null> {
+    try {
+      return await AssetRequest.find({ user: userId });
+    } catch (error) {
+      console.error('Error finding asset requests:', error);
+      return null;
+    }
+  }
 }

@@ -88,6 +88,7 @@ export interface IAssetService {
     countMyAssetRequests(userId: string, search: string, filter: string): Promise<number>;
     findRequestDetails(userId: string, assetId: string): Promise<IAssetRequest[]>
     updateStatus(requestId: string, status: string, comment: string): Promise<any>;
+    checkIsRequestLimit(userId: string, quantity: number): Promise<boolean | null>;
 }
 
 export interface IAssistanceRequestService {

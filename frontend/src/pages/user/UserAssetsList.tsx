@@ -100,16 +100,23 @@ const AssetListing = () => {
     try {
       setIsSubmitting(true);
       const assetId = selectedAsset?._id || '';
-      await userService.requestAsset(assetId, {
+      const response = await userService.requestAsset(assetId, {
         requestedDate: format(selectedDate, 'yyyy-MM-dd'), quantity: qty
       });
-      setIsRequestModalOpen(false);
-      toast.success('Asset requested successfully!', {
-        onClose: () => window.location.reload()
-      });
+      if (response.status === 200) {
+        setIsRequestModalOpen(false);
+        toast.success('Asset requested successfully!', {
+          onClose: () => window.location.reload()
+        });
+      }
     } catch (error) {
-      toast.success('Error requesting asset!');
-      console.error('Error requesting asset:', error);
+      setIsRequestModalOpen(false);
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message || 'Error requesting asset!');
+      } else {
+        toast.error('Error requesting asset!');
+        console.error('Error requesting asset:', error);
+      }
     } finally {
       setIsSubmitting(false);
     }
