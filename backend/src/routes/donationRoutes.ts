@@ -8,7 +8,7 @@ const donationController = container.resolve<IDonationController>('IDonationCont
 
 router.post('/create-checkout-session', donationController.createCheckoutSession);
 router.get('/history', donationController.fetchDontaionHistory);
-router.get('/webhook', express.raw({ type: 'application/json' }), donationController.webhook);
+router.get('/receipt/:donationId', donationController.fetchDontaionHistory);
 
 
 export default router;

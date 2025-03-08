@@ -9,6 +9,10 @@ import "reflect-metadata";
 import { registerDependencies } from "./container";
 import http from 'http';
 import { setupSocketIO } from './utils/socket';
+import morgan from 'morgan';
+import { DonationController } from './controllers/donationController';
+import { IDonationController } from './controllers/interfaces/IDonationController';
+import { container } from 'tsyringe';
 
 dotenv.config();
 
@@ -28,8 +32,14 @@ app.use(cors({
 const io = setupSocketIO(server);
 app.set('socketio', io);
 
+// Webhook listener
+const donationController = container.resolve<IDonationController>('IDonationController');
+app.post('/api/donations/webhook', express.raw({ type: 'application/json' }), donationController.webhook);
+
 app.use(cookieParser());
 app.use(express.json());
+
+app.use(morgan("dev"));
 
 // Routes
 app.use('/api', router);

@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AxiosError } from 'axios';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import profile_pic from '../../assets/profile_pic.png';
@@ -51,6 +50,7 @@ import { chatService } from '@/services/chatService';
 import { IMessageDocument } from '@/interfaces/chatInterface';
 import { volunteerService } from '@/services/volunteerService';
 import { io, Socket } from 'socket.io-client';
+import { useNotifications } from '@/context/notificationContext';
 
 interface IAssistanceRequest {
     _id: string;
@@ -93,13 +93,19 @@ interface HistoryEntry {
 
 const AssistanceRequestDetails: React.FC = () => {
     const { id } = useParams();
+
+    const [queryParams] = useSearchParams();
+
+    const [activeTab, setActiveTab] = useState(() => {
+        return queryParams.get('tab') || 'details';
+    });
+
     const [request, setRequest] = useState<IAssistanceRequest | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
-    const [activeTab, setActiveTab] = useState('details');
 
     // Chat state
     const [messages, setMessages] = useState<IMessageDocument[]>([]);
@@ -114,9 +120,14 @@ const AssistanceRequestDetails: React.FC = () => {
     const authToken = useSelector((state: any) => state.auth.accessToken);
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
-    if (!isLoggedIn) {
-        return <Navigate to="/login" />;
-    }
+    const { markAllAsRead } = useNotifications();
+
+    useEffect(() => {
+        const tab = queryParams.get('tab');
+        if (tab) {
+            setActiveTab(tab);
+        }
+    }, [queryParams]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -140,7 +151,8 @@ const AssistanceRequestDetails: React.FC = () => {
                         }
                     ]);
 
-                    if (response.data.requestDetails.status === 'approved') {
+                    const tabParam = queryParams.get('tab');
+                    if (!tabParam && response.data.requestDetails.status === 'approved') {
                         setActiveTab('details');
                     }
                 }
@@ -184,6 +196,8 @@ const AssistanceRequestDetails: React.FC = () => {
     useEffect(() => {
         if (activeTab === 'chat' && request?.status === 'approved' && socketRef.current && id) {
             chatService.joinConversation(socketRef.current, id);
+
+            markAllAsRead();
 
             const fetchMessages = async () => {
                 try {
@@ -232,16 +246,13 @@ const AssistanceRequestDetails: React.FC = () => {
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setMessageInput(e.target.value);
 
-        // Send typing indicator
         if (socketRef.current && id) {
             chatService.sendTypingStatus(socketRef.current, id, true);
 
-            // Clear previous timeout
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
             }
 
-            // Set new timeout to stop typing indicator after 2 seconds
             typingTimeoutRef.current = setTimeout(() => {
                 if (socketRef.current && id) {
                     chatService.sendTypingStatus(socketRef.current, id, false);
@@ -323,6 +334,10 @@ const AssistanceRequestDetails: React.FC = () => {
         return format(new Date(dateString), 'h:mm a');
     };
 
+    if (!isLoggedIn) {
+        return <Navigate to="/login" />;
+    }
+
     if (isLoading) {
         return (
             <motion.div
@@ -398,7 +413,7 @@ const AssistanceRequestDetails: React.FC = () => {
                 transition={{ duration: 0.5 }}
                 className="p-4 sm:p-6"
             >
-                {/* Header Section */}
+                {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div className="flex items-center gap-3">
                         <Link to="/user/requests?tab=assistance">
@@ -427,7 +442,7 @@ const AssistanceRequestDetails: React.FC = () => {
 
                 {/* Main Content */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left Column - Quick Info */}
+                    {/* Left Column - Info */}
                     <motion.div
                         initial={{ x: -50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
@@ -490,7 +505,7 @@ const AssistanceRequestDetails: React.FC = () => {
                                         </div>
 
                                         <div className="right flex items-start justify-end">
-                                            <img src={request.user.profilePicture || profile_pic} alt="pic" width="120px" />
+                                            <img src={request.user.profilePicture || profile_pic} alt="pic" width="120px" className='rounded-md' />
                                         </div>
                                     </div>
                                 )}
@@ -541,7 +556,6 @@ const AssistanceRequestDetails: React.FC = () => {
                                     History
                                 </TabsTrigger>
 
-                                {/* Show Chat tab only if request is approved */}
                                 {request?.status === 'approved' && (
                                     <TabsTrigger
                                         value="chat"

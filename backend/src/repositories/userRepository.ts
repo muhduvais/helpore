@@ -1,6 +1,7 @@
 import { injectable } from "tsyringe";
 import { IUser, IUserDocument } from "../interfaces/userInterface";
 import User from "../models/userModel";
+import { v2 as cloudinary } from 'cloudinary';
 import { IUserRepository } from "./interfaces/IUserRepository";
 import { BaseRepository } from "./baseRepository";
 
@@ -67,4 +68,50 @@ export class UserRepository extends BaseRepository<IUserDocument> implements IUs
             return false;
         }
     }
+
+    async updateUserCertificates(userId: string, uploadedCertificateUrl: string): Promise<boolean> {
+        try {
+            await this.findByIdAndUpdate(userId, { 
+                $push: { certificates: uploadedCertificateUrl }
+            });
+            return true;
+        } catch (error) {
+            console.error("Error updating profile picture:", error);
+            return false;
+        }
+    }
+
+    async deleteFile(publicId: string): Promise<any> {
+        try {
+          const result = await cloudinary.uploader.destroy(publicId);
+          
+          if (result.result !== 'ok') {
+            throw new Error(`Failed to delete file from Cloudinary: ${result.result}`);
+          }
+          
+          return result;
+        } catch (error) {
+          console.error('Repository - Error deleting file from Cloudinary:', error);
+          throw error;
+        }
+      };
+
+      async removeCertificateUrl(userId: string, certificateUrl: string): Promise<IUser> {
+        try {
+          const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $pull: { certificates: certificateUrl } },
+            { new: true }
+          );
+          
+          if (!updatedUser) {
+            throw new Error('User not found');
+          }
+          
+          return updatedUser;
+        } catch (error) {
+          console.error('Repository - Error removing certificate URL from user:', error);
+          throw error;
+        }
+      };
 }

@@ -24,6 +24,10 @@ const userSchema = new Schema<IUser>({
         type: String,
         default: null,
     },
+    certificates: {
+        type: [String],
+        default: [],
+    },
     isActive: {
         type: Boolean,
         default: true,

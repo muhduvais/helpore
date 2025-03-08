@@ -52,7 +52,7 @@ const DonationSchema: Schema = new Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'completed', 'failed', 'refunded'],
+      enum: ['pending', 'completed', 'failed'],
       default: 'pending',
       index: true
     },

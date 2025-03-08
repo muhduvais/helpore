@@ -2,7 +2,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
-import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe } from "react-icons/fa";
+import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe, FaCertificate, FaDownload, FaTimes, FaCheck, FaCalendarAlt } from "react-icons/fa";
 import { IUser } from '../../interfaces/userInterface';
 import profile_pic from '../../assets/profile_pic.png';
 import { Link } from 'react-router-dom';
@@ -33,6 +33,14 @@ interface IAddress {
     longtitude: string;
 }
 
+interface ICertificate {
+    url: string;
+    type: string;
+    name: string;
+    uploadedAt?: string;
+    isVerified?: boolean;
+}
+
 const AdminUserDetails = () => {
     const params = useParams();
     const userId = params.id || '';
@@ -41,6 +49,12 @@ const AdminUserDetails = () => {
     const [address, setAddress] = useState<IAddress | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>('');
+
+    const [certificates, setCertificates] = useState<ICertificate[]>([]);
+    const [showPreview, setShowPreview] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string>('');
+    const [previewName, setPreviewName] = useState<string>('');
+    const [previewType, setPreviewType] = useState<string>('');
 
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
@@ -56,6 +70,30 @@ const AdminUserDetails = () => {
             if (response.status === 200) {
                 setUser(response.data.user);
                 setAddress(response.data.address);
+                
+                // Handle if certificates are an array of strings (urls)
+                if (response.data.user?.certificates) {
+                    if (Array.isArray(response.data.user.certificates)) {
+                        if (typeof response.data.user.certificates[0] === 'string') {
+                            // Convert string URLs to certificate objects
+                            const formattedCerts = response.data.user.certificates.map((url: string, index: number) => {
+                                const fileExtension = url.split('.').pop()?.toLowerCase() || '';
+                                const fileType = fileExtension === 'pdf' ? 'pdf' : 'image';
+                                return {
+                                    url: url,
+                                    type: fileType,
+                                    name: `Certificate ${index + 1}`,
+                                    uploadedAt: new Date().toISOString(),
+                                    isVerified: true
+                                };
+                            });
+                            setCertificates(formattedCerts);
+                        } else {
+                            // Already in the correct format
+                            setCertificates(response.data.user.certificates);
+                        }
+                    }
+                }
             }
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -80,6 +118,21 @@ const AdminUserDetails = () => {
         } catch (error) {
             setError('Error updating user status');
         }
+    };
+
+    // Certificate preview functions
+    const openPreview = (url: string, name: string, type: string) => {
+        setPreviewUrl(url);
+        setPreviewName(name);
+        setPreviewType(type);
+        setShowPreview(true);
+    };
+
+    const closePreview = () => {
+        setShowPreview(false);
+        setPreviewUrl('');
+        setPreviewName('');
+        setPreviewType('');
     };
 
     useEffect(() => {
@@ -126,6 +179,62 @@ const AdminUserDetails = () => {
             </AlertDialogContent>
         </AlertDialog>
     );
+
+    // Certificate card component
+    const CertificateCard = ({ certificate }: { certificate: ICertificate }) => {
+        const fileType = certificate.type.toLowerCase();
+        return (
+            <div 
+                className="border rounded-lg shadow-sm bg-white overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200 flex flex-col"
+                onClick={() => openPreview(certificate.url, certificate.name, certificate.type)}
+            >
+                {/* Thumbnail Preview */}
+                <div className="h-48 w-full overflow-hidden bg-gray-100 border-b relative">
+                    {fileType === 'pdf' ? (
+                        <div className="flex items-center justify-center h-full bg-gray-50">
+                            <div className="text-4xl text-red-500">PDF</div>
+                        </div>
+                    ) : (
+                        <img 
+                            src={certificate.url} 
+                            alt={certificate.name} 
+                            className="w-full h-full object-cover"
+                        />
+                    )}
+                </div>
+                
+                {/* Certificate Info */}
+                <div className="p-3 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 className="font-medium text-gray-700 truncate mb-1">{certificate.name}</h3>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                            <FaCalendarAlt />
+                            <span>
+                                {certificate.uploadedAt && new Date(certificate.uploadedAt).toLocaleDateString()}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center mt-2">
+                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                            {fileType.toUpperCase()}
+                        </span>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-blue-600 hover:text-blue-800 p-0 h-auto"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(certificate.url, '_blank');
+                            }}
+                        >
+                            <FaDownload size={14} />
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     if (isLoading) {
         return (
@@ -261,6 +370,33 @@ const AdminUserDetails = () => {
                 </CardContent>
             </Card>
 
+            {/* Certificates Section */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">User Certificates</h3>
+                        <span className="text-sm text-gray-500">
+                            {certificates.length} {certificates.length === 1 ? 'certificate' : 'certificates'}
+                        </span>
+                    </div>
+                    
+                    {certificates.length > 0 ? (
+                        <div className="max-h-[32rem] overflow-y-auto pr-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                {certificates.map((certificate, index) => (
+                                    <CertificateCard key={index} certificate={certificate} />
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg">
+                            <FaCertificate className="h-12 w-12 mx-auto text-gray-400" />
+                            <p className="mt-2 text-gray-500">No certificates available</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
             {/* Activity Section */}
             <Card>
                 <CardContent className="p-6">
@@ -268,6 +404,61 @@ const AdminUserDetails = () => {
                     <p className="text-gray-500">No recent activity</p>
                 </CardContent>
             </Card>
+
+            {/* Certificate Preview Modal */}
+            {showPreview && previewUrl && (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="relative bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-xl">
+                        {/* Modal Header */}
+                        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+                            <div className="flex items-center gap-2">
+                                <FaCertificate className="text-blue-500" />
+                                <h3 className="font-medium text-gray-800 truncate">{previewName}</h3>
+                            </div>
+                            <div className="flex space-x-2">
+                                <a
+                                    href={previewUrl}
+                                    download
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm"
+                                    title="Download"
+                                >
+                                    <FaDownload size={14} />
+                                    <span>Download</span>
+                                </a>
+                                <button
+                                    onClick={closePreview}
+                                    className="flex items-center gap-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm"
+                                    title="Close"
+                                >
+                                    <FaTimes size={14} />
+                                    <span>Close</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {/* Preview Content */}
+                        <div className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center p-4">
+                            <div className="bg-white shadow-lg rounded-lg overflow-hidden max-h-full max-w-full">
+                                {previewType.toLowerCase() === 'pdf' ? (
+                                    <iframe
+                                        src={previewUrl}
+                                        className="w-full h-[70vh] border"
+                                        title="PDF Preview"
+                                    ></iframe>
+                                ) : (
+                                    <img
+                                        src={previewUrl}
+                                        alt="Certificate Preview"
+                                        className="max-h-[75vh] object-contain mx-auto"
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

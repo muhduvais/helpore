@@ -38,6 +38,32 @@ export const userService = {
         }
     },
 
+    // Certificates
+    uploadCertificateImage: async (formData: any) => {
+        try {
+            const response = await customAxios.post('/api/users/certificate', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+            return response;
+        } catch (error) {
+            console.log('error: ', error)
+            throw error
+        }
+    },
+
+    deleteCertificate: async (certificateUrl: string) => {
+        try {
+            const response = await customAxios.delete('/api/users/certificate', {
+                data: { certificateUrl }
+            });
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     // Addresses
     createAddress: async (addressData: IAddress) => {
         try {

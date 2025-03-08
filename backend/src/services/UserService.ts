@@ -3,6 +3,7 @@ import { BaseService } from './BaseService';
 import { IUserService } from './interfaces/ServiceInterface';
 import { IUser, IAddress, IUserDocument } from '../interfaces/userInterface';
 import { IAddUserForm } from '../interfaces/adminInterface';
+import cloudinary from 'cloudinary';
 import bcrypt from 'bcryptjs';
 import { IUserRepository } from '../repositories/interfaces/IUserRepository';
 import { IAddressRepository } from '../repositories/interfaces/IAddressRepository';
@@ -142,6 +143,83 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             return await this.addressRepository.findAddressByEntityId(userId);
         } catch (error) {
             console.error('Error fetching the addresses: ', error);
+            return null;
+        }
+    }
+
+    async uploadCertificateImage(userId: string, file: Express.Multer.File): Promise<string> {
+        try {
+            if (!file.path) {
+                throw new Error('No file path provided');
+            }
+
+            const randomDigits = Math.floor(100000 + Math.random() * 900000);
+
+            console.log('Attempting to upload to Cloudinary:', {
+                path: file.path,
+                publicId: `user-certificate-images/${randomDigits}`
+            });
+
+            const uploadResponse = await cloudinary.v2.uploader.upload(file.path, {
+                public_id: `user-certificate-images/${randomDigits}`,
+                folder: 'user_certificates',
+                resource_type: 'auto',
+                secure: true,
+            });
+
+            console.log('Cloudinary upload successful:', uploadResponse.secure_url);
+
+            await this.userRepository.updateUserCertificates(userId, uploadResponse.secure_url)
+
+            return uploadResponse.secure_url;
+        } catch (error) {
+            console.error('Error in uploading certificate service:', error);
+            throw error;
+        }
+    }
+
+    async deleteCertificate(userId: string, certificateUrl: string): Promise<IUser> {
+        try {
+            const publicId = this.extractPublicIdFromUrl(certificateUrl);
+
+            if (!publicId) {
+                throw new Error('Invalid certificate URL');
+            }
+
+            await this.userRepository.deleteFile(publicId);
+
+            const updatedUser = await this.userRepository.removeCertificateUrl(userId, certificateUrl);
+
+            return updatedUser;
+        } catch (error) {
+            console.error('Service - Error deleting certificate:', error);
+            throw error;
+        }
+    };
+
+    extractPublicIdFromUrl(url: string) {
+        try {
+            if (!url.includes('cloudinary.com')) {
+                throw new Error('Not a Cloudinary URL');
+            }
+
+            const uploadIndex = url.indexOf('/upload/');
+            if (uploadIndex === -1) {
+                throw new Error('Invalid Cloudinary URL format');
+            }
+
+            let fullPath = url.substring(uploadIndex + 8);
+
+            fullPath = fullPath.replace(/^v\d+\//, '');
+
+            const extensionIndex = fullPath.lastIndexOf('.');
+            if (extensionIndex !== -1) {
+                fullPath = fullPath.substring(0, extensionIndex);
+            }
+
+            return fullPath;
+        } catch (error) {
+            console.error('Error extracting public ID from URL:', error);
             return null;
         }
     }

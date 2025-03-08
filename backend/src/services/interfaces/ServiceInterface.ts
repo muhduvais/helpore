@@ -2,6 +2,9 @@ import { IUser, IAddress, IAsset, IAssetRequestResponse, IAssetRequest, IUserDoc
 import { IAddUserForm } from '../../interfaces/adminInterface';
 import { IAssistanceRequest } from '../../interfaces/userInterface';
 import { IConversationDocument, IMessageDocument } from '../../interfaces/chatInterface';
+import { IDonation } from '../../models/donationModel';
+import { IDonationResponse } from '../../repositories/donationRepository';
+import { INotificationDocument } from '../../models/notificationModel';
 
 export interface IAuthService {
     registerUser(name: string, email: string, password: string): Promise<string | boolean>;
@@ -32,6 +35,8 @@ export interface IUserService {
     addAddress(addressData: IAddress): Promise<string>;
     fetchAddresses(userId: string): Promise<IAddress[]>;
     fetchAddress(userId: string): Promise<IAddress>;
+    uploadCertificateImage(userId: string, file: Express.Multer.File): Promise<string>;
+    deleteCertificate(userId: string, certificateUrl: string): Promise<IUser>;
 }
 
 export interface IAdminService {
@@ -105,6 +110,7 @@ export interface IDonationService {
     handleWebhookEvent(event): Promise<any>;
     getUserDonationHistory(userId: string): Promise<any>;
     constructEvent(payload: any, signature: any, secret: any): Promise<any>;
+    generateAndSendReceipt(donationId: string): Promise<Buffer>;
 }
 
 export interface IChatService {
@@ -112,6 +118,24 @@ export interface IChatService {
     getConversationMessages(requestId: string): Promise<IMessageDocument[]>;
     getUserConversations(userId: string): Promise<IConversationDocument[]>;
     markConversationAsRead(conversationId: string, userId: string): Promise<void>;
+}
+
+export interface INotificationService {
+    createNotification(
+        userId: string,
+        userType: 'users' | 'volunteers',
+        type: 'message' | 'system',
+        content: string,
+        requestId?: string,
+        sender?: string,
+        senderType?: 'users' | 'volunteers'
+    ): Promise<INotificationDocument>;
+    getUserNotifications(userId: string): Promise<INotificationDocument[]>;
+    getUnreadCount(userId: string): Promise<number>;
+    markAsRead(notificationId: string, userId: string): Promise<void>;
+    markAllAsRead(userId: string): Promise<void>;
+    deleteNotification(notificationId: string, userId: string): Promise<void>;
+    deleteAllNotifications(userId: string): Promise<void>;
 }
 
 export interface IOtpService {

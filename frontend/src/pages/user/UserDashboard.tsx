@@ -5,6 +5,7 @@ import { userService } from '../../services/userService';
 import { Activity, DollarSign, FileText, Bell } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { blockToggle } from '@/redux/slices/authSlice';
+import { NavLink } from 'react-router-dom';
 
 const UserDashboard: React.FC = () => {
 
@@ -17,10 +18,8 @@ const UserDashboard: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await userService.fetchUserDetails();
-
       if (response.status === 200) {
-        const { userDetails } = response.data;
-        setUser(userDetails.user);
+        setUser(response.data.user);
       }
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -86,13 +85,44 @@ const UserDashboard: React.FC = () => {
                 Here's a summary of your recent activity and key information at a glance.
               </p>
             </div>
-            {user?.name && (
-              <div className="hidden md:flex items-center space-x-3">
-                <div className="w-12 h-12 bg-[#688D48] rounded-full flex items-center justify-center text-white font-semibold">
-                  {user.name.split(' ').map(n => n[0]).join('')}
+            {user && user.profilePicture ? (
+              <NavLink to="/user/profile" className="hidden md:flex items-center space-x-3 relative group">
+                <div className="w-[100px] h-[100px] rounded-full overflow-hidden border-[0.5px] border-[#d2d2d2] relative">
+                  <img
+                    src={user.profilePicture}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
+                    <div className="text-white text-[12px] font-semibold flex flex-col items-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="mb-1"
+                      >
+                        <path d="M5 12h14" />
+                        <path d="M12 5l7 7-7 7" />
+                      </svg>
+                      <span>Visit Profile</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              </NavLink>
+            ) :
+              user?.name && (
+                <div className="hidden md:flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-[#688D48] rounded-full flex items-center justify-center text-white font-semibold">
+                    {user.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                </div>
+              )}
           </div>
         </div>
 

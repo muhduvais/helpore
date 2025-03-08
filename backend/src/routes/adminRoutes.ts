@@ -5,6 +5,8 @@ import express from 'express';
 
 const router = express.Router();
 
+// router.use(authenticateToken);
+
 // const userController = container.resolve<IUserController>('userController');
 
 // router.use(authorizeRole('admin'));

@@ -15,8 +15,6 @@ export class ChatRepository implements IChatRepository {
 
         const requestId = String(messageData.requestId);
 
-        io.to(`request-${requestId}`).emit('new-message', savedMessage);
-
 
         return savedMessage;
     }

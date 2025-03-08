@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AxiosError } from 'axios';
 import { Card } from "@/components/ui/card";
@@ -50,6 +50,7 @@ import { userService } from '@/services/userService';
 import { chatService } from '@/services/chatService';
 import { IMessageDocument } from '@/interfaces/chatInterface';
 import { io, Socket } from 'socket.io-client';
+import { useNotifications } from '@/context/notificationContext';
 
 interface IAssistanceRequest {
     _id: string;
@@ -85,13 +86,19 @@ interface HistoryEntry {
 
 const AssistanceRequestDetails: React.FC = () => {
     const { id } = useParams();
+
+    const [queryParams] = useSearchParams();
+
+    const [activeTab, setActiveTab] = useState(() => {
+        return queryParams.get('tab') || 'details';
+    });
+
     const [request, setRequest] = useState<IAssistanceRequest | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
-    const [activeTab, setActiveTab] = useState('details');
 
     // Chat state
     const [messages, setMessages] = useState<IMessageDocument[]>([]);
@@ -110,6 +117,15 @@ const AssistanceRequestDetails: React.FC = () => {
     if (!isLoggedIn) {
         return <Navigate to="/login" />;
     }
+
+    const { markAllAsRead } = useNotifications();
+
+    useEffect(() => {
+        const tab = queryParams.get('tab');
+        if (tab) {
+            setActiveTab(tab);
+        }
+    }, [queryParams]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -133,7 +149,8 @@ const AssistanceRequestDetails: React.FC = () => {
                         }
                     ]);
 
-                    if (response.data.requestDetails.status === 'approved') {
+                    const tabParam = queryParams.get('tab');
+                    if (!tabParam && response.data.requestDetails.status === 'approved') {
                         setActiveTab('details');
                     }
                 }
@@ -180,11 +197,13 @@ const AssistanceRequestDetails: React.FC = () => {
         if (activeTab === 'chat' && request?.status === 'approved' && socketRef.current && id) {
             chatService.joinConversation(socketRef.current, id);
 
+            markAllAsRead();
+
             const fetchMessages = async () => {
                 try {
                     setIsLoadingMessages(true);
                     const response = await chatService.getConversationMessages(id);
-                    
+
                     if (response.status === 200) {
                         setMessages(response.data.data);
                     }
@@ -428,7 +447,7 @@ const AssistanceRequestDetails: React.FC = () => {
 
                 {/* Main Content */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left Column - Quick Info */}
+                    {/* Left Column - Info */}
                     <motion.div
                         initial={{ x: -50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}

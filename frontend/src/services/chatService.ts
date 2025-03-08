@@ -81,7 +81,7 @@ export const chatService = {
     socket.on('new-message', (message: IMessageDocument) => {
       console.log('Received new message:', message);
       messageCallback(message);
-    });
+    })
 
     socket.on('user-typing', (data: any) => {
       typingCallback({

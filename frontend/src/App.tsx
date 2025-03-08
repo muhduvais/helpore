@@ -16,6 +16,7 @@ import AdminRoutes from './routes/adminRoutes';
 import NotFound404 from './pages/NotFound404';
 import { SidebarProvider } from './context/sidebarContext';
 import LandingPage from './pages/user/LandingPage';
+import { NotificationProvider } from '@/context/notificationContext';
 
 function App() {
 
@@ -36,23 +37,25 @@ function App() {
       <Router>
         <Provider store={store}>
           <SidebarProvider>
-            <Routes>
-              {/* Auth Routes */}
-              <Route path="/" element={<Navigate to="/home" replace />} />
-              <Route path="/home" element={<LandingPage />} />
+            <NotificationProvider>
+              <Routes>
+                {/* Auth Routes */}
+                <Route path="/" element={<Navigate to="/home" replace />} />
+                <Route path="/home" element={<LandingPage />} />
 
-              <Route path="/user/login" element={<LoginPage />} />
-              <Route path="/user/register" element={<RegisterPage />} />
-              <Route path="/user/verifyOtp" element={<OtpVerification />} />
-              <Route path="/user/resetPassword" element={<ResetPassword />} />
-              <Route path="/admin/login" element={<AdminLoginPage />} />
+                <Route path="/user/login" element={<LoginPage />} />
+                <Route path="/user/register" element={<RegisterPage />} />
+                <Route path="/user/verifyOtp" element={<OtpVerification />} />
+                <Route path="/user/resetPassword" element={<ResetPassword />} />
+                <Route path="/admin/login" element={<AdminLoginPage />} />
 
-              {/* Other Routes */}
-              <Route path="/admin/*" element={<AdminRoutes />} />
-              <Route path="/user/*" element={<UserRoutes />} />
-              <Route path="/volunteer/*" element={<VolunteerRoutes />} />
-              <Route path="/*" element={<NotFound404 />} />
-            </Routes>
+                {/* Other Routes */}
+                <Route path="/admin/*" element={<AdminRoutes />} />
+                <Route path="/user/*" element={<UserRoutes />} />
+                <Route path="/volunteer/*" element={<VolunteerRoutes />} />
+                <Route path="/*" element={<NotFound404 />} />
+              </Routes>
+            </NotificationProvider>
           </SidebarProvider>
         </Provider>
       </Router>

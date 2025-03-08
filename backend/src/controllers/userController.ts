@@ -16,6 +16,8 @@ export class UserController implements IUserController {
     this.updateProfilePicture = this.updateProfilePicture.bind(this);
     this.changePassword = this.changePassword.bind(this);
     this.toggleIsBlocked = this.toggleIsBlocked.bind(this);
+    this.uploadCertificateImage = this.uploadCertificateImage.bind(this);
+    this.deleteCertificate = this.deleteCertificate.bind(this);
   }
 
   async addUser(req: Request, res: Response): Promise<void> {
@@ -189,4 +191,76 @@ export class UserController implements IUserController {
       });
     }
   }
+
+  async uploadCertificateImage(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.userId;
+    try {
+      const file = req.file;
+      console.log('File: ', file)
+      if (!file) {
+        res.status(400).json({ message: 'No image uploaded' });
+        return;
+      }
+
+      console.log('Received file:', {
+        path: file.path,
+        mimetype: file.mimetype,
+        filename: file.filename
+      });
+
+      const uploadResponse = await this.userService.uploadCertificateImage(userId, file);
+
+      if (!uploadResponse) {
+        res.status(500).json({ message: 'Failed to upload image to Cloudinary' });
+        return;
+      }
+
+      res.status(200).json({ certificateUrl: uploadResponse });
+    } catch (error) {
+      console.error('Error uploading the certificate image: ', error);
+      res.status(500).json({
+        message: 'Error uploading the certificate image',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  async deleteCertificate(req: Request, res: Response): Promise<void> {
+    try {
+        const { certificateUrl } = req.body;
+        const userId = req.user?.userId;
+
+        console.log('certificateUrl: ', certificateUrl)
+
+        if (!certificateUrl) {
+            res.status(400).json({ success: false, message: "Certificate URL is required" });
+            return;
+        }
+
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized: User ID not found" });
+            return;
+        }
+
+        const result = await this.userService.deleteCertificate(userId, certificateUrl);
+
+        if (!result) {
+            res.status(404).json({ success: false, message: "Certificate not found or could not be deleted" });
+            return;
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Certificate deleted successfully",
+            data: result,
+        });
+    } catch (error) {
+        console.error("Error deleting certificate:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to delete certificate",
+        });
+    }
+};
+
 }

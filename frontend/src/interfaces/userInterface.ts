@@ -10,6 +10,7 @@ export interface IUser {
     email: string;
     password: string;
     profilePicture: string;
+    certificates?: string[] | undefined;
     isActive: boolean;
     isBlocked: boolean;
     isVerified: boolean;

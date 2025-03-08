@@ -10,6 +10,7 @@ import assetRequestRoutes from './assetRequestRoutes';
 import assistanceRequestRoutes from './assistanceRequestRoutes';
 import donationRoutes from './donationRoutes';
 import chatRoutes from './chatRoutes';
+import notificationRoutes from './notificationRoutes';
 import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = express.Router();
@@ -28,6 +29,7 @@ router.use('/assets', assetRoutes);
 router.use('/assetRequests', assetRequestRoutes);
 router.use('/assistanceRequests', assistanceRequestRoutes);
 router.use('/donations', donationRoutes);
+router.use('/notifications', notificationRoutes);
 router.use('/chats', chatRoutes);
 
 export default router;

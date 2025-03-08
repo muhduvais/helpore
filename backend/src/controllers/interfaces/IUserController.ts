@@ -8,4 +8,6 @@ export interface IUserController {
   updateProfilePicture(req: Request, res: Response): Promise<void>;
   changePassword(req: Request, res: Response): Promise<void>;
   toggleIsBlocked(req: Request, res: Response): Promise<void>;
+  uploadCertificateImage(req: Request, res: Response): Promise<void>;
+  deleteCertificate(req: Request, res: Response): Promise<void>;
 }

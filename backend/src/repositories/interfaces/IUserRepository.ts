@@ -12,4 +12,7 @@ export interface IUserRepository extends IBaseRepository<IUserDocument> {
     updatePassword(userId: string, newPassword: string): Promise<boolean>;
     updateProfilePicture(userId: string, profilePicture: string): Promise<boolean>;
     countUsers(query: object): Promise<number>;
+    updateUserCertificates(userId: string, uploadedCertificateUrl: string): Promise<boolean>;
+    deleteFile(publicId: string): Promise<any>;
+    removeCertificateUrl(userId: string, certificateUrl: string): Promise<IUser>;
 }

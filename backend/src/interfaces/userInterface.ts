@@ -9,6 +9,7 @@ export interface IUser {
     email: string;
     password: string;
     profilePicture: string;
+    certificates: string[];
     isActive: boolean;
     isBlocked: boolean;
     isVerified: boolean;
@@ -29,6 +30,7 @@ export interface IUserDocument extends Document {
     email: string;
     password: string;
     profilePicture: string;
+    certificates: string[];
     isActive: boolean;
     isBlocked: boolean;
     isVerified: boolean;

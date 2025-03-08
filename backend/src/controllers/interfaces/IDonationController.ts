@@ -4,4 +4,5 @@ export interface IDonationController {
     createCheckoutSession(req: Request, res: Response): Promise<void>;
     webhook (req: Request, res: Response): Promise<void>;
     fetchDontaionHistory (req: Request, res: Response): Promise<void>;
+    generateReceipt(req: Request, res: Response): Promise<void>;
 }
