@@ -13,6 +13,15 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
         }
     }
 
+    async find(): Promise<T[] | null> {
+        try {
+            return await this.model.find({});
+        } catch (error) {
+            console.error(`Error finding ${this.model.modelName}`, error);
+            throw error;
+        }
+    }
+
     async findAll(query: object, skip: number, limit: number): Promise<T[] | null> {
         try {
             return await this.model.find(query).skip(skip).limit(limit);

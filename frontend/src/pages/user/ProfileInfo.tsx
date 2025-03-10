@@ -1,14 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
-import { MdEdit, MdOutlinePhotoCamera } from "react-icons/md";
+import { MdOutlinePhotoCamera } from "react-icons/md";
 import { User, Key, Cog, Upload } from 'lucide-react';
 import profile_pic from '../../assets/profile_pic.png';
 import loading_Profile from '../../assets/loadingProfile.webp';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { validateChangePassword } from "../../utils/validation";
 import { userService } from '../../services/userService';
-import { IAddress, IUser } from '../../interfaces/userInterface';
+import { IUser } from '../../interfaces/userInterface';
 import { AxiosError } from 'axios';
-import 'react-toastify/dist/ReactToastify.css';
 import { adminService } from '@/services/adminService';
 import EditProfileModal from '@/components/editUserProfile';
 
@@ -131,9 +131,10 @@ const Profile = () => {
             setIsLoading(true);
             try {
                 const response = await userService.changePassword(formData);
+
                 if (response?.status === 200) {
-                    toast.success('Password reset successfully!');
                     clearFields();
+                    toast.success('Password reset successfully!');
                 }
             } catch (error) {
                 if (error instanceof AxiosError) {
@@ -250,6 +251,17 @@ const Profile = () => {
 
     return (
         <>
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
             <EditProfileModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -269,7 +281,7 @@ const Profile = () => {
                             onMouseLeave={() => setIsImageHovered(false)}
                             onClick={handleProfilePictureClick}
                         >
-                            <div className="relative">
+                            <div className="relative cursor-pointer">
                                 <img
                                     src={isProfileUploading ? loading_Profile : user?.profilePicture || profile_pic}
                                     alt="Profile"
@@ -659,13 +671,18 @@ const Profile = () => {
                 </div>
 
                 {/* Footer Section */}
-                <div className="bg-gray-100 p-4 flex items-center justify-between border-t">
-                    <button
-                        className='ml-3 px-8 py-2 bg-[#688D48] rounded text-white'
-                        onClick={() => setIsEditModalOpen(true)}
-                    >Edit Profile</button>
-                    <p className="text-sm text-gray-600 px-3">Profile - {user?.name}</p>
-                </div>
+                {activeTab === 'info' ? (
+                    <div className="bg-gray-100 p-4 flex items-center justify-between border-t">
+                        <button
+                            className='ml-3 px-8 py-2 bg-[#688D48] rounded text-white'
+                            onClick={() => setIsEditModalOpen(true)}
+                        >Edit Profile</button>
+                        <p className="text-sm text-gray-600 px-3">Profile - {user?.name}</p>
+                    </div>) : (
+                    <div className="bg-gray-100 p-4 flex items-center justify-center border-t">
+                        <p className="text-sm text-gray-600 px-3">Profile - {user?.name}</p>
+                    </div>)
+                }
             </div>
         </>
     );

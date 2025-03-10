@@ -144,7 +144,7 @@ const DonationPage = () => {
 
     const handleDownloadReceipt = async (donationId: string) => {
         try {
-            await donationService.downloadDonationReceipt(donationId);
+            await donationService.downloadDonationReceipt(donationId, null);
         } catch (error) {
             console.error('Failed to download receipt:', error);
         }

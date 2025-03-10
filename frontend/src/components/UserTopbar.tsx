@@ -52,18 +52,18 @@ const UserTopbar: React.FC<any> = () => {
             }
         );
 
-        gsap.fromTo(notificationRef.current,
-            {
-                opacity: 0,
-                y: -30,
-            },
-            {
-                opacity: 1,
-                y: 0,
-                duration: 1.3,
-                ease: "power2.out"
-            }
-        );
+        // gsap.fromTo(notificationRef.current,
+        //     {
+        //         opacity: 0,
+        //         y: -30,
+        //     },
+        //     {
+        //         opacity: 1,
+        //         y: 0,
+        //         duration: 1.3,
+        //         ease: "power2.out"
+        //     }
+        // );
 
         gsap.fromTo(logoutRef.current,
             {
@@ -73,7 +73,7 @@ const UserTopbar: React.FC<any> = () => {
             {
                 opacity: 1,
                 y: 0,
-                duration: 1.5,
+                duration: 1.3,
                 ease: "power2.out"
             }
         );
@@ -143,9 +143,9 @@ const UserTopbar: React.FC<any> = () => {
                         <button ref={profileRef} className='flex items-center justify-center'><FaUserCircle className='text-2xl text-[#5F5F5F] hover:text-[#000] transition-all duration-300 ease-in-out' /></button>
                     </Link>
                 </div>
-                <div className="notifications">
+                {/* <div className="notifications">
                     <button ref={notificationRef} className='flex items-center justify-center'><IoNotifications className='text-2xl text-[#5F5F5F] hover:text-[#000] transition-all duration-300 ease-in-out' /></button>
-                </div>
+                </div> */}
                 <button ref={logoutRef} className='logout bg-[#fff] text-black py-1 px-3 rounded font-bold flex items-center justify-center gap-x-1'
                     onClick={handleLogout}
                 >

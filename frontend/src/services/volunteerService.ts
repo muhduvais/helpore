@@ -83,7 +83,6 @@ export const volunteerService = {
                     filter
                 }
             });
-            console.log('response: ', response)
             return response;
         } catch (error) {
             throw error

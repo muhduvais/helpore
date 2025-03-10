@@ -111,7 +111,9 @@ export interface IDonationService {
     handleWebhookEvent(event): Promise<any>;
     getUserDonationHistory(userId: string): Promise<any>;
     constructEvent(payload: any, signature: any, secret: any): Promise<any>;
-    generateAndSendReceipt(donationId: string): Promise<Buffer>;
+    generateAndSendReceipt(donationId: string, userId: string): Promise<Buffer>;
+    getAllDonations(page: number, limit: number, search: string, campaign: string): Promise<IDonation[]>;
+    totalDonationsCount(search: string, campaign: string): Promise<number | null>;
 }
 
 export interface IChatService {

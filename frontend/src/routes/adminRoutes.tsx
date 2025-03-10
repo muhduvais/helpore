@@ -14,6 +14,7 @@ import AdminVolunteerDetails from '@/pages/admin/AdminVolunteerDetails';
 import AdminAssetDetails from '@/pages/admin/AdminAssetDetails';
 import AdminRequestManagement from '@/pages/admin/AdminRequestManagement ';
 import AdminAssistanceRequestDetails from '@/pages/admin/AdminAssistanceRequestDetails';
+import AdminDonations from '@/pages/admin/AdminDonations';
 import { AuthErrorHandler } from '@/utils/authErroHandler';
 
 const AdminRoutes = () => {
@@ -39,6 +40,8 @@ const AdminRoutes = () => {
 
                         <Route path="/requestManagement" element={<AdminRequestManagement />} />
                         <Route path="/assistanceRequests/:id" element={<AdminAssistanceRequestDetails />} />
+
+                        <Route path="/donations" element={<AdminDonations />} />
 
                         <Route path="/404" element={<Admin404 />} />
                         <Route path="/*" element={<Admin404 />} />

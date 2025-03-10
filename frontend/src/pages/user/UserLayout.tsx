@@ -100,7 +100,7 @@ const Layout: React.FC = () => {
         pauseOnHover
       />
 
-      <nav className="bg-[#688D48] text-white shadow-lg fixed w-full z-20">
+      <nav className="bg-[#688D48] text-white shadow-lg fixed w-full z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
             <img src={logo} alt="Logo" />

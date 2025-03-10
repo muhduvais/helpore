@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ChartNoAxesGantt, FileText, HeartHandshake, LayoutDashboard, Users } from "lucide-react";
+import { ChartNoAxesGantt, FileText, Handshake, HeartHandshake, LayoutDashboard, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from '../assets/Logo-black.png';
 import logo_short from '../assets/Logo-black-short.png';
@@ -18,6 +18,7 @@ const AdminSidebar = () => {
     const threeRef = useRef(null);
     const fourRef = useRef(null);
     const fiveRef = useRef(null);
+    const sixRef = useRef(null);
 
     const currentPage = location.pathname.split("/")[2] || "dashboard";
 
@@ -28,6 +29,7 @@ const AdminSidebar = () => {
             gsap.fromTo(threeRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.3, ease: "power2.out" });
             gsap.fromTo(fourRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.5, ease: "power2.out" });
             gsap.fromTo(fiveRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
+            gsap.fromTo(sixRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
         }
     }, []);
 
@@ -77,31 +79,38 @@ const AdminSidebar = () => {
                     </li>
                 </Link>
 
-                <Link ref={twoRef} className={`${currentPage === "userManagement" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/userManagement">
+                <Link ref={twoRef} className={`${currentPage === "userManagement"  || currentPage === "userDetails" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/userManagement">
                     <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
                         <Users size={20} />
                         <span className={`${sidebarState ? 'block' : 'hidden'}`}>User Management</span>
                     </li>
                 </Link>
 
-                <Link ref={threeRef} className={`${currentPage === "volunteerManagement" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/volunteerManagement">
+                <Link ref={threeRef} className={`${currentPage === "volunteerManagement"  || currentPage === "volunteerDetails" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/volunteerManagement">
                     <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
-                        <HeartHandshake size={20} />
+                        <Handshake size={20} />
                         <span className={`${sidebarState ? 'block' : 'hidden'}`}>Volunteer Management</span>
                     </li>
                 </Link>
 
-                <Link ref={fourRef} className={`${currentPage === "assetManagement" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/assetManagement">
+                <Link ref={fourRef} className={`${currentPage === "assetManagement"  || currentPage === "assets" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/assetManagement">
                     <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
                         <ChartNoAxesGantt size={20} />
                         <span className={`${sidebarState ? 'block' : 'hidden'}`}>Asset Management</span>
                     </li>
                 </Link>
 
-                <Link ref={fiveRef} className={`${currentPage === "requestManagement" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/requestManagement">
+                <Link ref={fiveRef} className={`${currentPage === "requestManagement"  || currentPage === "assistanceRequests" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/requestManagement">
                     <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
                         <FileText size={20} />
                         <span className={`${sidebarState ? 'block' : 'hidden'}`}>Request Management</span>
+                    </li>
+                </Link>
+
+                <Link ref={sixRef} className={`${currentPage === "donations" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/donations">
+                    <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
+                        <HeartHandshake size={20} />
+                        <span className={`${sidebarState ? 'block' : 'hidden'}`}>Donations</span>
                     </li>
                 </Link>
             </ul>

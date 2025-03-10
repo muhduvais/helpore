@@ -58,7 +58,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
                         ...notif,
                         timestamp: new Date(notif.timestamp || notif.createdAt)
                     }));
-                    console.log('transformed: ', transformedNotifications)
                     setNotifications(transformedNotifications);
                 }
             } catch (error) {

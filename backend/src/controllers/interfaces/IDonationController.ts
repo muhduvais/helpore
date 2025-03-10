@@ -5,4 +5,6 @@ export interface IDonationController {
     webhook (req: Request, res: Response): Promise<void>;
     fetchDontaionHistory (req: Request, res: Response): Promise<void>;
     generateReceipt(req: Request, res: Response): Promise<void>;
+    getDonations(req: Request, res: Response): Promise<void>;
+    exportDonations(req: Request, res: Response): Promise<void>;
 }

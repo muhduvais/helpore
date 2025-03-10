@@ -213,4 +213,36 @@ export const adminService = {
         }
     },
 
+    // Donations
+    fetchAllDonations: async (search: string, filter: string, page: number) => {
+        try {
+            const response = await customAxios.get(`/api/donations`, {
+                params: {
+                    search,
+                    filter,
+                    page,
+                }
+            });
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
+
+    exportDonations: async (search: string, filter: string, page: number) => {
+        try {
+            const response = await customAxios.get(`/api/donations`, {
+                responseType: 'blob',
+                params: {
+                    search,
+                    filter,
+                    page,
+                }
+            });
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
+
 }

@@ -49,6 +49,10 @@ export class DonationRepository extends BaseRepository<IDonation> implements IDo
     });
   }
 
+  async findAll(query: any, skip: number, limit: number): Promise<IDonation[] | null>  {
+    return await Donation.find(query).skip(skip).limit(limit).sort({ date: -1 }).populate('userId');
+  }
+
   async findByUserId(userId: string): Promise<IDonation[]> {
     return await Donation.find({ userId: new mongoose.Types.ObjectId(userId) })
       .sort({ date: -1 })
@@ -92,5 +96,14 @@ export class DonationRepository extends BaseRepository<IDonation> implements IDo
         }
       }
     ]);
+  }
+
+  async countDonations(query: object): Promise<number | null> {
+    try {
+      return this.count(query);
+    } catch (error) {
+      console.log('Error counting donations: ', error)
+      return null;
+    }
   }
 }
