@@ -33,6 +33,22 @@ const AdminAddUser = () => {
     pincode: '',
   }
 
+  interface IAddUserFormErrors {
+    name: string;
+    age: string;
+    gender: string;
+    phone: string;
+    email: string;
+    password: string;
+    fname: string;
+    lname: string;
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    pincode: string;
+  };
+
   const [formData, setFormData] = useState<AddUserFormData>(initialData);
   const [formErrors, setFormErrors] = useState<AddUserFormData>(initialData);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +64,7 @@ const AdminAddUser = () => {
     const { name, value } = e.target;
     const validationResult = validateForm(name, value);
     if (validationResult?.error) {
-      setFormErrors((prev: any) => ({ ...prev, [name]: validationResult.error }));
+      setFormErrors((prev: IAddUserFormErrors) => ({ ...prev, [name]: validationResult.error }));
     }
   };
 

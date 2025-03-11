@@ -37,6 +37,7 @@ export interface IUserService {
     fetchAddress(userId: string): Promise<IAddress>;
     uploadCertificateImage(userId: string, file: Express.Multer.File): Promise<string>;
     deleteCertificate(userId: string, certificateUrl: string): Promise<IUser>;
+    checkCertificate(userId: string): Promise<boolean>;
 }
 
 export interface IAdminService {

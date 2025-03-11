@@ -4,6 +4,7 @@ import AssetRequest from "../models/assetRequestModel";
 import { IAssetRequestRepository } from "./interfaces/IAssetRequestRepository";
 import mongoose from "mongoose";
 import { BaseRepository } from "./baseRepository";
+import Asset from "../models/assetModel";
 
 @injectable()
 export class AssetRequestRepository extends BaseRepository<IAssetRequest> implements IAssetRequestRepository {
@@ -16,7 +17,7 @@ export class AssetRequestRepository extends BaseRepository<IAssetRequest> implem
       console.log('qty: ', quantity)
       const assetRequest = new AssetRequest({ asset: assetId, user: userId, requestedDate, quantity, status: 'pending' });
       await assetRequest.save();
-      await this.findByIdAndUpdate(assetId, { $inc: { stocks: -quantity } })
+      await Asset.findByIdAndUpdate(assetId, { $inc: { stocks: -quantity } })
       return true;
     } catch (error) {
       console.error('Error creating the request:', error);

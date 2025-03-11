@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
 import logo from '../../assets/Logo.png';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import * as TimeAgoModule from 'react-timeago';
 import { useNotifications } from '@/context/notificationContext';
 const TimeAgo = (TimeAgoModule as any).default;

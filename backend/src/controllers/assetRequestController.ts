@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IAssetRequestController } from './interfaces/IAssetRequestController';
-import { IAssetService } from '../services/interfaces/ServiceInterface';
+import { IAssetService, IUserService } from '../services/interfaces/ServiceInterface';
 
 @injectable()
 export class AssetRequestController implements IAssetRequestController {
     constructor(
         @inject('IAssetService') private readonly assetService: IAssetService,
+        @inject('IUserService') private readonly userService: IUserService,
     ) {
         this.requestAsset = this.requestAsset.bind(this);
         this.getAssetRequests = this.getAssetRequests.bind(this);
@@ -21,6 +22,13 @@ export class AssetRequestController implements IAssetRequestController {
         const { requestedDate, quantity } = req.body;
 
         try {
+            const isCertificateAdded = await this.userService.checkCertificate(userId);
+
+            if (!isCertificateAdded) {
+                res.status(400).json({ success: false, noCertificate: true, message: 'You cannot request without adding your medical certificates. Pease go to \'Profile > Uploads\' and upload the documents.' });
+                return;
+            }
+
             const isLimit = await this.assetService.checkIsRequestLimit(userId, quantity);
 
             if (isLimit) {

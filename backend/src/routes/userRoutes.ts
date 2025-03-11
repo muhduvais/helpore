@@ -35,7 +35,7 @@ const upload = multer({
 router.post('/certificate', (req, res, next) => {
     upload.single('file')(req, res, (err) => {
         if (err instanceof multer.MulterError) {
-            return res.status(400).json({ success: false, message: err.message });
+            return res.status(400).json({ success: false, message: err.message === 'File too large' ? 'File size should be less than 5MB' : err.message });
         } else if (err) {
             return res.status(400).json({ success: false, message: err.message });
         }

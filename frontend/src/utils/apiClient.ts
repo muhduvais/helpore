@@ -3,7 +3,7 @@ import { logout, refreshToken } from '../redux/slices/authSlice';
 import axios from 'axios';
 
 export const customAxios = axios.create({
-    baseURL: 'http://localhost:5000',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     withCredentials: true,
 });
 

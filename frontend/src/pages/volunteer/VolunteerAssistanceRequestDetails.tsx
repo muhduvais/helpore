@@ -416,7 +416,7 @@ const AssistanceRequestDetails: React.FC = () => {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div className="flex items-center gap-3">
-                        <Link to="/user/requests?tab=assistance">
+                        <Link to="/volunteer/requests">
                             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                                 <Button variant="ghost" size="icon">
                                     <ArrowLeft className="text-[#688D48] h-5 w-5" />

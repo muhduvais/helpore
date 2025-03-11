@@ -223,4 +223,13 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             return null;
         }
     }
+
+    async checkCertificate(userId: string): Promise<boolean> {
+        try {
+            return await this.userRepository.checkCertificate(userId);
+        } catch (error) {
+            console.error('Error checking the certificate:', error);
+            throw error;
+        }
+    };
 }

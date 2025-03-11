@@ -87,7 +87,7 @@ export class DonationController implements IDonationController {
 
   async generateReceipt(req: Request, res: Response): Promise<void> {
     const { donationId } = req.params;
-    const userId = req.query.userId as string || req.user?.userId;
+    const userId = !req.query.userId && req.user?.role !== 'admin' ? req.user?.userId : req.query.userId as string;
     try {
       const pdfBuffer = await this.donationService.generateAndSendReceipt(donationId, userId);
 

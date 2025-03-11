@@ -3,8 +3,7 @@ import { MdOutlinePhotoCamera } from "react-icons/md";
 import { User, Key, Cog, Upload } from 'lucide-react';
 import profile_pic from '../../assets/profile_pic.png';
 import loading_Profile from '../../assets/loadingProfile.webp';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import { validateChangePassword } from "../../utils/validation";
 import { userService } from '../../services/userService';
 import { IUser } from '../../interfaces/userInterface';
@@ -97,7 +96,13 @@ const Profile = () => {
             // Reset file input
             setCertificateFile(null);
         } catch (error) {
-            setCertificateErrorMessage('Failed to upload certificate!');
+            if (error instanceof AxiosError) {
+                if (error.response?.data?.error === 'Unknown error') {
+                    setCertificateErrorMessage('There was an error, please try again!');
+                } else {
+                    setCertificateErrorMessage(error.response?.data?.message || 'Failed to upload certificate!');
+                }
+            }
             console.error('File uploading error: ', error);
         } finally {
             setIsCertificateLoading(false);
@@ -251,17 +256,6 @@ const Profile = () => {
 
     return (
         <>
-            <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-            />
             <EditProfileModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -270,7 +264,6 @@ const Profile = () => {
                 onUpdate={fetchUserDetails}
             />
             <div className="bg-white shadow-lg rounded-lg max-w-6xl w-full overflow-hidden">
-                <ToastContainer />
 
                 {/* Profile Banner */}
                 <div className="bg-gradient-to-r from-[#688D48] to-[#435D2C] p-8">
@@ -465,7 +458,9 @@ const Profile = () => {
                     {activeTab === 'uploads' && (
                         <div className="bg-gray-50 p-6 rounded-lg shadow-md">
                             <h2 className="text-2xl font-bold mb-6 text-gray-700">Certificates</h2>
-
+                            {certificateErrorMessage && (
+                                <p className="text-red-500 mt-2 text-sm">{certificateErrorMessage}</p>
+                            )}
                             {/* Certificates Grid */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[80vh] overflow-y-auto pr-2">
                                 {/* Upload Card*/}
@@ -513,9 +508,6 @@ const Profile = () => {
                                                     </div>
                                                 ) : 'Upload Certificate'}
                                             </button>
-                                            {certificateErrorMessage && (
-                                                <p className="text-red-500 mt-2 text-sm">{certificateErrorMessage}</p>
-                                            )}
                                         </form>
                                     </div>
                                 </div>

@@ -16,12 +16,16 @@ interface Notification {
 interface NotificationContextType {
     notifications: Notification[];
     unreadCount: number;
+    showNewNotifications: boolean;
     addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void;
     markAsRead: (id: string) => void;
     markAllAsRead: () => void;
     clearAllNotifications: () => void;
     clearNotification: (id: string) => void;
+    closeShowNewNotifications: () => void;
 }
+
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
@@ -40,6 +44,7 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [socket, setSocket] = useState<Socket | null>(null);
+    const [showNewNotifications, setShowNewNotifications] = useState<boolean>(false);
     const auth = useSelector((state: any) => state.auth);
 
     // Calculate unread count
@@ -72,16 +77,16 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     useEffect(() => {
         if (!auth.accessToken) return;
 
-        const newSocket = io('http://localhost:5000');
+        const newSocket = io(SERVER_URL);
 
         newSocket.on('connect', () => {
             console.log('Notification socket connected');
-            // Join user-specific room for notifications
             newSocket.emit('join-notification-room', auth.userId);
         });
 
         newSocket.on('new-notification', (notification: Omit<Notification, 'timestamp'>) => {
             addNotification(notification);
+            setShowNewNotifications(true);
         });
 
         setSocket(newSocket);
@@ -95,23 +100,28 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     const addNotification = (notification: Omit<Notification, 'timestamp'>) => {
         const newNotification: Notification = {
             ...notification,
-            _id: notification._id || Math.random().toString(36).substring(2, 11), // Handle both id formats
+            _id: notification._id || Math.random().toString(36).substring(2, 11),
             timestamp: new Date()
         };
 
         setNotifications(prev => [newNotification, ...prev]);
+        /////
 
         // Play sound
         const audio = new Audio('/notification-sound.mp3');
         audio.play().catch(e => console.log('Error playing notification sound', e));
 
         // Show browser notification if supported
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('New message', {
-                body: notification.content,
-            });
-        }
+        // if ('Notification' in window && Notification.permission === 'granted') {
+        //     new Notification('New message', {
+        //         body: notification.content,
+        //     });
+        // }
     };
+
+    const closeShowNewNotifications = () => {
+        setShowNewNotifications(false);
+    }
 
     // Mark notification as read
     const markAsRead = async (notificationId: string) => {
@@ -162,11 +172,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         <NotificationContext.Provider value={{
             notifications,
             unreadCount,
+            showNewNotifications,
             addNotification,
             markAsRead,
             markAllAsRead,
             clearAllNotifications,
             clearNotification,
+            closeShowNewNotifications,
         }}>
             {children}
         </NotificationContext.Provider>
