@@ -1,5 +1,5 @@
-import { IUser, IUserDocument } from "../../interfaces/userInterface";
-import { INotificationDocument } from "../../models/notificationModel";
+import { IUser, IUserDocument } from "../../interfaces/user.interface";
+import { INotificationDocument } from "../../models/notification.model";
 import { IBaseRepository } from "./IBaseRepository";
 
 export interface INotificationRepository {

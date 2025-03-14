@@ -1,4 +1,4 @@
-import { IConversationDocument, IMessageDocument } from "../../interfaces/chatInterface";
+import { IConversationDocument, IMessageDocument } from "../../interfaces/chat.interface";
 
 export interface IChatRepository {
   createMessage(messageData: Partial<IMessageDocument>): Promise<IMessageDocument>;

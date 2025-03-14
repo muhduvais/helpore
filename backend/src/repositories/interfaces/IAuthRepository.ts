@@ -1,4 +1,4 @@
-import { IUser, IUserDocument } from "../../interfaces/userInterface";
+import { IUser, IUserDocument } from "../../interfaces/user.interface";
 
 export interface IAuthRepository {
   findUser(email: string): Promise<IUserDocument | null>;

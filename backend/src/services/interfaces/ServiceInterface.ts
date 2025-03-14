@@ -1,10 +1,10 @@
-import { IUser, IAddress, IAsset, IAssetRequestResponse, IAssetRequest, IUserDocument, IAssistanceRequestResponse } from '../../interfaces/userInterface';
-import { IAddUserForm } from '../../interfaces/adminInterface';
-import { IAssistanceRequest } from '../../interfaces/userInterface';
-import { IConversationDocument, IMessageDocument } from '../../interfaces/chatInterface';
-import { IDonation } from '../../models/donationModel';
-import { IDonationResponse } from '../../repositories/donationRepository';
-import { INotificationDocument } from '../../models/notificationModel';
+import { IUser, IAddress, IAsset, IAssetRequestResponse, IAssetRequest, IUserDocument, IAssistanceRequestResponse } from '../../interfaces/user.interface';
+import { IAddUserForm } from '../../interfaces/admin.interface';
+import { IAssistanceRequest } from '../../interfaces/user.interface';
+import { IConversationDocument, IMessageDocument } from '../../interfaces/chat.interface';
+import { IDonation } from '../../models/donation.model';
+import { IDonationResponse } from '../../repositories/implementation/donation.repository';
+import { INotificationDocument } from '../../models/notification.model';
 
 export interface IAuthService {
     registerUser(name: string, email: string, password: string): Promise<string | boolean>;

@@ -36,39 +36,39 @@ import { IChatController } from "./controllers/interfaces/IChatController";
 import { INotificationController } from "./controllers/interfaces/INotificationController";
 
 // Repositories
-import { UserRepository } from "./repositories/userRepository";
-import { AddressRepository } from "./repositories/addressRepository";
-import { AssetRepository } from "./repositories/assetRepository";
-import { AssetRequestRepository } from "./repositories/assetRequestRepository";
-import { AssistanceRequestRepository } from "./repositories/assistanceRequestRepository";
-import { AuthRepository } from "./repositories/authRepository";
-import { OtpRepository } from "./repositories/otpRepository";
-import { DonationRepository } from "./repositories/donationRepository";
-import { ChatRepository } from "./repositories/chatRepository";
-import { NotificationRepository } from "./repositories/notificationRepository";
+import { UserRepository } from "./repositories/implementation/user.repository";
+import { AddressRepository } from "./repositories/implementation/address.repository";
+import { AssetRepository } from "./repositories/implementation/asset.repository";
+import { AssetRequestRepository } from "./repositories/implementation/asset-request.repository";
+import { AssistanceRequestRepository } from "./repositories/implementation/assistance-request.repository";
+import { AuthRepository } from "./repositories/implementation/auth.repository";
+import { OtpRepository } from "./repositories/implementation/otp.repository";
+import { DonationRepository } from "./repositories/implementation/donation.repository";
+import { ChatRepository } from "./repositories/implementation/chat.repository";
+import { NotificationRepository } from "./repositories/implementation/notification.repository";
 
 // Services
-import { AdminService } from './services/AdminService';
-import { UserService } from './services/UserService';
-import { VolunteerService } from './services/VolunteerService';
-import { AssetService } from './services/AssetService';
-import { AssistanceRequestService } from './services/AssistanceRequestService';
-import { AuthService } from './services/AuthService';
-import { DonationService } from "./services/DonationService";
-import { ChatService } from "./services/chatService";
-import { NotificationService } from "./services/notificationService";
+import { AdminService } from './services/implementation/admin.service';
+import { UserService } from './services/implementation/user.service';
+import { VolunteerService } from './services/implementation/volunteer.service';
+import { AssetService } from './services/implementation/asset.service';
+import { AssistanceRequestService } from './services/implementation/assistance-request.service';
+import { AuthService } from './services/implementation/auth.service';
+import { DonationService } from "./services/implementation/donation.service";
+import { ChatService } from "./services/implementation/chat.service";
+import { NotificationService } from "./services/implementation/notification.service";
 
 // Controllers
-import { AuthController } from "./controllers/authController";
-import { UserController } from "./controllers/userController";
-import { VolunteerController } from "./controllers/volunteerController";
-import { AssetController } from "./controllers/assetController";
-import { AssetRequestController } from "./controllers/assetRequestController";
-import { AssistanceRequestController } from "./controllers/assistanceRequestController";
-import { AddressController } from "./controllers/addressController";
-import { DonationController } from "./controllers/donationController";
-import { ChatController } from "./controllers/chatController";
-import { NotificationController } from "./controllers/notificationController";
+import { AuthController } from "./controllers/implementation/auth.controller";
+import { UserController } from "./controllers/implementation/user.controller";
+import { VolunteerController } from "./controllers/implementation/volunteer.controller";
+import { AssetController } from "./controllers/implementation/asset.controller";
+import { AssetRequestController } from "./controllers/implementation/asset-request.controller";
+import { AssistanceRequestController } from "./controllers/implementation/assistance-request.controller";
+import { AddressController } from "./controllers/implementation/address.controller";
+import { DonationController } from "./controllers/implementation/donation.controller";
+import { ChatController } from "./controllers/implementation/chat.controller";
+import { NotificationController } from "./controllers/implementation/notification.controller";
 
 export function registerDependencies() {
     try {

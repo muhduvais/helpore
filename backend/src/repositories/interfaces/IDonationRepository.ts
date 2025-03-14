@@ -1,5 +1,5 @@
-import { IDonation } from "../../models/donationModel";
-import { DonationCreateData, IDonationResponse } from "../donationRepository";
+import { IDonation } from "../../models/donation.model";
+import { DonationCreateData, IDonationResponse } from "../implementation/donation.repository";
 import { IBaseRepository } from "./IBaseRepository";
 
 export interface IDonationRepository extends IBaseRepository<IDonation> {

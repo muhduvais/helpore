@@ -1,4 +1,4 @@
-import { IAssetRequest, IAssetRequestResponse } from "../../interfaces/userInterface";
+import { IAssetRequest, IAssetRequestResponse } from "../../interfaces/user.interface";
 import { IBaseRepository } from "./IBaseRepository";
 
 export interface IAssetRequestRepository extends IBaseRepository<IAssetRequest> {

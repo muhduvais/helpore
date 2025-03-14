@@ -1,17 +1,17 @@
 import "reflect-metadata";
 import express from 'express';
-import authRoutes from './authRoutes';
-import userRoutes from './userRoutes';
-import adminRoutes from './adminRoutes';
-import volunteerRoutes from './volunteerRoutes';
-import addressRoutes from './addresssRoutes';
-import assetRoutes from './assetRoutes';
-import assetRequestRoutes from './assetRequestRoutes';
-import assistanceRequestRoutes from './assistanceRequestRoutes';
-import donationRoutes from './donationRoutes';
-import chatRoutes from './chatRoutes';
-import notificationRoutes from './notificationRoutes';
-import { authenticateToken } from '../middlewares/authMiddleware';
+import authRoutes from './auth.routes';
+import userRoutes from './user.routes';
+import adminRoutes from './admin.routes';
+import volunteerRoutes from './volunteer.routes';
+import addressRoutes from './addresss.routes';
+import assetRoutes from './asset.routes';
+import assetRequestRoutes from './asset-request.routes';
+import assistanceRequestRoutes from './assistance-request.routes';
+import donationRoutes from './donation.routes';
+import chatRoutes from './chat.routes';
+import notificationRoutes from './notification.routes';
+import { authenticateToken } from "../middlewares";
 
 const router = express.Router();
 

@@ -1,16 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import router from './routes/routes';
-import connectDB from './config/db';
+import { connectDB } from './config';
 import dotenv from 'dotenv';
-import { handleError } from './middlewares/errorMiddleware';
+import { handleError } from './middlewares';
 import cookieParser from 'cookie-parser';
 import "reflect-metadata";
 import { registerDependencies } from "./container";
 import http from 'http';
-import { setupSocketIO } from './utils/socket';
+import { setupSocketIO } from './utils/socket.util';
 import morgan from 'morgan';
-import { DonationController } from './controllers/donationController';
+import { DonationController } from './controllers/implementation/donation.controller';
 import { IDonationController } from './controllers/interfaces/IDonationController';
 import { container } from 'tsyringe';
 

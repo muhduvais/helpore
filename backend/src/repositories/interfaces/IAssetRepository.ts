@@ -1,4 +1,4 @@
-import { IAsset } from "../../interfaces/userInterface";
+import { IAsset } from "../../interfaces/user.interface";
 import { IBaseRepository } from "./IBaseRepository";
 
 export interface IAssetRepository extends IBaseRepository<IAsset> {

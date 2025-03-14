@@ -1,4 +1,4 @@
-import { IAssistanceRequest, IAssistanceRequestDocument, IAssistanceRequestResponse } from "../../interfaces/userInterface";
+import { IAssistanceRequest, IAssistanceRequestDocument, IAssistanceRequestResponse } from "../../interfaces/user.interface";
 
 export interface IAssistanceRequestRepository {
   createAssistanceRequest(formData: IAssistanceRequest): Promise<boolean>;

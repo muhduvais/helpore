@@ -1,4 +1,4 @@
-import { IUser, IUserDocument } from "../../interfaces/userInterface";
+import { IUser, IUserDocument } from "../../interfaces/user.interface";
 import { IBaseRepository } from "./IBaseRepository";
 
 export interface IUserRepository extends IBaseRepository<IUserDocument> {
