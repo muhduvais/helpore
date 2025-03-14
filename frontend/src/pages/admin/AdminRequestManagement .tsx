@@ -60,7 +60,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useDebounce } from 'use-debounce';
 import asset_picture from '../../assets/asset_picture.png';
-import { adminService } from '@/services/adminService';
+import { adminService } from '@/services/admin.service';
 import { IAssistanceRequest, IAssistanceRequestResponse } from '@/interfaces/adminInterface';
 import { AxiosError } from 'axios';
 import { IAssetRequest } from '@/interfaces/userInterface';

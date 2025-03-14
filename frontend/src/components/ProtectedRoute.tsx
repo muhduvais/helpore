@@ -1,5 +1,5 @@
 import { logout } from "@/redux/slices/authSlice";
-import { authService } from "@/services/authService";
+import { authService } from "@/services/auth.service";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";

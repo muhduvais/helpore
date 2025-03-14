@@ -27,7 +27,7 @@ import { Label } from '@/components/ui/label';
 import { FaAngleLeft, FaAngleRight, FaBox } from 'react-icons/fa';
 import { CiSearch } from 'react-icons/ci';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { userService } from '@/services/userService';
+import { userService } from '@/services/user.service';
 import { IAsset } from '@/interfaces/adminInterface';
 import asset_picture from '../../assets/asset_picture.png';
 import { toast } from "react-toastify";

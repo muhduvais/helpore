@@ -6,7 +6,7 @@ import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
 import { toast, ToastContainer } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { authService } from '../../services/authService';
+import { authService } from '../../services/auth.service';
 
 const LoginPage: React.FC = () => {
 

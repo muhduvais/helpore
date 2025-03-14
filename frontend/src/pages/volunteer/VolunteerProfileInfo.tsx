@@ -5,12 +5,12 @@ import profile_pic from '../../assets/profile_pic.png';
 import loading_Profile from '../../assets/loadingProfile.webp';
 import { ToastContainer, toast } from 'react-toastify';
 import { validateChangePassword } from "../../utils/validation";
-import { userService } from '../../services/userService';
+import { userService } from '../../services/user.service';
 import { IAddress, IUser } from '../../interfaces/userInterface';
 import { AxiosError } from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
-import { adminService } from '@/services/adminService';
-import EditProfileModal from '@/components/editUserProfile';
+import { adminService } from '@/services/admin.service';
+import EditProfileModal from '@/components/EditUserProfile';
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('info');

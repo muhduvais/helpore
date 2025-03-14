@@ -15,7 +15,7 @@ import {
     SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { adminService } from '@/services/adminService';
+import { adminService } from '@/services/admin.service';
 import { IAsset } from '@/interfaces/adminInterface';
 import { validateAddAsset } from '@/utils/validation';
 import { AddAssetFormData, AddAssetFormErrors } from '@/interfaces/authInterface';

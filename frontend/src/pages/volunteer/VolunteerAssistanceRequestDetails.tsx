@@ -46,9 +46,9 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { toast } from "react-toastify";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { chatService } from '@/services/chatService';
+import { chatService } from '@/services/chat.service';
 import { IMessageDocument } from '@/interfaces/chatInterface';
-import { volunteerService } from '@/services/volunteerService';
+import { volunteerService } from '@/services/volunteer.service';
 import { io, Socket } from 'socket.io-client';
 import { useNotifications } from '@/context/notificationContext';
 

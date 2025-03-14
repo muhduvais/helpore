@@ -31,7 +31,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { volunteerService } from '@/services/volunteerService';
+import { volunteerService } from '@/services/volunteer.service';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { useDebounce } from 'use-debounce';
 

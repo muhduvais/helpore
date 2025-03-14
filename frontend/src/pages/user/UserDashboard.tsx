@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 import { IUser } from '../../interfaces/userInterface';
-import { userService } from '../../services/userService';
+import { userService } from '../../services/user.service';
 import { Activity, DollarSign, FileText, Bell } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { blockToggle } from '@/redux/slices/authSlice';

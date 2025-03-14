@@ -35,7 +35,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { toast } from "react-toastify";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { adminService } from '@/services/adminService';
+import { adminService } from '@/services/admin.service';
 
 interface IAssistanceRequest {
     _id: string;

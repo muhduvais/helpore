@@ -18,7 +18,7 @@ import { HeartHandshake, IndianRupeeIcon, ArrowRight, ThumbsUp, Calendar } from 
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { donationService } from '@/services/donationService';
+import { donationService } from '@/services/donation.service';
 import DonationSuccessModal from '@/modals/DonationSuccessModal';
 
 interface DonationHistoryItem {

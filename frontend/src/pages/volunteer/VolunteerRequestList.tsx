@@ -36,7 +36,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from 'use-debounce';
 import { IAssistanceRequestResponse } from '@/interfaces/userInterface';
-import { volunteerService } from '@/services/volunteerService';
+import { volunteerService } from '@/services/volunteer.service';
 
 interface IAssistancePaginatedResponse {
   processingRequests: IAssistanceRequestResponse[];

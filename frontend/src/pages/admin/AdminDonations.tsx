@@ -27,10 +27,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Download, RefreshCw } from 'lucide-react';
-import { adminService } from '@/services/adminService';
+import { adminService } from '@/services/admin.service';
 import { IUser } from '@/interfaces/userInterface';
 import { FaDownload } from 'react-icons/fa';
-import { donationService } from '@/services/donationService';
+import { donationService } from '@/services/donation.service';
 
 interface Donation {
   _id: string;

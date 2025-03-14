@@ -1,7 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import UserTopbar from "@/components/UserTopbar";
 import { Outlet } from "react-router-dom";
-import AdminSidebar from "@/components/admin-sidebar";
+import AdminSidebar from "@/components/AdminSidebar";
 import { ToastContainer } from "react-toastify";
 
 const AdminLayout = () => {

@@ -9,7 +9,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { validateForm } from '../../utils/validation';
 import { Fields } from '../../interfaces/formInterface';
-import { authService } from '../../services/authService';
+import { authService } from '../../services/auth.service';
 
 const AdminLoginPage: React.FC = () => {
 

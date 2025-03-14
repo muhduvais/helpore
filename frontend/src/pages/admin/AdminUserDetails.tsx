@@ -6,7 +6,7 @@ import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGl
 import { IUser } from '../../interfaces/userInterface';
 import profile_pic from '../../assets/profile_pic.png';
 import { Link } from 'react-router-dom';
-import { adminService } from '@/services/adminService';
+import { adminService } from '@/services/admin.service';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
