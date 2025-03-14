@@ -7,7 +7,7 @@ import { FaUsers, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { CiSearch } from 'react-icons/ci';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { TiUserAdd } from 'react-icons/ti';
-import { adminService } from '../../services/adminService';
+import { adminService } from '../../services/admin.service';
 import {
   Table,
   TableBody,

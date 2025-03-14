@@ -1,6 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet } from "react-router-dom";
-import VolunteerSidebar from "@/components/volunteer-sidebar";
+import VolunteerSidebar from "@/components/VolunteerSidebar";
 import { ToastContainer } from "react-toastify";
 import VolunteerTopbar from "@/components/VolunteerTopbar";
 

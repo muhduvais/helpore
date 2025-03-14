@@ -269,6 +269,9 @@ export const validateAddAsset = (formData: AddAssetFormData) => {
   if (formData.stocks === null || formData.stocks === undefined || formData.stocks === '') {
     errors.stocks = 'Stock is required'
     isValid = false
+  } else if (Number(formData.stocks) < 0) {
+    errors.stocks = ' Please add a valid stock!'
+    isValid = false
   } else if (Number(formData.stocks) > 50) {
     errors.stocks = 'Maximum 50 stocks are allowed!'
     isValid = false

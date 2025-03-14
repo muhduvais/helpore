@@ -13,7 +13,7 @@ import { SiTicktick } from "react-icons/si";
 import { RootState } from '../../redux/store';
 import { useSelector } from 'react-redux';
 import { validateForm } from '../../utils/validation';
-import { authService } from '../../services/authService';
+import { authService } from '../../services/auth.service';
 import { authController } from '../../controllers/authController';
 
 const LoginPage: React.FC = () => {

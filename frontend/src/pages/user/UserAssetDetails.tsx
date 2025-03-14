@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { userService } from '@/services/userService';
+import { userService } from '@/services/user.service';
 import asset_picture from '../../assets/asset_picture.png';
 import { FaCalendar, FaTimes } from 'react-icons/fa';
 import { toast } from "react-toastify";

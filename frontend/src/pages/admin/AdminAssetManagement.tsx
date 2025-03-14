@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fa';
 import { CiSearch } from 'react-icons/ci';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { adminService } from '@/services/adminService';
+import { adminService } from '@/services/admin.service';
 import { IAsset } from '@/interfaces/adminInterface';
 import asset_picture from '../../assets/asset_picture.png';
 

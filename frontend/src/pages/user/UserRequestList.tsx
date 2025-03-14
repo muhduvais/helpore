@@ -34,7 +34,7 @@ import { FaAngleLeft, FaAngleRight, FaWheelchair } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { userService } from '@/services/userService';
+import { userService } from '@/services/user.service';
 import asset_picture from '../../assets/asset_picture.png';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from 'use-debounce';

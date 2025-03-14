@@ -5,7 +5,7 @@ import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { authService } from '../../services/authService';
+import { authService } from '../../services/auth.service';
 import { validateForm } from '../../utils/validation';
 import { AxiosError } from 'axios';
 import { useDispatch } from 'react-redux';

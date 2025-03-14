@@ -42,7 +42,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { toast } from "react-toastify";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { userService } from '@/services/userService';
+import { userService } from '@/services/user.service';
 
 interface IAssistanceRequest {
     _id: string;

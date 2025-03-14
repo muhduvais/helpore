@@ -18,7 +18,7 @@ import {
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { adminService } from '@/services/adminService';
+import { adminService } from '@/services/admin.service';
 import { IAsset } from '@/interfaces/adminInterface';
 import asset_picture from '../../assets/asset_picture.png';
 import EditAssetModal from '@/components/AdminEditAsset';

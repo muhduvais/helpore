@@ -39,7 +39,7 @@ import { toast } from "react-toastify";
 import { validateForm } from '@/utils/validation';
 import { IAssistanceRequest, IAddress } from '@/interfaces/userInterface';
 import { Types } from 'mongoose';
-import { userService } from '@/services/userService';
+import { userService } from '@/services/user.service';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 

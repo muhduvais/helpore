@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import profile_pic from "../../assets/profile_pic.png";
 import { validateChangePassword } from "../../utils/validation";
-import { userService } from '../../services/userService'
+import { userService } from '../../services/user.service'
 import { toast, ToastContainer } from 'react-toastify';
 import { AxiosError } from "axios";
 import { IUser } from "../../interfaces/userInterface";
