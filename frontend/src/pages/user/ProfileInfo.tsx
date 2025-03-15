@@ -3,13 +3,14 @@ import { MdOutlinePhotoCamera } from "react-icons/md";
 import { User, Key, Cog, Upload } from 'lucide-react';
 import profile_pic from '../../assets/profile_pic.png';
 import loading_Profile from '../../assets/loadingProfile.webp';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { validateChangePassword } from "../../utils/validation";
 import { userService } from '../../services/user.service';
 import { IUser } from '../../interfaces/userInterface';
 import { AxiosError } from 'axios';
 import { adminService } from '@/services/admin.service';
 import EditProfileModal from '@/components/EditUserProfile';
+import { Toaster } from 'sonner';
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('info');
@@ -174,7 +175,7 @@ const Profile = () => {
         const file = event.target.files?.[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
-                toast.error('Image size should be less than 5MB');
+                toast.info('Image size should be less than 5MB');
                 return;
             }
 
@@ -256,6 +257,7 @@ const Profile = () => {
 
     return (
         <>
+            <Toaster position="top-right" richColors />
             <EditProfileModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}

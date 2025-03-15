@@ -15,7 +15,7 @@ import {
   FaTrash
 } from "react-icons/fa";
 import { validateAddAsset } from "@/utils/validation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { adminService } from "@/services/admin.service";
 import { FormField } from "@/components/FormField";
@@ -85,7 +85,7 @@ const AddAsset = () => {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile && droppedFile.type.startsWith('image/')) {
       setFile(droppedFile);
@@ -116,7 +116,7 @@ const AddAsset = () => {
       formFileData.append('file', file);
 
       setIsLoading(true);
-  
+
       try {
         const uploadResponse = await adminService.uploadAssetImage(formFileData);
         uploadedImageUrl = uploadResponse.data.imageUrl;
@@ -145,11 +145,13 @@ const AddAsset = () => {
     try {
       const response = await adminService.addAsset(finalFormData);
 
-      if (response.data) {
-        toast.success('Asset added successfully!', {
-          onClose: () => navigate('/admin/assetManagement')
+      if (response.status === 200) {
+        toast.success("Asset added successfully!", {
+          duration: 3000,
+          onAutoClose: () => navigate("/admin/assetManagement")
         });
       }
+
     } catch (error) {
       if (error instanceof AxiosError) {
         const errorMessage = error.response?.data?.message || 'An error occurred';
@@ -203,7 +205,7 @@ const AddAsset = () => {
                   </h3>
                   <p className="text-sm text-gray-500">Enter the basic information about the asset</p>
                 </div>
-                
+
                 <FormField
                   name="name"
                   label="Asset Name"
@@ -214,15 +216,15 @@ const AddAsset = () => {
                   error={formErrors.name}
                   disabled={isLoading}
                 />
-                
+
                 <div className="space-y-2">
                   <Label className={`text-sm font-medium ${formErrors.category ? 'text-red-500' : 'text-gray-700'} flex items-center gap-2`}>
                     <FaTags className="text-gray-400" />
                     Category
                   </Label>
-                  <Select 
+                  <Select
                     disabled={isLoading}
-                    value={formData.category} 
+                    value={formData.category}
                     onValueChange={(value) => handleSelectChange('category', value)}
                   >
                     <SelectTrigger className="w-full focus:ring-2 focus:ring-[#688D48] focus:border-transparent">
@@ -238,7 +240,7 @@ const AddAsset = () => {
                     <p className="text-sm text-red-500 mt-1">{formErrors.category}</p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label className={`text-sm font-medium ${formErrors.description ? 'text-red-500' : 'text-gray-700'} flex items-center gap-2`}>
                     <FaFileAlt className="text-gray-400" />
@@ -268,7 +270,7 @@ const AddAsset = () => {
                   </h3>
                   <p className="text-sm text-gray-500">Add inventory and visual information</p>
                 </div>
-                
+
                 <FormField
                   name="stocks"
                   label="Stock Quantity"
@@ -280,17 +282,16 @@ const AddAsset = () => {
                   error={formErrors.stocks}
                   disabled={isLoading}
                 />
-                
+
                 <div className="space-y-2">
                   <Label className={`text-sm font-medium ${formErrors.image ? 'text-red-500' : 'text-gray-700'} flex items-center gap-2`}>
                     <FaImage className="text-gray-400" />
                     Asset Image
                   </Label>
-                  
+
                   <div
-                    className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
-                      isDragging ? 'border-[#688D48] bg-[#f0f4ed]' : 'border-gray-300'
-                    } ${newImageUrl ? 'bg-gray-50' : ''}`}
+                    className={`border-2 border-dashed rounded-lg p-4 transition-colors ${isDragging ? 'border-[#688D48] bg-[#f0f4ed]' : 'border-gray-300'
+                      } ${newImageUrl ? 'bg-gray-50' : ''}`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
@@ -344,14 +345,14 @@ const AddAsset = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {formErrors.image && (
                     <p className="text-sm text-red-500 mt-1">{formErrors.image}</p>
                   )}
                 </div>
               </div>
             </div>
-            
+
             {/* Form Actions */}
             <div className="border-t pt-6 mt-6 flex gap-4 justify-end">
               <Button

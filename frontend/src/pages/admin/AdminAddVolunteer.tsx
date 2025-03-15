@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaLock, FaEye, FaEyeSlash, FaCity, FaMap, FaFlag, FaHome } from "react-icons/fa";
 import { validateForm } from "@/utils/validation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
 import { AxiosError } from "axios";
 import { AddUserFormData } from "@/types/admin.types";
@@ -87,11 +87,10 @@ const AdminAddVolunteer = () => {
         return setErrorMessage(response.data.message);
       }
 
-      if (response.data) {
-        toast.success('Successfully added the volunteer!', {
-          onClose: () => navigate('/admin/volunteerManagement')
-        });
-      }
+      toast.success("Successfully added the volunteer!", {
+        duration: 3000,
+        onAutoClose: () => navigate("/admin/volunteerManagement")
+      });
 
     } catch (error: unknown) {
       if (error instanceof AxiosError) {

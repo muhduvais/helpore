@@ -16,7 +16,7 @@ import { FaDownload, FaHandHoldingHeart, FaHistory } from 'react-icons/fa';
 import { CiHeart } from 'react-icons/ci';
 import { HeartHandshake, IndianRupeeIcon, ArrowRight, ThumbsUp, Calendar } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
 import { donationService } from '@/services/donation.service';
 import DonationSuccessModal from '@/modals/DonationSuccessModal';
@@ -88,7 +88,7 @@ const DonationPage = () => {
 
     const handleDonationCheckout = async () => {
         if (amount < 50) {
-            toast.error('Please donate minimum ₹50');
+            toast.info('Please donate minimum ₹50');
             return;
         }
 

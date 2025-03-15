@@ -1,12 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
-import { MdEdit, MdOutlinePhotoCamera } from "react-icons/md";
+import { MdOutlinePhotoCamera } from "react-icons/md";
 import { User, Key, Cog, Upload } from 'lucide-react';
 import profile_pic from '../../assets/profile_pic.png';
 import loading_Profile from '../../assets/loadingProfile.webp';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { validateChangePassword } from "../../utils/validation";
 import { userService } from '../../services/user.service';
-import { IAddress, IUser } from '../../interfaces/userInterface';
 import { AxiosError } from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
 import { adminService } from '@/services/admin.service';
@@ -104,7 +103,7 @@ const Profile = () => {
         const file = event.target.files?.[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
-                toast.error('Image size should be less than 5MB');
+                toast.info('Image size should be less than 5MB');
                 return;
             }
 
@@ -160,8 +159,6 @@ const Profile = () => {
                 onUpdate={fetchUserDetails}
             />
             <div className="bg-white shadow-lg rounded-lg max-w-6xl w-full overflow-hidden">
-                <ToastContainer />
-
                 {/* Profile Banner */}
                 <div className="bg-gradient-to-r from-[#688D48] to-[#435D2C] p-8">
                     <div className="relative flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">

@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { login } from '../../redux/slices/authSlice'
-import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'sonner';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { SiTicktick } from "react-icons/si";
@@ -200,18 +200,6 @@ const LoginPage: React.FC = () => {
 
     return (
       <>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-
         {/* Modal */}
         {showForgotModal && (
           <div className={`fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 ${showForgotModal ? 'opacity-100' : 'opacity-0'

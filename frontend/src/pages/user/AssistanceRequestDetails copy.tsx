@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/alert";
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/user.service';
 

@@ -2,17 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import {
     MapPin,
     Clock,
-    User,
     AlertCircle,
     CheckCircle2,
     XCircle,
     Search,
-    ListFilter,
     Calendar
 } from 'lucide-react';
 import {

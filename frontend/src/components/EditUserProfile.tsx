@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/FormField';
 import { FaUser, FaEnvelope, FaPhone, FaHome, FaCity, FaMap, FaFlag, FaMapMarkerAlt } from 'react-icons/fa';
 import { userService } from '@/services/user.service';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 
 interface IAddress {

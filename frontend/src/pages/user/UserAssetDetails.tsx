@@ -37,7 +37,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/user.service';
 import asset_picture from '../../assets/asset_picture.png';
 import { FaCalendar, FaTimes } from 'react-icons/fa';
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
 
 interface IAsset {
@@ -206,9 +206,9 @@ const UserAssetDetails: React.FC = () => {
                 requestedDate: format(selectedDate, 'yyyy-MM-dd'), quantity: qty
             });
             if (response.status === 200) {
-                setIsRequestModalOpen(false);
-                toast.success('Asset requested successfully!', {
-                    onClose: () => window.location.reload()
+                toast.success("Asset requested successfully!", {
+                    duration: 3000,
+                    onAutoClose: () => window.location.reload()
                 });
             }
         } catch (error) {

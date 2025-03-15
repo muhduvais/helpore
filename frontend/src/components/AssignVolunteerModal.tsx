@@ -8,7 +8,7 @@ import { UserPlus, Search, Loader2 } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 import { adminService } from "@/services/admin.service";
 import profile_pic from "../assets/profile_pic.png";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 
 interface Volunteer {

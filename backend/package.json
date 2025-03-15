@@ -42,6 +42,7 @@
     "redux": "^5.0.1",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.1",
+    "sonner": "^2.0.1",
     "stripe": "^17.7.0",
     "ws": "^8.18.1"
   },

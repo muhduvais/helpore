@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import profile_pic from "../../assets/profile_pic.png";
 import { validateChangePassword } from "../../utils/validation";
 import { userService } from '../../services/user.service'
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'sonner';
 import { AxiosError } from "axios";
 import { IUser } from "../../interfaces/userInterface";
 
@@ -74,17 +74,6 @@ const ProfileChangePassword = () => {
 
   return (
     <div className="bg-white shadow-lg rounded-lg max-w-6xl w-full overflow-hidden">
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
       {/* Profile Banner */}
       <div className="bg-gradient-to-r from-[#688D48] to-[#435D2C] p-6 text-white">
         <div className="relative flex items-center space-x-6">

@@ -17,6 +17,7 @@ import NotFound404 from './pages/NotFound404';
 import { SidebarProvider } from './context/sidebarContext';
 import LandingPage from './pages/user/LandingPage';
 import { NotificationProvider } from '@/context/notificationContext';
+import { Toaster } from 'sonner';
 
 function App() {
 
@@ -55,6 +56,7 @@ function App() {
                 <Route path="/volunteer/*" element={<VolunteerRoutes />} />
                 <Route path="/*" element={<NotFound404 />} />
               </Routes>
+              <Toaster position="top-center" />
             </NotificationProvider>
           </SidebarProvider>
         </Provider>

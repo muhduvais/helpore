@@ -21,8 +21,7 @@ import { validateAddAsset } from '@/utils/validation';
 import { AddAssetFormData, AddAssetFormErrors } from '@/interfaces/authInterface';
 import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "sonner";
 
 interface EditAssetModalProps {
     isOpen: boolean;
@@ -50,8 +49,6 @@ const initialErrorData = {
 const EditAssetModal: React.FC<EditAssetModalProps> = ({
     isOpen, onClose, asset, onAssetUpdated
 }) => {
-
-    const navigate = useNavigate();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});

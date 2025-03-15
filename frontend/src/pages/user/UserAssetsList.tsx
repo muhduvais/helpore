@@ -30,7 +30,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/user.service';
 import { IAsset } from '@/interfaces/adminInterface';
 import asset_picture from '../../assets/asset_picture.png';
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
 import { CalendarIcon, MinusCircle, PlusCircle } from 'lucide-react';
 
@@ -105,8 +105,9 @@ const AssetListing = () => {
       });
       if (response.status === 200) {
         setIsRequestModalOpen(false);
-        toast.success('Asset requested successfully!', {
-          onClose: () => window.location.reload()
+        toast.success("Asset requested successfully!", {
+          duration: 3000,
+          onAutoClose: () => window.location.reload()
         });
       }
     } catch (error) {

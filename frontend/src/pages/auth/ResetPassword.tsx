@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import customAxios from '../../utils/urlProxy'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'sonner';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { authService } from '../../services/auth.service';
 
@@ -83,8 +82,9 @@ const LoginPage: React.FC = () => {
             }
 
             if (response.data) {
-              toast.success('Password reset successfully!', {
-                onClose: () => navigate('/user/login')
+              toast.success("Password reset successfully!", {
+                duration: 3000,
+                onAutoClose: () => navigate("/user/login")
               });
             }
 
@@ -102,18 +102,6 @@ const LoginPage: React.FC = () => {
 
   return (
     <>
-    <ToastContainer 
-        position="top-right" 
-        autoClose={5000} 
-        hideProgressBar={false} 
-        newestOnTop={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
-        pauseOnHover 
-    />
-
       {/* Main container */}
     <div className={`main-container relative w-[100vw] h-[100vh] flex items-center justify-between text-[#222222] bg-cover bg-center px-20`}
     style={{ backgroundImage: `url(${bgDark_1_img})` }}

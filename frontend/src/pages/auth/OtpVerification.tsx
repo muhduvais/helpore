@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'sonner';
 import 'react-toastify/dist/ReactToastify.css';
 import { authService } from '../../services/auth.service';
 
@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
     const response = await authService.resendOtp(email);
     if (response.data.success) {
       setCount(30);
-      toast.success('A new OTP has been sent to your email!');
+      toast.success('A new OTP has sent to your email!');
     }
   }
 
@@ -70,8 +70,9 @@ const LoginPage: React.FC = () => {
         if (response.status !== 200) {
           return setOtpMessage(response.data.message);
         }
-        toast.success('Successfully verified your email, now you can login!', {
-          onClose: () => navigate('/user/login')
+        toast.success("Successfully verified your email, now you can login!", {
+          duration: 3000,
+          onAutoClose: () => navigate("/user/login")
         });
 
       } catch (error: unknown) {
@@ -91,17 +92,6 @@ const LoginPage: React.FC = () => {
       <div className={`main-container relative w-[100vw] h-[100vh] flex items-center justify-between text-[#222222] bg-cover bg-center px-20`}
         style={{ backgroundImage: `url(${bgDark_1_img})` }}
       >
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
         <div className="logo absolute top-16 left-28">
           <img src={logo} alt="logo" />
         </div>

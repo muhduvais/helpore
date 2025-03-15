@@ -2,23 +2,11 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import UserTopbar from "@/components/UserTopbar";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "@/components/AdminSidebar";
-import { ToastContainer } from "react-toastify";
 
 const AdminLayout = () => {
 
     return (
         <>
-            <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-            />
             <SidebarProvider>
                 <div className='main-part flex w-full justify-between'>
                     <AdminSidebar />

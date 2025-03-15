@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { validateForm } from '@/utils/validation';
 import { IAssistanceRequest, IAddress } from '@/interfaces/userInterface';
 import { Types } from 'mongoose';
@@ -250,7 +250,8 @@ const RequestAssistanceForm = () => {
             const response = await userService.requestAssistance(requestData);
             if (response.status === 200) {
                 toast.success("Request submitted successfully!", {
-                    onClose: () => navigate('/user/requests?tab=assistance')
+                    duration: 3000,
+                    onAutoClose: () => navigate("/user/requests?tab=assistance")
                 });
                 setFormData(initialFormData);
             } else {
