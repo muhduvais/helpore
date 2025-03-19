@@ -31,33 +31,33 @@ export class AssetController implements IAssetController {
 
     async uploadAssetImage(req: Request, res: Response): Promise<void> {
         try {
-          const file = req.file;
-          
-          if (!file) {
-            res.status(400).json({ message: 'No image uploaded' });
-            return;
-          }
-    
-          console.log('Received file:', {
-            originalname: file.originalname,
-            mimetype: file.mimetype,
-            size: file.size
-          });
-    
-          const imageUrl = await this.assetService.uploadAssetImage(file);
-    
-          res.status(200).json({ imageUrl });
+            const file = req.file;
+
+            if (!file) {
+                res.status(400).json({ message: 'No image uploaded' });
+                return;
+            }
+
+            console.log('Received file:', {
+                originalname: file.originalname,
+                mimetype: file.mimetype,
+                size: file.size
+            });
+
+            const imageUrl = await this.assetService.uploadAssetImage(file);
+
+            res.status(200).json({ imageUrl });
         } catch (error) {
-          console.error('Error uploading the asset image: ', error);
-          res.status(500).json({
-            message: 'Error uploading the asset image',
-            error: error instanceof Error ? error.message : 'Unknown error'
-          });
+            console.error('Error uploading the asset image: ', error);
+            res.status(500).json({
+                message: 'Error uploading the asset image',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
-      }
+    }
 
     async getAssets(req: Request, res: Response): Promise<void> {
-        
+
         const page = parseInt(req.query.page as string, 10) || 1;
         let limit = parseInt(req.query.limit as string, 10) || 5;
         const search = req.query.search as string;

@@ -145,7 +145,7 @@ const AddAsset = () => {
     try {
       const response = await adminService.addAsset(finalFormData);
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         toast.success("Asset added successfully!", {
           duration: 3000,
           onAutoClose: () => navigate("/admin/assetManagement")

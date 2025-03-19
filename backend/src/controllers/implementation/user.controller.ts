@@ -196,17 +196,11 @@ export class UserController implements IUserController {
     const userId = req.user?.userId;
     try {
       const file = req.file;
-      console.log('File: ', file)
+
       if (!file) {
         res.status(400).json({ message: 'No image uploaded' });
         return;
       }
-
-      console.log('Received file:', {
-        path: file.path,
-        mimetype: file.mimetype,
-        filename: file.filename
-      });
 
       const uploadResponse = await this.userService.uploadCertificateImage(userId, file);
 
@@ -227,40 +221,40 @@ export class UserController implements IUserController {
 
   async deleteCertificate(req: Request, res: Response): Promise<void> {
     try {
-        const { certificateUrl } = req.body;
-        const userId = req.user?.userId;
+      const { certificateUrl } = req.body;
+      const userId = req.user?.userId;
 
-        console.log('certificateUrl: ', certificateUrl)
+      console.log('certificateUrl: ', certificateUrl)
 
-        if (!certificateUrl) {
-            res.status(400).json({ success: false, message: "Certificate URL is required" });
-            return;
-        }
+      if (!certificateUrl) {
+        res.status(400).json({ success: false, message: "Certificate URL is required" });
+        return;
+      }
 
-        if (!userId) {
-            res.status(401).json({ success: false, message: "Unauthorized: User ID not found" });
-            return;
-        }
+      if (!userId) {
+        res.status(401).json({ success: false, message: "Unauthorized: User ID not found" });
+        return;
+      }
 
-        const result = await this.userService.deleteCertificate(userId, certificateUrl);
+      const result = await this.userService.deleteCertificate(userId, certificateUrl);
 
-        if (!result) {
-            res.status(404).json({ success: false, message: "Certificate not found or could not be deleted" });
-            return;
-        }
+      if (!result) {
+        res.status(404).json({ success: false, message: "Certificate not found or could not be deleted" });
+        return;
+      }
 
-        res.status(200).json({
-            success: true,
-            message: "Certificate deleted successfully",
-            data: result,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Certificate deleted successfully",
+        data: result,
+      });
     } catch (error) {
-        console.error("Error deleting certificate:", error);
-        res.status(500).json({
-            success: false,
-            message: error.message || "Failed to delete certificate",
-        });
+      console.error("Error deleting certificate:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to delete certificate",
+      });
     }
-};
+  };
 
 }

@@ -86,6 +86,14 @@ const Profile = () => {
 
         try {
             const uploadResponse = await userService.uploadCertificateImage(formFileData);
+
+            if (uploadResponse.status === 200) {
+                toast.success('certificate uploaded!');
+            } else {
+                toast.error('Error uploading the certificate!');
+                return;
+            }
+
             const uploadedCertificateUrl = uploadResponse.data.certificateUrl;
 
             // Update certificates
@@ -189,10 +197,13 @@ const Profile = () => {
 
                 if (uploadedImageUrl) {
                     setFile(uploadedImageUrl);
-                    const updateProfilePicture = await userService.updateProfilePicture(uploadedImageUrl);
-                    if (!updateProfilePicture) {
-                        toast.error('Error updating the profile picture!');
-                    };
+                    const updateResponse = await userService.updateProfilePicture(uploadedImageUrl);
+
+                    if (updateResponse.status === 200) {
+                        toast.success('Profile updated!');
+                    } else {
+                        toast.error('Error updating the profile!');
+                    }
                 }
 
             } catch (error) {
@@ -219,6 +230,7 @@ const Profile = () => {
 
     const confirmDelete = async () => {
         setShowDeleteConfirmation(false);
+        console.log('certificate to delete: ', certificateToDelete)
         if (certificateToDelete) {
             setIsDeleting(true);
             setDeletingIndex(certificateToDelete.index);
@@ -226,7 +238,7 @@ const Profile = () => {
                 const response = await userService.deleteCertificate(certificateToDelete.url);
                 if (response.status === 200) {
                     fetchUserDetails();
-                    toast.success("Certificate deleted successfully");
+                    toast.success("Certificate deleted!");
                 }
             } catch (error) {
                 console.error("Error deleting certificate:", error);
@@ -257,7 +269,6 @@ const Profile = () => {
 
     return (
         <>
-            <Toaster position="top-right" richColors />
             <EditProfileModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}

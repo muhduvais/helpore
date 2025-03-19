@@ -2,7 +2,6 @@ import { injectable, inject } from 'tsyringe';
 import { BaseService } from './base.service';
 import { IAssetService } from '../interfaces/ServiceInterface';
 import { IAsset, IAssetRequestResponse } from '../../interfaces/user.interface';
-import cloudinary from 'cloudinary';
 import { IAssetRepository } from '../../repositories/interfaces/IAssetRepository';
 import { IAssetRequestRepository } from '../../repositories/interfaces/IAssetRequestRepository';
 import { uploadToCloudinary } from '../../utils';

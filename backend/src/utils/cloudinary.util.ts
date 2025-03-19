@@ -9,7 +9,8 @@ export const uploadToCloudinary = async (
     if (!file.buffer) throw new Error('File buffer is empty');
 
     return new Promise((resolve, reject) => {
-        const fileName = `${uniqueId}_${file.originalname.split(' ').join('_')}`;
+        const fileName = `${uniqueId}_${file.originalname.split(' ').join('_').replace(/\.[^/.]+$/, '')}`;
+        console.log('filename: ', fileName)
 
         const uploadStream = cloudinary.uploader.upload_stream(
             {

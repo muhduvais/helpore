@@ -7,6 +7,7 @@ import cloudinary from 'cloudinary';
 import bcrypt from 'bcryptjs';
 import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
+import { uploadToCloudinary } from '../../utils';
 
 @injectable()
 export class UserService extends BaseService<IUserDocument> implements IUserService {
@@ -149,31 +150,20 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
     async uploadCertificateImage(userId: string, file: Express.Multer.File): Promise<string> {
         try {
-            if (!file.path) {
+            if (!file) {
                 throw new Error('No file path provided');
             }
 
-            const randomDigits = Math.floor(100000 + Math.random() * 900000);
+            const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 10);
 
-            console.log('Attempting to upload to Cloudinary:', {
-                path: file.path,
-                publicId: `user-certificate-images/${randomDigits}`
-            });
+            const result = await uploadToCloudinary(file, 'medical-certificates', uniqueId);
+            console.log('secureUrl: ', result.secure_url)
 
-            const uploadResponse = await cloudinary.v2.uploader.upload(file.path, {
-                public_id: `user-certificate-images/${randomDigits}`,
-                folder: 'user_certificates',
-                resource_type: 'auto',
-                secure: true,
-            });
+            await this.userRepository.updateUserCertificates(userId, result.secure_url)
 
-            console.log('Cloudinary upload successful:', uploadResponse.secure_url);
-
-            await this.userRepository.updateUserCertificates(userId, uploadResponse.secure_url)
-
-            return uploadResponse.secure_url;
+            return result.secure_url;
         } catch (error) {
-            console.error('Error in uploading certificate service:', error);
+            console.error('Error uploading certificate:', error);
             throw error;
         }
     }
@@ -181,6 +171,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
     async deleteCertificate(userId: string, certificateUrl: string): Promise<IUser> {
         try {
             const publicId = this.extractPublicIdFromUrl(certificateUrl);
+            console.log('publicId: ', publicId)
 
             if (!publicId) {
                 throw new Error('Invalid certificate URL');
@@ -216,6 +207,8 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             if (extensionIndex !== -1) {
                 fullPath = fullPath.substring(0, extensionIndex);
             }
+
+            fullPath = decodeURIComponent(fullPath);
 
             return fullPath;
         } catch (error) {

@@ -1,6 +1,4 @@
 import express from 'express';
-import multer from 'multer';
-import path from 'path';
 import { container } from 'tsyringe';
 import { IAssetController } from '../controllers/interfaces/IAssetController';
 import { uploadMiddleware } from '../middlewares';
