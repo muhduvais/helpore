@@ -23,6 +23,28 @@ export interface IUser {
     createdAt?: Date;
 }
 
+export interface IUserDocument extends Document {
+    _id: string;
+    userId: string;
+    name: string;
+    age: number;
+    gender: string;
+    phone: number;
+    email: string;
+    password: string;
+    profilePicture: string;
+    certificates: string[];
+    isActive: boolean;
+    isBlocked: boolean;
+    isVerified: boolean;
+    role: string;
+    tasks: number;
+    googleId: string | null;
+    resetToken: string;
+    resetTokenExpiry: Date;
+    uid?: string;
+}
+
 export interface IAddress {
     _id?: string;
     fname: string;

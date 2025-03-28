@@ -33,6 +33,7 @@
     "@stripe/stripe-js": "^5.7.0",
     "@types/file-saver": "^2.0.7",
     "@types/react-timeago": "^4.1.7",
+    "@zegocloud/zego-uikit-prebuilt": "^2.14.3-beta",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -63,7 +64,8 @@
     "sonner": "^2.0.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "use-debounce": "^10.0.4"
+    "use-debounce": "^10.0.4",
+    "zego-express-engine-webrtc": "^3.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

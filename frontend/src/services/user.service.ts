@@ -13,6 +13,14 @@ export const userService = {
             throw error
         }
     },
+    fetchUserDetailsById: async (userId: string) => {
+        try {
+            const response = await customAxios.get(`/api/users/${userId}`);
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
     updateUser: async (formData: any) => {
         try {
             const response = await customAxios.put('/api/users', { formData });
