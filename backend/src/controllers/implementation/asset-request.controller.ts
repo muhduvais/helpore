@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IAssetRequestController } from '../interfaces/IAssetRequestController';
 import { IAssetService, IUserService } from '../../services/interfaces/ServiceInterface';
+import { JwtPayload } from 'jsonwebtoken';
 
 @injectable()
 export class AssetRequestController implements IAssetRequestController {
@@ -18,7 +19,7 @@ export class AssetRequestController implements IAssetRequestController {
 
     async requestAsset(req: Request, res: Response): Promise<void> {
         const assetId = req.params.id;
-        const userId = req.user?.userId;
+        const { userId } = req.user as JwtPayload;
         const { requestedDate, quantity } = req.body;
 
         try {
@@ -89,11 +90,11 @@ export class AssetRequestController implements IAssetRequestController {
 
         let skip = (page - 1) * limit;
 
-        const userId = req.user.userId;
+        const { userId } = req.user as JwtPayload;
 
         try {
             const assetRequests = await this.assetService.fetchMyAssetRequests(search, filter, skip, limit, userId);
-            const documentsCount = await this.assetService.countMyAssetRequests(userId, search, filter);
+            const documentsCount = await this.assetService.countMyAssetRequests(userId, search, filter) || 0;
             const totalPages = Math.ceil(documentsCount / limit);
 
             if (assetRequests) {
@@ -108,7 +109,7 @@ export class AssetRequestController implements IAssetRequestController {
     }
 
     async getAssetRequestDetails(req: Request, res: Response): Promise<void> {
-        const userId = req.user?.userId;
+        const { userId } = req.user as JwtPayload;
         const assetId = req.params.id;
 
         try {

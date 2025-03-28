@@ -69,7 +69,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
             const pendingRequests = await this.assistanceRepository.findPendingRequests(requestQuery, skip);
 
-            if (!pendingRequests.length) {
+            if (!pendingRequests || !pendingRequests.length) {
                 return [];
             }
 
@@ -77,6 +77,11 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 .map(request => {
                     if (!request.address || !request.address.latitude || !request.address.longitude) {
                         console.warn(`Request ${request._id} has invalid address`);
+                        return null;
+                    }
+
+                    if (!volunteerAddress || !volunteerAddress.latitude || !volunteerAddress.longitude) {
+                        console.warn(`Request ${request._id} has invalid volunteerAddress`);
                         return null;
                     }
 
@@ -148,8 +153,8 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         }
 
         if (action === 'reject') {
-            if (!request.rejectedBy.includes(volunteerId)) {
-                request.rejectedBy.push(volunteerId);
+            if (!request.rejectedBy?.includes(volunteerId)) {
+                request.rejectedBy?.push(volunteerId);
             }
         }
 

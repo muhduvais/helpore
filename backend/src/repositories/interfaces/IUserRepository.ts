@@ -15,5 +15,5 @@ export interface IUserRepository extends IBaseRepository<IUserDocument> {
     updateUserCertificates(userId: string, uploadedCertificateUrl: string): Promise<boolean>;
     deleteFile(publicId: string): Promise<any>;
     removeCertificateUrl(userId: string, certificateUrl: string): Promise<IUser>;
-    checkCertificate(userId: string): Promise<boolean>;
+    checkCertificate(userId: string): Promise<boolean | undefined>;
 }

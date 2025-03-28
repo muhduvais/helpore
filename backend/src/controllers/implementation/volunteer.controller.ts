@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IAdminService, IVolunteerService } from '../../services/interfaces/ServiceInterface';
 import { IVolunteerController } from '../interfaces/IVolunteerController';
+import { JwtPayload } from 'jsonwebtoken';
 
 @injectable()
 export class VolunteerController implements IVolunteerController {
@@ -78,7 +79,7 @@ export class VolunteerController implements IVolunteerController {
 
     async updateProfilePicture(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user?.userId;
+            const { userId: volunteerId} = req.user as JwtPayload;
             const { profilePicture } = req.body;
 
             const updated = await this.volunteerService.changeProfilePicture(volunteerId, profilePicture);
@@ -97,7 +98,7 @@ export class VolunteerController implements IVolunteerController {
 
     async changePassword(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user?.userId;
+            const { userId: volunteerId} = req.user as JwtPayload;
             const { currentPassword, newPassword } = req.body;
 
             const isValid = await this.volunteerService.verifyCurrentPassword(volunteerId, currentPassword);

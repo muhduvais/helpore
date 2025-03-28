@@ -6,7 +6,7 @@
     "rootDir": "./src",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "strict": false,
+    "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,

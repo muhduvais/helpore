@@ -75,7 +75,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
         }
     }
 
-    async fetchVolunteerDetails(volunteerId: string): Promise<IUser> {
+    async fetchVolunteerDetails(volunteerId: string): Promise<IUser | null> {
         try {
             return await this.userRepository.findUserDetails(volunteerId);
         } catch (error) {
@@ -104,9 +104,10 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
         }
     }
 
-    async verifyCurrentPassword(volunteerId: string, currentPassword: string): Promise<boolean | null> {
+    async verifyCurrentPassword(volunteerId: string, currentPassword: string): Promise<boolean | null | undefined> {
         try {
             const password = await this.userRepository.findPassword(volunteerId);
+            if (!password) return;
             return bcrypt.compare(currentPassword, password);
         } catch (error) {
             console.error('Error updating the password: ', error);

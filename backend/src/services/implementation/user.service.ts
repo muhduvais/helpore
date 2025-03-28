@@ -28,7 +28,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         }
     }
 
-    async fetchUserDetails(userId: string): Promise<IUser> {
+    async fetchUserDetails(userId: string): Promise<IUser | null> {
         try {
             return await this.userRepository.findUserDetails(userId);
         } catch (error) {
@@ -47,7 +47,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         }
     }
 
-    async editUser(userId: string, formData: any) {
+    async editUser(userId: string, formData: any): Promise<string | null | undefined> {
         try {
             const { name, age, gender, phone, fname, lname, street, city, state, country, pincode } = formData;
 
@@ -69,6 +69,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             };
 
             const user = await this.userRepository.updateUser(userId, newUser);
+            if (!user) return;
             await this.addressRepository.updateAddress(user._id as string, newAddress);
             const registeredMail = user.email;
 
@@ -99,9 +100,10 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         }
     }
 
-    async verifyCurrentPassword(userId: string, currentPassword: string): Promise<boolean | null> {
+    async verifyCurrentPassword(userId: string, currentPassword: string): Promise<boolean | null | undefined> {
         try {
             const password = await this.userRepository.findPassword(userId);
+            if (!password) return;
             return bcrypt.compare(currentPassword, password);
         } catch (error) {
             console.error('Error updating the password: ', error);
@@ -120,7 +122,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         }
     }
 
-    async addAddress(addressData: IAddress): Promise<string> {
+    async addAddress(addressData: IAddress): Promise<string | null> {
         try {
             const newAddress = await this.addressRepository.addAddress(addressData);
             return String(newAddress._id);
@@ -130,7 +132,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         }
     }
 
-    async fetchAddresses(userId: string): Promise<IAddress[]> {
+    async fetchAddresses(userId: string): Promise<IAddress[] | null> {
         try {
             return await this.addressRepository.findAddressesByEntityId(userId);
         } catch (error) {
@@ -139,7 +141,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         }
     }
 
-    async fetchAddress(userId: string): Promise<IAddress> {
+    async fetchAddress(userId: string): Promise<IAddress | null> {
         try {
             return await this.addressRepository.findAddressByEntityId(userId);
         } catch (error) {
@@ -217,7 +219,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         }
     }
 
-    async checkCertificate(userId: string): Promise<boolean> {
+    async checkCertificate(userId: string): Promise<boolean | undefined> {
         try {
             return await this.userRepository.checkCertificate(userId);
         } catch (error) {

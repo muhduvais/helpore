@@ -3,6 +3,13 @@ import User from "../../models/user.model";
 import { IUser, IUserDocument } from "../../interfaces/user.interface";
 import { IAuthRepository } from "../interfaces/IAuthRepository";
 
+export interface IUserCreationData {
+  email: string | undefined;
+  password: string | null;
+  name: string;
+  googleId: string | null;
+}
+
 @injectable()
 export class AuthRepository implements IAuthRepository {
   async findUser(email: string): Promise<IUserDocument | null> {
@@ -25,7 +32,7 @@ export class AuthRepository implements IAuthRepository {
 
   async findIsBlocked(userId: string): Promise<boolean | null> {
     try {
-      const user = await User.findById(userId);
+      const user: IUserDocument | null = await User.findById(userId);
       return user ? user.isBlocked : null;
     } catch (error) {
       console.error('Error checking blocked status:', error);
@@ -33,7 +40,7 @@ export class AuthRepository implements IAuthRepository {
     }
   }
 
-  async createUser(userData: Partial<IUser>): Promise<IUserDocument | null> {
+  async createUser(userData: IUserCreationData): Promise<IUserDocument | null> {
     try {
       const user = new User({
         ...userData,

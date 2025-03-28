@@ -15,7 +15,7 @@ export interface IUser {
     isVerified: boolean;
     role: string;
     tasks: number;
-    googleId: string;
+    googleId: string | null;
     resetToken: string;
     resetTokenExpiry: Date;
     uid?: string;
@@ -36,7 +36,7 @@ export interface IUserDocument extends Document {
     isVerified: boolean;
     role: string;
     tasks: number;
-    googleId: string;
+    googleId: string | null;
     resetToken: string;
     resetTokenExpiry: Date;
     uid?: string;

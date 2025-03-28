@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { INotificationService } from '../../services/interfaces/ServiceInterface';
+import { JwtPayload } from 'jsonwebtoken';
 
 @injectable()
 export class NotificationController {
@@ -16,7 +17,7 @@ export class NotificationController {
 
     async getUserNotifications(req: Request, res: Response): Promise<void> {
         try {
-            const userId = req.user.userId;
+            const { userId } = req.user as JwtPayload;
             const notifications = await this.notificationService.getUserNotifications(userId);
             res.status(200).json({ success: true, data: notifications });
         } catch (error) {
@@ -32,7 +33,7 @@ export class NotificationController {
     async markAsRead(req: Request, res: Response): Promise<void> {
         try {
             const { notificationId } = req.params;
-            const userId = req.user.userId;
+            const { userId } = req.user as JwtPayload;
             await this.notificationService.markAsRead(notificationId, userId);
             res.status(200).json({ success: true, message: 'Notification marked as read' });
         } catch (error) {
@@ -47,7 +48,7 @@ export class NotificationController {
 
     async markAllAsRead(req: Request, res: Response): Promise<void> {
         try {
-            const userId = req.user.userId;
+            const { userId } = req.user as JwtPayload;
             await this.notificationService.markAllAsRead(userId);
             res.status(200).json({ success: true, message: 'All notifications marked as read' });
         } catch (error) {
@@ -63,7 +64,7 @@ export class NotificationController {
     async deleteNotification(req: Request, res: Response): Promise<void> {
         try {
             const { notificationId } = req.params;
-            const userId = req.user.userId;
+            const { userId } = req.user as JwtPayload;
             await this.notificationService.deleteNotification(notificationId, userId);
             res.status(200).json({ success: true, message: 'Notification deleted' });
         } catch (error) {
@@ -78,7 +79,7 @@ export class NotificationController {
 
     async deleteAllNotifications(req: Request, res: Response): Promise<void> {
         try {
-            const userId = req.user.userId;
+            const { userId } = req.user as JwtPayload;
             await this.notificationService.deleteAllNotifications(userId);
             res.status(200).json({ success: true, message: 'All notifications deleted' });
         } catch (error) {

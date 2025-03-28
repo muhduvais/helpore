@@ -3,6 +3,8 @@
 /frontend/node_modules/
 /backend/node_modules/
 
+.history
+
 # Build files
 /frontend/build/
 /backend/dist/

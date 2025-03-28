@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { IAssistanceRequest, IAssistanceRequestDocument, IAssistanceRequestResponse } from "../../interfaces/user.interface";
+import { IAssistanceRequest, IAssistanceRequestDocument, IAssistanceRequestResponse, IUserDocument } from "../../interfaces/user.interface";
 import { IAssistanceRequestRepository } from "../interfaces/IAssistanceRequestRepository";
 import AssistanceRequest from "../../models/assistance-request.model";
 import User from "../../models/user.model";
@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 @injectable()
 export class AssistanceRequestRepository extends BaseRepository<IAssistanceRequestDocument> implements IAssistanceRequestRepository {
 
-  async findRequestById(requestId: string): Promise<IAssistanceRequestDocument> {
+  async findRequestById(requestId: string): Promise<IAssistanceRequestDocument | null | undefined> {
     try {
       return await AssistanceRequest.findById(requestId);
     } catch (error) {
@@ -202,7 +202,7 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
     }
   }
 
-  async findAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequestDocument> {
+  async findAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequestDocument | null> {
     try {
       return await AssistanceRequest.findOne({ _id: requestId })
         .populate("user")
@@ -214,19 +214,19 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
     }
   }
 
-  async incrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument> {
+  async incrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument | null> {
     return await AssistanceRequest.findByIdAndUpdate(volunteerId, {
       $inc: { tasks: 1 }
     });
   }
 
-  async updateRequest(request: Partial<IAssistanceRequestDocument>): Promise<IAssistanceRequestDocument> {
+  async updateRequest(request: IAssistanceRequestDocument): Promise<IAssistanceRequestDocument> {
     return await request.save();
   }
 
   async checkTasksLimit(volunteerId: string): Promise<boolean | null> {
     try {
-      const volunteer = await User.findById(volunteerId);
+      const volunteer: IUserDocument | null = await User.findById(volunteerId);
       return volunteer ? volunteer.tasks >= 5 : null;
     } catch (error) {
       console.error("Error checking volunteer task limit:", error);

@@ -16,25 +16,25 @@ export class AssetRepository extends BaseRepository<IAsset> implements IAssetRep
       const newAsset = new Asset(assetData);
       await newAsset.save();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Mongoose save error:", error);
       throw new Error(`Error saving asset: ${error.message}`);
     }
   }
 
-  async findAssets(query: object, skip: number, limit: number, sortQuery: { [key: string]: 1 | -1 }): Promise<IAsset[]> | null {
+  async findAssets(query: object, skip: number, limit: number, sortQuery: { [key: string]: 1 | -1 }): Promise<IAsset[] | null> {
     try {
         return await Asset.find(query).skip(skip).limit(limit).sort(sortQuery);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error finding the assets:', error);
         return null;
     }
 }
 
-  async findAssetDetails(assetId: string): Promise<IAsset> {
+  async findAssetDetails(assetId: string): Promise<IAsset | null> {
     try {
       return await Asset.findById(assetId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error finding the asset:', error);
       return null;
     }
@@ -43,16 +43,16 @@ export class AssetRepository extends BaseRepository<IAsset> implements IAssetRep
   async countAssets(query: object): Promise<number> {
     try {
       return await Asset.countDocuments(query);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error counting assets:', error);
       return 0;
     }
   }
 
-  async updateById(id: string, submitData: object): Promise<IAsset> {
+  async updateById(id: string, submitData: object): Promise<IAsset | null> {
     try {
       return await Asset.findByIdAndUpdate(id, submitData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating the asset:', error);
       return null;
     }
@@ -62,7 +62,7 @@ export class AssetRepository extends BaseRepository<IAsset> implements IAssetRep
     try {
       await Asset.findByIdAndUpdate(assetId, { $inc: { stocks: -quantity } });
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating stock:', error);
       return false;
     }

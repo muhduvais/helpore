@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { inject, injectable } from "tsyringe";
 import { IAssistanceRequestController } from '../interfaces/IAssistanceRequestController';
 import { IAssistanceRequestService } from '../../services/interfaces/ServiceInterface';
+import { JwtPayload } from 'jsonwebtoken';
 
 @injectable()
 export class AssistanceRequestController implements IAssistanceRequestController {
@@ -37,7 +38,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
 
     async getNearbyRequests(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user?.userId;
+            const { userId: volunteerId } = req.user as JwtPayload;
             const page = parseInt(req.query.page as string, 10) || 1;
             const search = req.query.search as string;
             const filter = req.query.filter as string;
@@ -66,7 +67,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
 
     async updateRequestStatus(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.user?.userId;
+            const { userId: volunteerId } = req.user as JwtPayload;
             const requestId = req.params.id;
             const { action } = req.body;
 
@@ -93,7 +94,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
                 });
                 return;
             }
-        } catch (error) {
+        } catch (error: any) {
             res.status(400).json({
                 success: false,
                 message: error.message
@@ -123,7 +124,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
     }
 
     async getProcessingRequests(req: Request, res: Response): Promise<void> {
-        const volunteerId = req.user.userId;
+        const { userId: volunteerId } = req.user as JwtPayload;
 
         const page = parseInt(req.query.page as string, 10) || 1;
         let limit = parseInt(req.query.limit as string, 10) || 5;

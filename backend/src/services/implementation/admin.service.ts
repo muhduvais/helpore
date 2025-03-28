@@ -60,7 +60,7 @@ export class AdminService implements IAdminService {
     }
   }
 
-  async editUser(userId: string, formData: any) {
+  async editUser(userId: string, formData: any): Promise<string | null> {
     try {
       const { name, age, gender, phone, fname, lname, street, city, state, country, pincode } = formData;
 
@@ -82,6 +82,7 @@ export class AdminService implements IAdminService {
       };
 
       const user = await this.userRepository.updateUser(userId, newUser);
+      if (!user) return null;
       await this.addressRepository.updateAddress(user._id as string, newAddress);
       const registeredMail = user.email;
 
@@ -103,7 +104,7 @@ export class AdminService implements IAdminService {
     }
   }
 
-  async fetchUserDetails(userId: string): Promise<IUser> {
+  async fetchUserDetails(userId: string): Promise<IUser | null> {
     try {
       return await this.userRepository.findUserDetails(userId);
     } catch (error) {
@@ -192,7 +193,7 @@ export class AdminService implements IAdminService {
     }
   }
 
-  async fetchVolunteerDetails(volunteerId: string): Promise<IUser> {
+  async fetchVolunteerDetails(volunteerId: string): Promise<IUser | null> {
     try {
       return await this.userRepository.findUserDetails(volunteerId);
     } catch (error) {
@@ -212,7 +213,7 @@ export class AdminService implements IAdminService {
     }
   }
 
-  async fetchAddresses(userId: string): Promise<IAddress[]> {
+  async fetchAddresses(userId: string): Promise<IAddress[] | null> {
     try {
       return await this.addressRepository.findAddressesByEntityId(userId);
     } catch (error) {

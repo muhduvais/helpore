@@ -182,7 +182,7 @@ export class AssetRequestRepository extends BaseRepository<IAssetRequest> implem
     }
   }
 
-  async updateStatus(requestId: string, status: string, comment: string) {
+  async updateStatus(requestId: string, status: string, comment: string): Promise<IAssetRequest | null> {
     try {
       const updatedRequest = await AssetRequest.findByIdAndUpdate(
         requestId,

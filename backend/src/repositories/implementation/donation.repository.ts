@@ -59,7 +59,7 @@ export class DonationRepository extends BaseRepository<IDonation> implements IDo
       .select('amount date status campaign');
   }
 
-  async findByDonationId(donationId: string): Promise<IDonationResponse> {
+  async findByDonationId(donationId: string): Promise<IDonationResponse | null> {
     return await Donation.findOne({ _id: donationId })
   }
 

@@ -9,6 +9,7 @@ import { redisClient } from '../../utils';
 import { IAuthRepository } from '../../repositories/interfaces/IAuthRepository';
 import { IOtpRepository } from '../../repositories/interfaces/IOtpRepository';
 import { IAuthService } from '../interfaces/ServiceInterface';
+import { IUserCreationData } from '../../repositories/implementation/auth.repository';
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -18,7 +19,7 @@ export class AuthService implements IAuthService {
         @inject('IOtpRepository') private readonly otpRepository: IOtpRepository
     ) {}
 
-    async registerUser(name: string, email: string, password: string): Promise<string | boolean> {
+    async registerUser(name: string, email: string, password: string): Promise<string | boolean | null> {
         try {
             const existingUser = await this.authRepository.findUser(email);
             if (existingUser) {
@@ -106,7 +107,7 @@ export class AuthService implements IAuthService {
                 return false;
             }
 
-            const user: Partial<IUser> = {
+            const user: IUserCreationData = {
                 email: registrationData.email,
                 name: registrationData.name,
                 password: registrationData.password,
@@ -165,7 +166,7 @@ export class AuthService implements IAuthService {
         }
     }
 
-    async findIsBlocked(userId: string): Promise<boolean> {
+    async findIsBlocked(userId: string): Promise<boolean | null> {
         try {
             return await this.authRepository.findIsBlocked(userId);
         } catch (error) {
@@ -214,6 +215,9 @@ export class AuthService implements IAuthService {
             if (!existingUser) {
                 return false;
             }
+            if (!process.env.RESET_LINK_SECRET) {
+                throw new Error('RESET_LINK_SECRET environment variable is not defined!');
+            }
             const payload = { userId: existingUser._id, email };
             const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: '3h' });
             const tokenExpiry = new Date(Date.now() + 3600 * 1000);
@@ -231,7 +235,7 @@ export class AuthService implements IAuthService {
         }
     }
 
-    async resetPassword(email, password) {
+    async resetPassword(email: string, password: string) {
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
             await this.authRepository.resetPassword(email, hashedPassword);

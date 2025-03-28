@@ -16,7 +16,7 @@ export abstract class BaseService<T extends Document> implements IBaseService<T>
         }
     }
 
-    async findAll( query: object, skip: number = 0, limit: number = 10): Promise<T[]> {
+    async findAll( query: object, skip: number = 0, limit: number = 10): Promise<T[] | null> {
         try {
             return await this.repository.findAll(query, skip, limit);
         } catch (error) {

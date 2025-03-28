@@ -7,6 +7,6 @@ export interface IDonationRepository extends IBaseRepository<IDonation> {
   findAll(query: any, skip: number, limit: number): Promise<IDonation[] | null>;
   findByUserId(userId: string): Promise<any>;
   findBySessionId(sessionId: string): Promise<any>;
-  findByDonationId(donationId: string): Promise<IDonationResponse>;
+  findByDonationId(donationId: string): Promise<IDonationResponse | null>;
   countDonations(query: object): Promise<number | null>;
 }

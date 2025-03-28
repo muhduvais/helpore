@@ -18,7 +18,7 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
     async addAsset(data: IAsset): Promise<any> {
         try {
             return await this.assetRepository.addAsset(data);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Database error while adding asset:", error);
             throw new Error(`Error adding asset: ${error.message}`);
         }
@@ -91,7 +91,7 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         }
     }
 
-    async fetchAssetDetails(assetId: string): Promise<IAsset> {
+    async fetchAssetDetails(assetId: string): Promise<IAsset | null> {
         try {
             return await this.assetRepository.findAssetDetails(assetId);
         } catch (error) {
@@ -100,7 +100,7 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         }
     }
 
-    async updateAsset(assetId: string, submitData: any): Promise<IAsset> {
+    async updateAsset(assetId: string, submitData: any): Promise<IAsset | null> {
         try {
             return await this.assetRepository.updateById(assetId, submitData);
         } catch (error) {
@@ -181,6 +181,7 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
     async checkIsRequestLimit(userId: string, quantity: number): Promise<boolean | null> {
         try {
             const assetRequests = await this.assetRequestRepository.findMyAllRequests(userId);
+            if (!assetRequests) return null;
             const count = assetRequests.reduce((accu, request) => {
                 const quantity = Number(request.quantity) || 0;
                 return accu + quantity;
@@ -193,11 +194,11 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         }
     }
 
-    async countMyAssetRequests(userId: string, search: string, filter: string): Promise<number> {
+    async countMyAssetRequests(userId: string, search: string, filter: string): Promise<number | null> {
         try {
             let query: any = {};
 
-            if (search) {
+        if (search) {
                 query["asset.name"] = { $regex: search, $options: "i" };
             }
 

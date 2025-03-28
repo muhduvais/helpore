@@ -115,9 +115,10 @@ export class UserRepository extends BaseRepository<IUserDocument> implements IUs
         }
       };
 
-      async checkCertificate(userId: string): Promise<boolean> {
+      async checkCertificate(userId: string): Promise<boolean | undefined> {
         try {
           const user = await this.findById(userId);
+          if (!user) return;
           return user.certificates.length > 0;
         } catch (error) {
           console.error('Error checking the certificates:', error);

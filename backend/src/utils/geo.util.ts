@@ -21,7 +21,7 @@ export class GeocodingService {
     private baseUrl: string;
 
     constructor() {
-        this.apiKey = process.env.OPENCAGE_API_KEY;
+        this.apiKey = process.env.OPENCAGE_API_KEY as string;
         this.baseUrl = 'https://api.opencagedata.com/geocode/v1/json';
     }
 

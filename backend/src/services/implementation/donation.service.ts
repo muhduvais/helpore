@@ -4,7 +4,7 @@ import { IDonationService } from '../interfaces/ServiceInterface';
 import Stripe from 'stripe';
 import PDFDocument from 'pdfkit';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 import dotenv from 'dotenv';
 import { IDonation } from '../../models/donation.model';
 import { IDonationRepository } from '../../repositories/interfaces/IDonationRepository';
@@ -106,7 +106,7 @@ export class DonationService extends BaseService<IDonation> implements IDonation
     return { donations };
   }
 
-  async getAllDonations(page: number, limit: number, search: string, campaign: string): Promise<IDonation[]> {
+  async getAllDonations(page: number, limit: number, search: string, campaign: string): Promise<IDonation[] | null> {
     try {
       let skip = (page - 1) * limit;
       let query: any = {};
@@ -150,13 +150,14 @@ export class DonationService extends BaseService<IDonation> implements IDonation
   async generateAndSendReceipt(donationId: string, userId: string): Promise<Buffer> {
     const donation = await this.donationRepository.findById(donationId);
     const userDetails = await this.userRepository.findById(userId);
-    const addressDetails = await this.addressRepository.findAddressesByEntityId(userId)[0];
+    const addressDetailsResponse = await this.addressRepository.findAddressesByEntityId(userId);
+    const addressDetails = addressDetailsResponse[0];
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({
         size: 'A4',
         margin: 50,
         info: {
-          Title: `Donation Receipt ${donation._id}`,
+          Title: `Donation Receipt ${donation?._id}`,
           Author: 'HelpOre',
           Subject: 'Donation Receipt',
           Keywords: 'donation, receipt, charity'

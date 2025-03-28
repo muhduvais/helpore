@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IUserService } from '../../services/interfaces/ServiceInterface';
 import { IAddressController } from '../interfaces/IAddressController';
+import { JwtPayload } from 'jsonwebtoken';
 
 @injectable()
 export class AddressController implements IAddressController {
@@ -34,7 +35,7 @@ export class AddressController implements IAddressController {
     }
 
     async getAddresses (req: Request, res: Response): Promise<void> {
-        const userId = req.user?.userId;
+        const { userId } = req.user as JwtPayload;
         try {
             const addresses = await this.userService.fetchAddresses(userId);
             if (addresses) {

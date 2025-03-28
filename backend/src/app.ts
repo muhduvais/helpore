@@ -49,7 +49,7 @@ app.use(handleError);
 
 connectDB();
 
-const PORT = parseInt(process.env.PORT, 10);
+const PORT = parseInt(process.env.PORT as string, 10);
 const SERVER_URL = process.env.SERVER_URL;
 
 server.listen(PORT, () => {

@@ -212,7 +212,10 @@ export class AuthController implements IAuthController {
             const decoded = jwt.verify(token, process.env.RESET_LINK_SECRET!) as JwtPayload;
             const { userId } = decoded;
             const user = await this.authService.findUserById(userId);
-            console.log('user: ', userId)
+            if (!user) {
+                res.status(400).json({ message: 'User not found!' });
+                return;
+            }
             const email = user.email;
 
             await this.authService.resetPassword(email, newPassword);

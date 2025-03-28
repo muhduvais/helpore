@@ -8,10 +8,10 @@ export interface IAssistanceRequestRepository {
   findPendingRequests(requestQuery: object, skip: number): Promise<IAssistanceRequestDocument[]> | null;
   findProcessingRequests(search: string, filter: string, skip: number, limit: number, volunteerId: string
   ): Promise<IAssistanceRequestResponse[] | null>
-  findRequestById(requestId: string): Promise<IAssistanceRequestDocument>;
-  findAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequestDocument>;
-  incrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument>;
-  updateRequest(request: Partial<IAssistanceRequestDocument>): Promise<IAssistanceRequestDocument>;
+  findRequestById(requestId: string): Promise<IAssistanceRequestDocument | null | undefined>
+  findAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequestDocument | null>;
+  incrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument | null>;
+  updateRequest(request: IAssistanceRequestDocument): Promise<IAssistanceRequestDocument>;
   checkTasksLimit(volunteerId: string): Promise<boolean | null>;
   assignVolunteer(requestId: string, volunteerId: string): Promise<any>;
 }

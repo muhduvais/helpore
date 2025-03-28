@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IChatController } from '../interfaces/IChatController';
 import { IChatService } from '../../services/interfaces/ServiceInterface';
+import { JwtPayload } from 'jsonwebtoken';
 
 @injectable()
 export class ChatController implements IChatController {
@@ -17,7 +18,7 @@ export class ChatController implements IChatController {
     async sendMessage(req: Request, res: Response): Promise<void> {
         try {
             const { receiverId, content, requestId, senderType, receiverType } = req.body;
-            const senderId = req.user.userId;
+            const { userId: senderId } = req.user as JwtPayload;
 
             const message = await this.chatService.sendMessage(senderId, receiverId, content, requestId, senderType, receiverType);
             res.status(201).json({ success: true, data: message });
@@ -40,7 +41,7 @@ export class ChatController implements IChatController {
 
     async getUserConversations(req: Request, res: Response): Promise<void> {
         try {
-            const userId = req.user.userId;
+            const { userId } = req.user as JwtPayload;
             const conversations = await this.chatService.getUserConversations(userId);
             res.status(200).json({ success: true, data: conversations });
         } catch (error) {
@@ -52,7 +53,7 @@ export class ChatController implements IChatController {
     async markConversationAsRead(req: Request, res: Response): Promise<void> {
         try {
             const { conversationId } = req.params;
-            const userId = req.user.userId;
+            const { userId } = req.user as JwtPayload;
 
             await this.chatService.markConversationAsRead(conversationId, userId);
             res.status(200).json({ success: true, message: 'Messages marked as read' });

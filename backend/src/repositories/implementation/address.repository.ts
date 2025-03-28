@@ -23,7 +23,7 @@ export class AddressRepository extends BaseRepository<IAddressDocument> implemen
     }
   }
 
-  async findAddressesByQuery(query: object): Promise<IAddressDocument> {
+  async findAddressesByQuery(query: object): Promise<IAddressDocument | null> {
     try {
       return await Address.findOne(query).exec();
     } catch (error) {

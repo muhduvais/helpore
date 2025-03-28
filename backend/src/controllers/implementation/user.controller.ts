@@ -2,6 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { Request, Response } from 'express';
 import { IUserController } from '../interfaces/IUserController';
 import { IAdminService, IUserService } from '../../services/interfaces/ServiceInterface';
+import { JwtPayload } from 'jsonwebtoken';
 
 @injectable()
 export class UserController implements IUserController {
@@ -85,7 +86,7 @@ export class UserController implements IUserController {
 
   async getUserDetails(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.params.id ? req.params.id : req.user?.userId;
+      const userId = req.params.id ? req.params.id : (req.user as JwtPayload).userId;
 
       const [user, address] = await Promise.all([
         this.userService.fetchUserDetails(userId),
@@ -111,7 +112,7 @@ export class UserController implements IUserController {
 
   async updateUserDetails(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.userId;
+      const { userId } = req.user as JwtPayload;
       const { formData } = req.body;
       const registeredMail = await this.userService.editUser(userId, formData);
 
@@ -126,7 +127,7 @@ export class UserController implements IUserController {
 
   async updateProfilePicture(req: Request, res: Response): Promise<void> {
 
-    const userId = req.user?.userId;
+    const { userId } = req.user as JwtPayload;
 
     const { profilePicture } = req.body;
 
@@ -147,7 +148,7 @@ export class UserController implements IUserController {
 
   async changePassword(req: Request, res: Response): Promise<void> {
 
-    const userId = req.user?.userId;
+    const { userId } = req.user as JwtPayload;
 
     const data = req.body;
 
@@ -193,7 +194,7 @@ export class UserController implements IUserController {
   }
 
   async uploadCertificateImage(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.userId;
+    const { userId } = req.user as JwtPayload;
     try {
       const file = req.file;
 
@@ -222,7 +223,7 @@ export class UserController implements IUserController {
   async deleteCertificate(req: Request, res: Response): Promise<void> {
     try {
       const { certificateUrl } = req.body;
-      const userId = req.user?.userId;
+      const { userId } = req.user as JwtPayload;
 
       console.log('certificateUrl: ', certificateUrl)
 
@@ -248,7 +249,7 @@ export class UserController implements IUserController {
         message: "Certificate deleted successfully",
         data: result,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting certificate:", error);
       res.status(500).json({
         success: false,

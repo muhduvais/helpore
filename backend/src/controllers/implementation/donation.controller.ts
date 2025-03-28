@@ -38,7 +38,7 @@ export class DonationController implements IDonationController {
       });
 
       res.status(200).json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Checkout session error:', error);
       res.status(500).json({ error: error.message });
     }
@@ -56,7 +56,7 @@ export class DonationController implements IDonationController {
 
       const result = await this.donationService.handleWebhookEvent(event);
       res.status(200).json(result);
-    } catch (err) {
+    } catch (err: any) {
       res.status(400).send(`Webhook Error: ${err.message}`);
     }
   };
@@ -67,11 +67,12 @@ export class DonationController implements IDonationController {
 
       if (!userId) {
         res.status(401).json({ message: 'Unauthorized' });
+        return;
       }
 
       const result = await this.donationService.getUserDonationHistory(userId);
       res.status(200).json(result);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   };
@@ -89,6 +90,10 @@ export class DonationController implements IDonationController {
     const { donationId } = req.params;
     const userId = !req.query.userId && req.user?.role !== 'admin' ? req.user?.userId : req.query.userId as string;
     try {
+      if (!userId) {
+        res.status(400).json({ message: 'Invalid userId!' });
+        return;
+      }
       const pdfBuffer = await this.donationService.generateAndSendReceipt(donationId, userId);
 
       res.contentType('application/pdf');
@@ -116,7 +121,7 @@ export class DonationController implements IDonationController {
         filter
       );
 
-      const documentsCount = await this.donationService.totalDonationsCount(search, filter);
+      const documentsCount = await this.donationService.totalDonationsCount(search, filter) || 0;
 
       res.status(200).json({
         donations: donations,
@@ -139,7 +144,7 @@ export class DonationController implements IDonationController {
         1000,
         search,
         filter,
-      );
+      ) || [];
   
       // CSV stringifier
       const csvStringifier = createObjectCsvStringifier({

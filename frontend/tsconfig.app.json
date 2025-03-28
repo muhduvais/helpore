@@ -1,5 +1,28 @@
 {
   "compilerOptions": {
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "types": [
+      "node",
+      "babel__core",
+      "babel__generator",
+      "babel__template",
+      "babel__traverse",
+      "body-parser",
+      "connect",
+      "cookie-parser",
+      "express",
+      "express-serve-static-core",
+      "history",
+      "http-errors",
+      "json-schema",
+      "mime",
+      "qs",
+      "range-parser",
+      "send",
+      "serve-static"
+    ],
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -31,6 +54,7 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
-    "src"
-, "../backend/src/utils/geo.util.ts"  ]
+    "src",
+    "../backend/src/utils/geo.util.ts"
+  ]
 }
