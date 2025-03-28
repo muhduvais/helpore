@@ -146,9 +146,7 @@ export interface IOtpService {
     sendOtpEmail(email: string, otp: string): Promise<boolean>
 }
 
-// export interface IMeetingService {
-//     initializeMeetingCall(meeting: IMeetingDocument, currentUserId: string): Promise<void>;
-//     generateToken(userId: string, roomId: string): Promise<string>;
-//     leaveMeeting(): Promise<void>;
-//     validateMeetingAccess(meetingId: string, userId: string): Promise<boolean>;
-// }
+export interface IMeetingService {
+    generateToken( userId: string, roomId: string, userName: string ): Promise<string>;
+    verifyToken(token: string): Promise<boolean>;
+}

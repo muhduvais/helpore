@@ -22,6 +22,7 @@ import { IAuthService } from "./services/interfaces/ServiceInterface";
 import { IDonationService } from "./services/interfaces/ServiceInterface";
 import { IChatService } from "./services/interfaces/ServiceInterface";
 import { INotificationService } from "./services/interfaces/ServiceInterface";
+import { IMeetingService } from "./services/interfaces/ServiceInterface";
 
 // Controllers - Interfaces
 import { IAuthController } from './controllers/interfaces/IAuthController';
@@ -34,6 +35,7 @@ import { IAddressController } from "./controllers/interfaces/IAddressController"
 import { IDonationController } from "./controllers/interfaces/IDonationController";
 import { IChatController } from "./controllers/interfaces/IChatController";
 import { INotificationController } from "./controllers/interfaces/INotificationController";
+import { IMeetingController } from "./controllers/interfaces/IMeetingController";
 
 // Repositories
 import { UserRepository } from "./repositories/implementation/user.repository";
@@ -57,6 +59,7 @@ import { AuthService } from './services/implementation/auth.service';
 import { DonationService } from "./services/implementation/donation.service";
 import { ChatService } from "./services/implementation/chat.service";
 import { NotificationService } from "./services/implementation/notification.service";
+import { MeetingService } from "./services/implementation/meeting.service";
 
 // Controllers
 import { AuthController } from "./controllers/implementation/auth.controller";
@@ -69,6 +72,7 @@ import { AddressController } from "./controllers/implementation/address.controll
 import { DonationController } from "./controllers/implementation/donation.controller";
 import { ChatController } from "./controllers/implementation/chat.controller";
 import { NotificationController } from "./controllers/implementation/notification.controller";
+import { MeetingController } from "./controllers/implementation/meeting.controller";
 
 export function registerDependencies() {
     try {
@@ -94,6 +98,13 @@ export function registerDependencies() {
         container.register<IDonationService>('IDonationService', { useClass: DonationService });
         container.register<IChatService>('IChatService', { useClass: ChatService });
         container.register<INotificationService>('INotificationService', { useClass: NotificationService });
+        container.register<IMeetingService>('IMeetingService', {
+            useFactory: () => {
+                const appId = process.env.ZEGO_APP_ID ? parseInt(process.env.ZEGO_APP_ID) : 0;
+                const serverSecret = process.env.ZEGO_SERVER_SECRET || '';
+                return new MeetingService(appId, serverSecret);
+            }
+        });
 
         // Register Controllers
         container.register<IAuthController>("IAuthController", { useClass: AuthController });
@@ -106,6 +117,7 @@ export function registerDependencies() {
         container.register<IDonationController>("IDonationController", { useClass: DonationController });
         container.register<IChatController>("IChatController", { useClass: ChatController });
         container.register<INotificationController>("INotificationController", { useClass: NotificationController });
+        container.register<IMeetingController>("IMeetingController", { useClass: MeetingController });
     } catch (error) {
         console.error("Error registering dependencies:", error);
         throw error;

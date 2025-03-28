@@ -11,6 +11,7 @@ import assistanceRequestRoutes from './assistance-request.routes';
 import donationRoutes from './donation.routes';
 import chatRoutes from './chat.routes';
 import notificationRoutes from './notification.routes';
+import meetingRoutes from './meeting.routes';
 import { authenticateToken } from "../middlewares";
 
 const router = express.Router();
@@ -31,5 +32,6 @@ router.use('/assistanceRequests', assistanceRequestRoutes);
 router.use('/donations', donationRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/chats', chatRoutes);
+router.use('/meetings', meetingRoutes);
 
 export default router;
