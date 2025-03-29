@@ -16,135 +16,60 @@ import {
     Clock,
     Info,
     List,
-    UserPlus,
-    Video,
-    XCircle
+    Video
 } from 'lucide-react';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle
-} from "@/components/ui/alert-dialog";
 
-import { CreateMeetingModal } from '@/components/VideoCall.tsx/CreateMeetingModal';
 import { meetingService } from '@/services/meeting.service';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
-import { adminService } from '@/services/admin.service';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { IMeeting } from '@/interfaces/meeting.interface';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { MeetingDetailsModal } from '@/components/MeetingDetailsModal';
 
-const MeetingsPage: React.FC = () => {
+const VolunteerMeetingsPage: React.FC = () => {
     const navigate = useNavigate();
-    const { userId } = useSelector((state: any) => state.auth);
+    const { volunteerId } = useSelector((state: any) => state.auth);
 
     const [meetings, setMeetings] = useState<IMeeting[]>([]);
-    const [users, setUsers] = useState<Array<{ id: string, name: string }>>([]);
-    const [volunteers, setVolunteers] = useState<Array<{ id: string, name: string }>>([]);
-    const [isCreateMeetingModalOpen, setIsCreateMeetingModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [cancelMeetingId, setCancelMeetingId] = useState<string | null>(null);
-    const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
     const [selectedMeeting, setSelectedMeeting] = useState<IMeeting | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
     useEffect(() => {
-        const fetchMeetingsAndUsers = async () => {
+        const fetchVolunteerMeetings = async () => {
             try {
-                const meetingsResponse = await meetingService.getMeetings();
-
-                const filteredMeetings = meetingsResponse.filter((meeting: any) =>
-                    meeting.adminId === userId ||
-                    meeting.participants.includes(userId)
-                );
-
-                setMeetings(filteredMeetings);
-
-                const usersResponse = await adminService.fetchUsers(1, 0, '');
-                const volunteersResponse = await adminService.fetchVolunteers(1, 0, '');
-
-                setUsers(
-                    usersResponse.data.users.map((user: any) => ({
-                        id: user._id,
-                        name: user.name
-                    }))
-                );
-
-                setVolunteers(
-                    volunteersResponse.data.volunteers.map((volunteer: any) => ({
-                        id: volunteer._id,
-                        name: volunteer.name
-                    }))
-                );
-
+                const volunteerMeetingsResponse = await meetingService.getUserMeetings();
+                setMeetings(volunteerMeetingsResponse.meetings);
                 setIsLoading(false);
             } catch (error) {
-                console.error('Failed to fetch meetings:', error);
-                toast.error('Failed to load meetings');
+                console.error('Failed to fetch volunteer meetings:', error);
+                toast.error('Failed to load your meetings');
                 setIsLoading(false);
             }
         };
 
-        fetchMeetingsAndUsers();
-    }, [userId]);
+        fetchVolunteerMeetings();
+    }, [volunteerId]);
 
     const handleJoinMeeting = async (meetingId: string) => {
         try {
-            await meetingService.updateMeetingStatus(meetingId, 'active');
-
-            navigate(`/admin/meetings/${meetingId}`);
+            navigate(`/volunteer/meetings/${meetingId}`);
         } catch (error) {
             console.error('Failed to join meeting:', error);
             toast.error('Could not join meeting');
         }
     };
 
-    const handleCancelMeeting = async () => {
-        if (!cancelMeetingId) return;
-
-        try {
-            await meetingService.updateMeetingStatus(cancelMeetingId, 'cancelled');
-
-            setMeetings(meetings.map(meeting => {
-                if (meeting._id === cancelMeetingId) {
-                    const updatedMeeting = meeting;
-                    updatedMeeting.status = 'cancelled';
-                    return updatedMeeting;
-                }
-                return meeting;
-            }));
-
-            toast.success('Meeting cancelled!');
-        } catch (error) {
-            console.error('Failed to cancel meeting:', error);
-            toast.error('Could not cancel the meeting!');
-        } finally {
-            setIsCancelDialogOpen(false);
-            setCancelMeetingId(null);
-        }
-    };
-
-    const openCancelDialog = (meetingId: string) => {
-        setCancelMeetingId(meetingId);
-        setIsCancelDialogOpen(true);
+    const canJoinMeeting = (scheduledTime: string | Date, status: string) => {
+        const meetingTime = new Date(scheduledTime);
+        const now = new Date();
+        return meetingTime <= now && status !== 'completed';
     };
 
     const openDetailsModal = (meeting: IMeeting) => {
         setSelectedMeeting(meeting);
         setIsDetailsModalOpen(true);
-    };
-
-    const canJoinMeeting = (scheduledTime: string | Date, status: string) => {
-        const meetingTime = new Date(scheduledTime);
-        const now = new Date();
-        return meetingTime <= now && status !== 'completed' && status !== 'cancelled';
     };
 
     const renderMeetingStatus = (status: string, scheduledTime: string | Date) => {
@@ -181,19 +106,13 @@ const MeetingsPage: React.FC = () => {
         <div className="container mx-auto p-6">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">My Meetings</h1>
-                <Button
-                    onClick={() => setIsCreateMeetingModalOpen(true)}
-                    className="bg-[#688D48] hover:bg-[#435D2C]"
-                >
-                    <UserPlus className="mr-2" /> Schedule Meeting
-                </Button>
             </div>
 
-            {meetings.length === 0 ? (
+            {meetings && meetings.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center p-10">
                         <Clock className="w-12 h-12 text-gray-400 mb-4" />
-                        <p className="text-gray-600">No meetings scheduled</p>
+                        <p className="text-gray-600">You don't have any scheduled meetings</p>
                     </CardContent>
                 </Card>
             ) : (
@@ -233,14 +152,6 @@ const MeetingsPage: React.FC = () => {
                                                         <Video className="mr-2 w-4 h-4" /> Join
                                                     </Button>
                                                 )}
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className='text-red-500 hover:text-red-700'
-                                                    onClick={() => openCancelDialog(meeting._id)}
-                                                >
-                                                    <XCircle className="mr-2 w-4 h-4 text-red-500 hover:text-red-700" /> Cancel
-                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -292,44 +203,15 @@ const MeetingsPage: React.FC = () => {
                 </div>
             )}
 
-            <CreateMeetingModal
-                isOpen={isCreateMeetingModalOpen}
-                onClose={() => setIsCreateMeetingModalOpen(false)}
-                users={users}
-                volunteers={volunteers}
-                currentUserId={userId}
-                onSuccess={(newMeeting: IMeeting) => {
-                    setMeetings((prevMeetings) => [...prevMeetings, newMeeting]);
-                    toast.success('Meeting created!');
-                }}
-            />
-
-            <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel Meeting</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Are you sure you want to cancel this meeting? This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>No, keep it</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleCancelMeeting} className="bg-red-600 hover:bg-red-700">
-                            Yes, cancel meeting
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-
             <MeetingDetailsModal
                 isOpen={isDetailsModalOpen}
                 onClose={() => setIsDetailsModalOpen(false)}
                 meeting={selectedMeeting}
-                users={users}
-                volunteers={volunteers}
+                users={[]}
+                volunteers={[]}
             />
         </div>
     );
 };
 
-export default MeetingsPage;
+export default VolunteerMeetingsPage;

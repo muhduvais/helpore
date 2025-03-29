@@ -14,6 +14,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
     Clock,
+    Info,
+    List,
     Video
 } from 'lucide-react';
 
@@ -21,6 +23,8 @@ import { meetingService } from '@/services/meeting.service';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
 import { IMeeting } from '@/interfaces/meeting.interface';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { MeetingDetailsModal } from '@/components/MeetingDetailsModal';
 
 const UserMeetingsPage: React.FC = () => {
     const navigate = useNavigate();
@@ -28,6 +32,9 @@ const UserMeetingsPage: React.FC = () => {
 
     const [meetings, setMeetings] = useState<IMeeting[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    const [selectedMeeting, setSelectedMeeting] = useState<IMeeting | null>(null);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchUserMeetings = async () => {
@@ -47,7 +54,6 @@ const UserMeetingsPage: React.FC = () => {
 
     const handleJoinMeeting = async (meetingId: string) => {
         try {
-            await meetingService.updateMeetingStatus(meetingId, 'active');
             navigate(`/user/meetings/${meetingId}`);
         } catch (error) {
             console.error('Failed to join meeting:', error);
@@ -55,29 +61,45 @@ const UserMeetingsPage: React.FC = () => {
         }
     };
 
-    const canJoinMeeting = (scheduledTime: string) => {
+    const canJoinMeeting = (scheduledTime: string | Date, status: string) => {
         const meetingTime = new Date(scheduledTime);
         const now = new Date();
-        return meetingTime <= now;
+        return meetingTime <= now && status !== 'completed';
     };
 
-    const renderMeetingStatus = (status: string, scheduledTime: string) => {
+    const openDetailsModal = (meeting: IMeeting) => {
+        setSelectedMeeting(meeting);
+        setIsDetailsModalOpen(true);
+    };
+
+    const renderMeetingStatus = (status: string, scheduledTime: string | Date) => {
         switch (status) {
             case 'scheduled':
-                return canJoinMeeting(scheduledTime)
+                return canJoinMeeting(scheduledTime, status)
                     ? <Badge variant="default">Ready to Join</Badge>
                     : <Badge variant="secondary">Upcoming</Badge>;
             case 'active':
                 return <Badge variant="outline">In Progress</Badge>;
             case 'completed':
                 return <Badge variant="destructive">Completed</Badge>;
+            case 'cancelled':
+                return <Badge variant="destructive">Cancelled</Badge>;
             default:
                 return <Badge>Unknown</Badge>;
         }
     };
 
     if (isLoading) {
-        return <div>Loading meetings...</div>;
+        return (
+            <div className="flex justify-center items-center min-h-[400px]">
+                <DotLottieReact
+                    src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
+                    loop
+                    autoplay
+                    style={{ width: '60px', height: '60px' }}
+                />
+            </div>
+        )
     }
 
     return (
@@ -94,48 +116,100 @@ const UserMeetingsPage: React.FC = () => {
                     </CardContent>
                 </Card>
             ) : (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Your Upcoming and Recent Meetings</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Title</TableHead>
-                                    <TableHead>Scheduled Time</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {meetings && meetings.map((meeting) => (
-                                    <TableRow key={meeting._id}>
-                                        <TableCell>{meeting.title}</TableCell>
-                                        <TableCell>
-                                            {format(new Date(meeting.scheduledTime), 'PPp')}
-                                        </TableCell>
-                                        <TableCell>
-                                            {renderMeetingStatus(meeting.status, meeting.scheduledTime.toString())}
-                                        </TableCell>
-                                        <TableCell>
-                                            {(canJoinMeeting(meeting.scheduledTime.toString()) || meeting.status === 'active') && (
+                <div>
+                    <Card className='mb-2'>
+                        <CardHeader>
+                            <CardTitle className='text-xl'>Upcoming and Ongoing Meetings</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Title</TableHead>
+                                        <TableHead>Scheduled Time</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {meetings.map((meeting) => (
+                                        (meeting.status === 'scheduled' || meeting.status === 'active') &&
+                                        <TableRow key={meeting._id}>
+                                            <TableCell>{meeting.title}</TableCell>
+                                            <TableCell>
+                                                {format(new Date(meeting.scheduledTime), 'PPp')}
+                                            </TableCell>
+                                            <TableCell>
+                                                {renderMeetingStatus(meeting.status, meeting.scheduledTime)}
+                                            </TableCell>
+                                            <TableCell className="space-x-2">
+                                                {canJoinMeeting(meeting.scheduledTime, meeting.status) && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleJoinMeeting(meeting._id)}
+                                                    >
+                                                        <Video className="mr-2 w-4 h-4" /> Join
+                                                    </Button>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className='text-xl'>Completed and Cancelled Meetings</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Title</TableHead>
+                                        <TableHead>Scheduled Time</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {meetings.map((meeting) => (
+                                        (meeting.status === 'completed' || meeting.status === 'cancelled') &&
+                                        <TableRow key={meeting._id}>
+                                            <TableCell>{meeting.title}</TableCell>
+                                            <TableCell>
+                                                {format(new Date(meeting.scheduledTime), 'PPp')}
+                                            </TableCell>
+                                            <TableCell>
+                                                {renderMeetingStatus(meeting.status, meeting.scheduledTime)}
+                                            </TableCell>
+                                            <TableCell className="space-x-2">
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
-                                                    onClick={() => handleJoinMeeting(meeting._id)}
+                                                    onClick={() => openDetailsModal(meeting)}
                                                 >
-                                                    <Video className="mr-2 w-4 h-4" /> Join
+                                                    <Info className="mr-2 w-4 h-4" /> Details
                                                 </Button>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
             )}
+
+            <MeetingDetailsModal
+                isOpen={isDetailsModalOpen}
+                onClose={() => setIsDetailsModalOpen(false)}
+                meeting={selectedMeeting}
+                users={[]}
+                volunteers={[]}
+            />
         </div>
     );
 };

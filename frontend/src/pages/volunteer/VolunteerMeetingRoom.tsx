@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 import { meetingService } from '@/services/meeting.service';
-import { userService } from '@/services/user.service';
+import { volunteerService } from '@/services/volunteer.service';
+import { useSelector } from 'react-redux';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
-const UserMeetingRoom: React.FC = () => {
+const VolunteerMeetingRoom: React.FC = () => {
     const { meetingId } = useParams<{ meetingId: string }>();
     const navigate = useNavigate();
     const meetingContainerRef = useRef<HTMLDivElement>(null);
@@ -19,23 +20,26 @@ const UserMeetingRoom: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(true);
 
+    const volunteerId = useSelector((state: any) => state.auth.userId);
+
     useEffect(() => {
         const initializeMeeting = async () => {
             try {
-                // Fetch user details
-                const userResponse = await userService.fetchUserDetails();
-                const user = userResponse.data.user;
+                // Fetch volunteer details
+                const volunteerResponse = await volunteerService.fetchVolunteerDetails(volunteerId);
+                const volunteer = volunteerResponse.data.volunteerDetails;
+                console.log('volunteer response: ', volunteerResponse)
 
                 // Fetch meeting details
                 const meetingDetails = await meetingService.fetchMeetingDetails(meetingId || '');
                 setMeeting(meetingDetails);
 
-                // Check if user is authorized to join this meeting
-                const isParticipant = meetingDetails.participants.includes(user._id);
+                // Check if volunteer is authorized to join this meeting
+                const isParticipant = meetingDetails.participants.includes(volunteer._id);
                 if (!isParticipant) {
                     setIsAuthorized(false);
                     toast.error("You are not authorized to join this meeting");
-                    setTimeout(() => navigate('/user/meetings'), 3000);
+                    setTimeout(() => navigate('/volunteer/meetings'), 3000);
                     return;
                 }
 
@@ -54,8 +58,8 @@ const UserMeetingRoom: React.FC = () => {
                     appId,
                     appSign,
                     meetingId || '',
-                    user._id || 'guest',
-                    user.name || 'Guest User'
+                    volunteer._id || 'guest',
+                    volunteer.name || 'Guest volunteer'
                 );
 
                 // Initialize Zego video conference
@@ -88,7 +92,7 @@ const UserMeetingRoom: React.FC = () => {
                         },
                         onLeaveRoom: () => {
                             console.log('Left meeting room');
-                            navigate('/user/meetings');
+                            navigate('/volunteer/meetings');
                             window.location.reload();
                         },
                         onError: (error: any) => {
@@ -104,7 +108,7 @@ const UserMeetingRoom: React.FC = () => {
             } catch (error) {
                 console.error('Meeting initialization error:', error);
                 toast.error('Failed to join meeting');
-                navigate('/user/meetings');
+                navigate('/volunteer/meetings');
             }
         };
 
@@ -124,7 +128,7 @@ const UserMeetingRoom: React.FC = () => {
             <div className="flex flex-col items-center justify-center h-screen">
                 <h2 className="text-xl font-semibold mb-4">Unauthorized Access</h2>
                 <p className="mb-4">You are not authorized to join this meeting.</p>
-                <Button onClick={() => navigate('/user/meetings')}>Return to Dashboard</Button>
+                <Button onClick={() => navigate('/volunteer/meetings')}>Return to Dashboard</Button>
             </div>
         );
     }
@@ -168,4 +172,4 @@ const UserMeetingRoom: React.FC = () => {
     );
 };
 
-export default UserMeetingRoom;
+export default VolunteerMeetingRoom;

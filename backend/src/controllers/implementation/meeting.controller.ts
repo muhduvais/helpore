@@ -28,7 +28,7 @@ export class MeetingController implements IMeetingController {
                 scheduledTime
             );
 
-            res.status(201).json(meeting);
+            res.status(201).json({ meeting });
         } catch (error) {
             console.error('Error creating meeting:', error);
             res.status(500).json({ error: 'Could not create meeting' });
@@ -64,8 +64,7 @@ export class MeetingController implements IMeetingController {
 
     getUserMeetings = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId } = req.user as JwtPayload;
-            console.log('user: ', userId)
+            const { userId, role } = req.user as JwtPayload;
 
             if (!userId) {
                 res.status(401).json({ message: 'User not authenticated' });

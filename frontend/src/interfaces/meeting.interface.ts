@@ -11,7 +11,7 @@ export interface IMeeting extends Document {
   title: string;
   participants: string[];
   scheduledTime: Date | string;
-  status: 'scheduled' | 'active' | 'completed';
+  status: 'scheduled' | 'active' | 'completed' | 'cancelled';
   createdAt: Date;
 }
 

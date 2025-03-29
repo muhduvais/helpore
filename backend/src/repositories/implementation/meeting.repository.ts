@@ -2,7 +2,7 @@ import { injectable } from 'tsyringe';
 import Meeting from '../../models/meeting.model';
 import { IMeeting } from '../../interfaces/meeting.interface';
 import { IMeetingRepository } from '../interfaces/IMeetingRepository';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 @injectable()
 export class MeetingRepository implements IMeetingRepository {
@@ -25,25 +25,33 @@ export class MeetingRepository implements IMeetingRepository {
         }
     }
 
-    async findByUserId(userId: string): Promise<IMeeting[]> {
+    async findMeetingsByParticipantId(userId: string): Promise<IMeeting[]> {
         try {
-            return await Meeting.find();
+            const userObjectId = new Types.ObjectId(userId);
+
+            const meetings = await Meeting.find({
+                participants: userObjectId
+            })
+            .sort({ scheduledTime: 1 });
+
+            return meetings;
         } catch (error) {
-            console.error('Error finding meetings by user ID:', error);
+            console.error('Error fetching meetings for participant:', error);
             throw error;
         }
     }
 
     async findAll(): Promise<IMeeting[]> {
         try {
-            return await Meeting.find();
+            return await Meeting.find()
+            .sort({ scheduledTime: 1 });
         } catch (error) {
             console.error('Error finding all meetings:', error);
             throw error;
         }
     }
 
-    async updateStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed'): Promise<IMeeting | null> {
+    async updateStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed' | 'cancelled'): Promise<IMeeting | null> {
         try {
             return await Meeting.findByIdAndUpdate(
                 meetingId,

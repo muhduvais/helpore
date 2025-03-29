@@ -7,7 +7,7 @@ const router = express.Router();
 
 const volunteerController = container.resolve<IVolunteerController>('IVolunteerController');
 
-router.use(authorizeRole('admin'));
+router.use(authorizeRole(['admin', 'volunteer']));
 
 router.get('/', volunteerController.getVolunteers);
 router.post('/', volunteerController.addVolunteer);

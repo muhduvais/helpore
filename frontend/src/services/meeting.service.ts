@@ -148,7 +148,7 @@ export const meetingService = {
   getUserMeetings: async () => {
     try {
       const response = await customAxios.get("/api/meetings/user");
-      console.log('response: ', response)
+      console.log('user response: ', response)
       return response.data;
     } catch (error) {
       console.error("Error fetching user meetings:", error);
@@ -158,7 +158,7 @@ export const meetingService = {
 
   updateMeetingStatus: async (
     meetingId: string,
-    status: 'scheduled' | 'active' | 'completed'
+    status: 'scheduled' | 'active' | 'completed' | 'cancelled'
   ) => {
     try {
       const response = await customAxios.patch(

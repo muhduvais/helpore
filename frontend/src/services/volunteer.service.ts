@@ -1,21 +1,22 @@
-import { ChangePasswordData, IAddress, IUser } from '../interfaces/userInterface';
+import { ChangePasswordData, IAddress } from '../interfaces/userInterface';
 import { customAxios } from '../utils/apiClient';
 
 
 export const volunteerService = {
 
     // Profile
-    fetchUserDetails: async () => {
+    fetchVolunteerDetails: async (volunteerId: string) => {
         try {
-            const response = await customAxios.get('/api/users')
+            const response = await customAxios.get(`/api/volunteers/${volunteerId}`)
             return response;
         } catch (error) {
+            console.log('Error fetching volunteer details: ', error)
             throw error
         }
     },
-    updateUser: async (formData: any) => {
+    updateVolunteer: async (formData: any) => {
         try {
-            const response = await customAxios.put('/api/users', { formData });
+            const response = await customAxios.put('/api/volunteers', { formData });
             return response;
         } catch (error) {
             throw error;
@@ -23,7 +24,7 @@ export const volunteerService = {
     },
     updateProfilePicture: async (profilePicture: string) => {
         try {
-            const response = await customAxios.patch('/api/users/profilePicture', { profilePicture })
+            const response = await customAxios.patch('/api/volunteers/profilePicture', { profilePicture })
             return response;
         } catch (error) {
             throw error
@@ -31,7 +32,7 @@ export const volunteerService = {
     },
     changePassword: async (data: ChangePasswordData) => {
         try {
-            const response = await customAxios.patch('/api/users/password', data)
+            const response = await customAxios.patch('/api/volunteers/password', data)
             return response;
         } catch (error) {
             throw error
@@ -47,7 +48,7 @@ export const volunteerService = {
             throw error
         }
     },
-    getUserAddresses: async () => {
+    getVolunteerAddresses: async () => {
         try {
             const response = await customAxios.get('/api/addresses');
             console.log('addresses: ', response)

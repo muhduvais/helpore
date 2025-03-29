@@ -10,6 +10,8 @@ import ProfileSettings from '@/pages/user/ProfileSettings';
 import VolunteerLayout from '@/pages/volunteer/VolunteerLayout';
 import VolunteerRequests from '@/pages/volunteer/volunteerRequestsList';
 import VolunteerRequestList from '@/pages/volunteer/VolunteerRequestList';
+import VolunteerMeetingsPage from '@/pages/volunteer/VolunteerMeetingsPage';
+import VolunteerMeetingRoom from '@/pages/volunteer/VolunteerMeetingRoom';
 
 const VolunteerRoutes = () => {
     return (
@@ -31,6 +33,9 @@ const VolunteerRoutes = () => {
 
                         <Route path="/assistanceRequests" element={<VolunteerRequests />} />
                         <Route path="/assistanceRequests/:id" element={<VolunteerAssistanceRequestDetails />} />
+
+                        <Route path="/meetings" element={<VolunteerMeetingsPage />} />
+                        <Route path="/meetings/:meetingId" element={<VolunteerMeetingRoom />} />
 
                         <Route path="/404" element={<Volunteer404 />} />
                         <Route path="/*" element={<Volunteer404 />} />

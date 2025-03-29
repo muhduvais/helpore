@@ -48,7 +48,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     }
 };
 
-export const authorizeRole = (requiredRole: string) => {
+export const authorizeRole = (requiredRole: string[]) => {
     return (req: Request, res: Response, next: NextFunction): void => {
         try {
             if (!req.user) {
@@ -56,7 +56,7 @@ export const authorizeRole = (requiredRole: string) => {
                 return;
             }
 
-            if (req.user.role !== requiredRole) {
+            if (!requiredRole.includes(req.user.role)) {
                 res.status(403).json({ message: `Access denied! ${requiredRole} role is required.` });
                 return;
             }

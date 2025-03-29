@@ -39,7 +39,7 @@ export class MeetingService implements IMeetingService {
     }
 
     async getUserMeetings(userId: string): Promise<IMeeting[]> {
-        return await this.meetingRepository.findByUserId(userId);
+        return await this.meetingRepository.findMeetingsByParticipantId(userId);
     }
 
     async updateMeetingStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed'): Promise<IMeeting | null> {

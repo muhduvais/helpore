@@ -6,7 +6,7 @@ const MeetingSchema = new Schema<IMeeting>({
     title: { type: String, required: true },
     participants: [{ type: Types.ObjectId, ref: 'users' }],
     scheduledTime: { type: Date || String, default: Date.now },
-    status: { type: String, enum: ['scheduled', 'active', 'completed'], default: 'scheduled', },
+    status: { type: String, enum: ['scheduled', 'active', 'completed' , 'cancelled'], default: 'scheduled', },
     createdAt: { type: Date, default: Date.now },
 });
 

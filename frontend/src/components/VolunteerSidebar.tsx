@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ChartNoAxesGantt, FileText, HeartHandshake, LayoutDashboard, Users } from "lucide-react";
+import { Calendar, FileText, LayoutDashboard, List } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from '../assets/Logo-black.png';
 import logo_short from '../assets/Logo-black-short.png';
@@ -17,7 +17,6 @@ const VolunteerSidebar = () => {
     const twoRef = useRef(null);
     const threeRef = useRef(null);
     const fourRef = useRef(null);
-    const fiveRef = useRef(null);
 
     const currentPage = location.pathname.split("/")[2] || "dashboard";
 
@@ -27,7 +26,6 @@ const VolunteerSidebar = () => {
             gsap.fromTo(twoRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" });
             gsap.fromTo(threeRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.3, ease: "power2.out" });
             gsap.fromTo(fourRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.5, ease: "power2.out" });
-            gsap.fromTo(fiveRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
         }
     }, []);
 
@@ -86,8 +84,15 @@ const VolunteerSidebar = () => {
 
                 <Link ref={threeRef} className={`${currentPage === "requests" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/volunteer/requests">
                     <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
-                        <FileText size={20} />
+                        <List size={20} />
                         <span className={`${sidebarState ? 'block' : 'hidden'}`}>Processing Requests</span>
+                    </li>
+                </Link>
+
+                <Link ref={fourRef} className={`${currentPage === "meetings" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/volunteer/meetings">
+                    <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
+                        <Calendar size={20} />
+                        <span className={`${sidebarState ? 'block' : 'hidden'}`}>Meetings</span>
                     </li>
                 </Link>
             </ul>

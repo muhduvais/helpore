@@ -36,8 +36,9 @@ export class VolunteerController implements IVolunteerController {
 
     async getVolunteers(req: Request, res: Response): Promise<void> {
 
-        const page = parseInt(req.query.page as string, 10) || 1;
-        let limit = parseInt(req.query.limit as string, 10) || 5;
+        const page = req.query.page !== undefined ? parseInt(req.query.page as string, 10) : 1;
+        let limit = req.query.limit !== undefined ? parseInt(req.query.limit as string, 10) : 5;
+
         const search = req.query.search as string;
         let skip = !search ? ((page - 1) * limit) : 0;
         const isActive = req.query.isActive || 'all';
@@ -79,7 +80,7 @@ export class VolunteerController implements IVolunteerController {
 
     async updateProfilePicture(req: Request, res: Response): Promise<void> {
         try {
-            const { userId: volunteerId} = req.user as JwtPayload;
+            const { userId: volunteerId } = req.user as JwtPayload;
             const { profilePicture } = req.body;
 
             const updated = await this.volunteerService.changeProfilePicture(volunteerId, profilePicture);
@@ -98,7 +99,7 @@ export class VolunteerController implements IVolunteerController {
 
     async changePassword(req: Request, res: Response): Promise<void> {
         try {
-            const { userId: volunteerId} = req.user as JwtPayload;
+            const { userId: volunteerId } = req.user as JwtPayload;
             const { currentPassword, newPassword } = req.body;
 
             const isValid = await this.volunteerService.verifyCurrentPassword(volunteerId, currentPassword);

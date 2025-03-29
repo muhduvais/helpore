@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactEventHandler } from 'react';
+import { useState, useEffect, ReactEventHandler } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Card } from "@/components/ui/card";
@@ -329,7 +329,7 @@ const AdminRequests = () => {
     return (
       <Dialog
         open={userDetailsDialog.open}
-        onOpenChange={(open) => !open && setUserDetailsDialog({ open: false, userId: null })}
+        onOpenChange={(open: any) => !open && setUserDetailsDialog({ open: false, userId: null })}
       >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
