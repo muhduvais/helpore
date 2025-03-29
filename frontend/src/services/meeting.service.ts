@@ -16,7 +16,7 @@ export const meetingService = {
         userName: currentUser.name
       });
 
-      return response.data.token;
+      return response;
     } catch (error) {
       console.error('Failed to generate Zego token:', error);
       throw new Error('Token generation failed');
@@ -125,27 +125,34 @@ export const meetingService = {
     }
   },
 
-  createMeeting: async (meetingData: {
-    title: string;
-    participants: string[];
-    scheduledTime?: Date;
-  }) => {
+  createMeeting: async (adminId: string, title: string, participants: string[], scheduledTime: Date | string) => {
     try {
-      const userResponse = await userService.fetchUserDetails();
-      const currentUser = userResponse.data.user;
-
-      const payload = {
-        ...meetingData,
-        adminId: currentUser._id,
-        status: 'scheduled',
-        createdAt: new Date()
-      };
-
-      const response = await customAxios.post('/api/meetings', payload);
+      const response = await customAxios.post("/api/meetings", { adminId, title, participants, scheduledTime });
       return response.data;
     } catch (error) {
-      console.error('Failed to create meeting:', error);
-      throw new Error('Could not create meeting');
+      console.error("Error creating meeting:", error);
+      throw error;
+    }
+  },
+
+  getMeetings: async () => {
+    try {
+      const response = await customAxios.get("/api/meetings");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching meetings:", error);
+      throw error;
+    }
+  },
+
+  getUserMeetings: async () => {
+    try {
+      const response = await customAxios.get("/api/meetings/user");
+      console.log('response: ', response)
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user meetings:", error);
+      throw error;
     }
   },
 

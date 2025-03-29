@@ -1,4 +1,4 @@
-import React, { useState, ReactNode, useEffect, useRef } from 'react';
+import { useState, ReactNode, useEffect, useRef } from 'react';
 import { Menu, X, Home, Box, FileText, Heart, Newspaper, Users, LogOut, User, Bell } from 'lucide-react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -82,7 +82,7 @@ const Layout: React.FC = () => {
     { title: 'Assets', icon: <Box className="w-5 h-5" />, path: '/user/assets' },
     { title: 'Requests', icon: <FileText className="w-5 h-5" />, path: '/user/requests' },
     { title: 'Donations', icon: <Heart className="w-5 h-5" />, path: '/user/donations' },
-    { title: 'Blogs', icon: <Newspaper className="w-5 h-5" />, path: '/user/blogs' },
+    { title: 'Meetings', icon: <Newspaper className="w-5 h-5" />, path: '/user/meetings' },
     { title: 'About Us', icon: <Users className="w-5 h-5" />, path: '/user/about' },
   ];
 

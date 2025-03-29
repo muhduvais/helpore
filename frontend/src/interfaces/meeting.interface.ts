@@ -6,6 +6,7 @@ export interface ZegoCloudConfiguration {
 }
 
 export interface IMeeting extends Document {
+  _id: string;
   adminId: string;
   title: string;
   participants: string[];

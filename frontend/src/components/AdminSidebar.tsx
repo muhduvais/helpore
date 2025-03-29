@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ChartNoAxesGantt, FileText, Handshake, HeartHandshake, LayoutDashboard, Users } from "lucide-react";
+import { Calendar, ChartNoAxesGantt, FileText, Handshake, HeartHandshake, LayoutDashboard, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from '../assets/Logo-black.png';
 import logo_short from '../assets/Logo-black-short.png';
@@ -19,6 +19,7 @@ const AdminSidebar = () => {
     const fourRef = useRef(null);
     const fiveRef = useRef(null);
     const sixRef = useRef(null);
+    const sevenRef = useRef(null);
 
     const currentPage = location.pathname.split("/")[2] || "dashboard";
 
@@ -30,6 +31,7 @@ const AdminSidebar = () => {
             gsap.fromTo(fourRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.5, ease: "power2.out" });
             gsap.fromTo(fiveRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
             gsap.fromTo(sixRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
+            gsap.fromTo(sevenRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
         }
     }, []);
 
@@ -111,6 +113,13 @@ const AdminSidebar = () => {
                     <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
                         <HeartHandshake size={20} />
                         <span className={`${sidebarState ? 'block' : 'hidden'}`}>Donations</span>
+                    </li>
+                </Link>
+
+                <Link ref={sevenRef} className={`${currentPage === "meetings" ? 'bg-[#435D2C]' : 'bg-[#688D48]'} px-2 py-2 w-full rounded`} to="/admin/meetings">
+                    <li className={`flex items-center ${sidebarState ? 'justify-start' : 'justify-center'} gap-x-2`}>
+                        <Calendar size={20} />
+                        <span className={`${sidebarState ? 'block' : 'hidden'}`}>Meetings</span>
                     </li>
                 </Link>
             </ul>

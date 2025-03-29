@@ -73,6 +73,8 @@ import { DonationController } from "./controllers/implementation/donation.contro
 import { ChatController } from "./controllers/implementation/chat.controller";
 import { NotificationController } from "./controllers/implementation/notification.controller";
 import { MeetingController } from "./controllers/implementation/meeting.controller";
+import { IMeetingRepository } from "./repositories/interfaces/IMeetingRepository";
+import { MeetingRepository } from "./repositories/implementation/meeting.repository";
 
 export function registerDependencies() {
     try {
@@ -87,6 +89,7 @@ export function registerDependencies() {
         container.register<IDonationRepository>("IDonationRepository", { useClass: DonationRepository });
         container.register<IChatRepository>("IChatRepository", { useClass: ChatRepository });
         container.register<INotificationRepository>("INotificationRepository", { useClass: NotificationRepository });
+        container.register<IMeetingRepository>("IMeetingRepository", { useClass: MeetingRepository });
 
         // Register Services
         container.register<IAdminService>('IAdminService', { useClass: AdminService });
@@ -99,10 +102,11 @@ export function registerDependencies() {
         container.register<IChatService>('IChatService', { useClass: ChatService });
         container.register<INotificationService>('INotificationService', { useClass: NotificationService });
         container.register<IMeetingService>('IMeetingService', {
-            useFactory: () => {
+            useFactory: (dependencyContainer) => {
                 const appId = process.env.ZEGO_APP_ID ? parseInt(process.env.ZEGO_APP_ID) : 0;
                 const serverSecret = process.env.ZEGO_SERVER_SECRET || '';
-                return new MeetingService(appId, serverSecret);
+                const meetingRepository = dependencyContainer.resolve<IMeetingRepository>('IMeetingRepository');
+                return new MeetingService(appId, serverSecret, meetingRepository);
             }
         });
 

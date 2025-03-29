@@ -16,6 +16,8 @@ import AdminRequestManagement from '@/pages/admin/AdminRequestManagement ';
 import AdminAssistanceRequestDetails from '@/pages/admin/AdminAssistanceRequestDetails';
 import AdminDonations from '@/pages/admin/AdminDonations';
 import { AuthErrorHandler } from '@/utils/authErroHandler';
+import MeetingsPage from '@/pages/admin/AdminMeetings';
+import MeetingRoom from '@/pages/admin/AdminMeetingRoom';
 
 const AdminRoutes = () => {
     return (
@@ -42,6 +44,9 @@ const AdminRoutes = () => {
                         <Route path="/assistanceRequests/:id" element={<AdminAssistanceRequestDetails />} />
 
                         <Route path="/donations" element={<AdminDonations />} />
+
+                        <Route path="/meetings" element={<MeetingsPage />} />
+                        <Route path="/meetings/:meetingId" element={<MeetingRoom />} />
 
                         <Route path="/404" element={<Admin404 />} />
                         <Route path="/*" element={<Admin404 />} />

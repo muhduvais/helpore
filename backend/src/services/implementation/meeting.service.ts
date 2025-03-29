@@ -1,81 +1,69 @@
-import { injectable } from 'tsyringe';
-import crypto from 'crypto';
+import { inject, injectable } from 'tsyringe';
+import * as jwt from 'jsonwebtoken';
 import { IMeetingService } from '../interfaces/ServiceInterface';
+import { IMeetingRepository } from '../../repositories/interfaces/IMeetingRepository';
+import { IMeeting } from '../../interfaces/meeting.interface';
+import { Types } from 'mongoose';
 
 @injectable()
 export class MeetingService implements IMeetingService {
     private appId: number;
     private serverSecret: string;
 
-    constructor(appId: number, serverSecret: string) {
+    constructor(appId: number, serverSecret: string,
+        @inject('IMeetingRepository') private meetingRepository: IMeetingRepository,
+    ) {
         this.appId = appId;
         this.serverSecret = serverSecret;
     }
 
-    async generateToken(
-        userId: string,
-        roomId: string,
-        userName: string
-    ): Promise<string> {
-        const timestamp = Math.floor(Date.now() / 1000);
+    async createMeeting(adminId: string, title: string, participants: string[], scheduledTime: Date | string): Promise<IMeeting> {
+        const meetingData: IMeeting = {
+            adminId,
+            title,
+            participants: participants.map(id => new Types.ObjectId(id)),
+            scheduledTime: new Date(scheduledTime),
+            status: 'scheduled',
+            createdAt: new Date()
+        };
 
-        const nonce = this.generateNonce();
+        return await this.meetingRepository.create(meetingData);
+    }
 
-        const payload = JSON.stringify({
+    async getMeetings(): Promise<IMeeting[]> {
+        return await this.meetingRepository.findAll();
+    }
+
+    async getMeetingById(meetingId: string): Promise<IMeeting | null> {
+        return await this.meetingRepository.findById(meetingId);
+    }
+
+    async getUserMeetings(userId: string): Promise<IMeeting[]> {
+        return await this.meetingRepository.findByUserId(userId);
+    }
+
+    async updateMeetingStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed'): Promise<IMeeting | null> {
+        return await this.meetingRepository.updateStatus(meetingId, status);
+    }
+
+    async generateToken(userId: string, roomId: string, userName: string): Promise<string> {
+        const currentTime = Math.floor(Date.now() / 1000);
+        const expireTime = currentTime + 3600;
+
+        const payload = {
             app_id: this.appId,
             user_id: userId,
             room_id: roomId,
             user_name: userName,
-            timestamp: timestamp,
-            nonce: nonce,
-            expire: timestamp + 3600
+            timestamp: currentTime,
+            nonce: Math.floor(Math.random() * 100000),
+            expire: expireTime
+        };
+
+        const token = jwt.sign(payload, this.serverSecret, {
+            algorithm: 'HS256'
         });
 
-        const signature = this.generateSignature(payload);
-
-        return this.encodeToken(payload, signature);
-    }
-
-    private generateNonce(length: number = 16): string {
-        return crypto.randomBytes(length).toString('hex');
-    }
-
-    private generateSignature(payload: string): string {
-        const hmac = crypto.createHmac('sha256', this.serverSecret);
-        hmac.update(payload);
-        return hmac.digest('hex');
-    }
-
-    private encodeToken(payload: string, signature: string): string {
-        const encodedPayload = Buffer.from(payload).toString('base64');
-        const encodedSignature = Buffer.from(signature).toString('base64');
-
-        return `${encodedPayload}.${encodedSignature}`;
-    }
-
-    async verifyToken(token: string): Promise<boolean> {
-        try {
-            const [encodedPayload, encodedSignature] = token.split('.');
-
-            const payload = JSON.parse(
-                Buffer.from(encodedPayload, 'base64').toString('utf-8')
-            );
-
-            const signature = Buffer.from(encodedSignature, 'base64').toString('utf-8');
-
-            const currentTime = Math.floor(Date.now() / 1000);
-            if (payload.expire < currentTime) {
-                return false;
-            }
-
-            const regeneratedSignature = this.generateSignature(
-                JSON.stringify(payload)
-            );
-
-            return signature === regeneratedSignature;
-        } catch (error) {
-            console.error('Token verification failed:', error);
-            return false;
-        }
+        return token;
     }
 }

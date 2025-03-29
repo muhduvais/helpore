@@ -3,12 +3,6 @@ import { Request, Response, NextFunction } from 'express';
 import { JwtPayload } from '../interfaces/auth.interface';
 import User from '../models/user.model';
 
-declare module 'express-serve-static-core' {
-    interface Request {
-        user?: JwtPayload;
-    }
-}
-
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const authHeader = req.header('Authorization');

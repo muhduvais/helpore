@@ -5,6 +5,7 @@ import { IConversationDocument, IMessageDocument } from '../../interfaces/chat.i
 import { IDonation } from '../../models/donation.model';
 import { IDonationResponse } from '../../repositories/implementation/donation.repository';
 import { INotificationDocument } from '../../models/notification.model';
+import { IMeeting } from '../../interfaces/meeting.interface';
 
 export interface IAuthService {
     registerUser(name: string, email: string, password: string): Promise<string | boolean | null>;
@@ -147,6 +148,10 @@ export interface IOtpService {
 }
 
 export interface IMeetingService {
-    generateToken( userId: string, roomId: string, userName: string ): Promise<string>;
-    verifyToken(token: string): Promise<boolean>;
+    createMeeting( adminId: string, title: string, participants: string[], scheduledTime: Date | string ): Promise<IMeeting>;
+    getMeetings(): Promise<IMeeting[]>;
+    getMeetingById(meetingId: string): Promise<IMeeting | null>;
+    getUserMeetings(userId: string): Promise<IMeeting[]>;
+    updateMeetingStatus( meetingId: string, status: 'scheduled' | 'active' | 'completed' ): Promise<IMeeting | null>;
+    generateToken(userId: string, roomId: string, userName: string): Promise<string>;
 }

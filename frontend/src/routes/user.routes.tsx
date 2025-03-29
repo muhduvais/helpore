@@ -13,6 +13,8 @@ import { AuthErrorHandler } from '../utils/authErroHandler';
 import RequestAssistanceForm from '@/pages/user/AssistanceRequest';
 import AssistanceRequestDetails from '@/pages/user/AssistanceRequestDetails';
 import DonationPage from '@/pages/user/Donation';
+import MeetingsPage from '@/pages/user/UserMeetingsPage';
+import UserMeetingRoom from '@/pages/user/UserMeetingRoom';
 
 const UserRoutes = () => {
   return (
@@ -43,6 +45,9 @@ const UserRoutes = () => {
 
             {/* Donations */}
             <Route path="/donations" element={<DonationPage />} />
+
+            <Route path="/meetings" element={<MeetingsPage />} />
+            <Route path="/meetings/:meetingId" element={<UserMeetingRoom />} />
 
             <Route path="404" element={<User404 />} />
             <Route path="*" element={<User404 />} />
