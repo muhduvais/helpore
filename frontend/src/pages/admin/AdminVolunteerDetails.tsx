@@ -43,7 +43,7 @@ const AdminVolunteerDetails = () => {
             setError('');
             const response = await adminService.fetchVolunteerDetails(volunteerId);
             if (response.status === 200) {
-                setVolunteer(response.data.volunteerDetails);
+                setVolunteer(response.data.volunteer);
             }
         } catch (error) {
             if (error instanceof AxiosError) {
