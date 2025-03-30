@@ -1,26 +1,24 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface INotificationDocument extends Document {
-  user: mongoose.Types.ObjectId | string;
+  user?: mongoose.Types.ObjectId | string;
   type: 'message' | 'system';
   content: string;
   read: boolean;
   createdAt: Date;
   requestId?: mongoose.Types.ObjectId | string;
   sender?: mongoose.Types.ObjectId | string;
-  userType: string;
-  senderType: string;
+  userType?: string;
+  senderType?: string;
 }
 
 const notificationSchema: Schema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
-    required: true,
     refPath: 'userType'
   },
   userType: {
     type: String,
-    required: true,
     enum: ['users', 'volunteers']
   },
   type: {

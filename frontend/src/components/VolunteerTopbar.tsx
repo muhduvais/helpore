@@ -173,6 +173,11 @@ const VolunteerTopbar: React.FC<any> = () => {
             navigate(`/volunteer/assistanceRequests/${notification.requestId}?tab=chat`);
             setShowNotifications(false);
         }
+
+        if (notification.type === 'system' && notification.requestId) {
+            window.location.href = `/volunteer/meetings`;
+            setShowNotifications(false);
+          }
     };
 
     return (

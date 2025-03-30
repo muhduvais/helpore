@@ -60,6 +60,39 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
         }
     }
 
+    async editVolunteer(volunteerId: string, formData: any): Promise<string | null | undefined> {
+        try {
+            const { name, age, gender, phone, fname, lname, street, city, state, country, pincode } = formData;
+
+            const newVolunteer: Partial<IUser> = {
+                name,
+                age,
+                gender,
+                phone,
+            };
+
+            const newAddress: IAddress = {
+                fname,
+                lname,
+                street,
+                city,
+                state,
+                country,
+                pincode,
+            };
+
+            const volunteer = await this.userRepository.updateUser(volunteerId, newVolunteer);
+            if (!volunteer) return;
+            await this.addressRepository.updateAddress(volunteer._id as string, newAddress);
+            const registeredMail = volunteer.email;
+
+            return registeredMail;
+        } catch (error) {
+            console.error('Error updating the volunteer details', error);
+            return null;
+        }
+    }
+
     async fetchVolunteers(search: string, skip: number, limit: number, isActive: string): Promise<IUser[] | null> {
         try {
             let query: any = { role: 'volunteer' };
@@ -79,7 +112,16 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
         try {
             return await this.userRepository.findUserDetails(volunteerId);
         } catch (error) {
-            console.error('Error fetching the volunteer details: ', error);
+            console.error('Error fetching volunteer details:', error);
+            throw error;
+        }
+    }
+
+    async fetchAddress(volunteerId: string): Promise<IAddress | null> {
+        try {
+            return await this.addressRepository.findAddressByEntityId(volunteerId);
+        } catch (error) {
+            console.error('Error fetching the address: ', error);
             return null;
         }
     }

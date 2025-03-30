@@ -4,6 +4,8 @@ import { IMeetingService } from '../interfaces/ServiceInterface';
 import { IMeetingRepository } from '../../repositories/interfaces/IMeetingRepository';
 import { IMeeting } from '../../interfaces/meeting.interface';
 import { Types } from 'mongoose';
+import { io } from '../../utils';
+import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
 
 @injectable()
 export class MeetingService implements IMeetingService {
@@ -12,6 +14,7 @@ export class MeetingService implements IMeetingService {
 
     constructor(appId: number, serverSecret: string,
         @inject('IMeetingRepository') private meetingRepository: IMeetingRepository,
+        @inject('INotificationRepository') private notificationRepository: INotificationRepository,
     ) {
         this.appId = appId;
         this.serverSecret = serverSecret;
@@ -27,7 +30,32 @@ export class MeetingService implements IMeetingService {
             createdAt: new Date()
         };
 
-        return await this.meetingRepository.create(meetingData);
+        const newMeeting = await this.meetingRepository.create(meetingData);
+
+        const notification = {
+            type: 'system',
+            content: `New meeting scheduled: "${title}" on ${new Date(scheduledTime).toLocaleString()}`,
+            read: false,
+            requestId: newMeeting._id?.toString() || '',
+            senderId: adminId,
+        };
+
+        if (io) {
+            participants.forEach(participantId => {
+                io.to(`notification-${participantId}`).emit('new-notification', { ...notification, _id: new Types.ObjectId() });
+            });
+        }
+
+        // Create a notification for the receiver
+        await this.notificationRepository.createNotification({
+            type: 'system',
+            content: `New meeting scheduled: "${title}" on ${new Date(scheduledTime).toLocaleString()}`,
+            read: false,
+            requestId: newMeeting._id?.toString() || '',
+            sender: adminId,
+        });
+
+        return newMeeting;
     }
 
     async getMeetings(): Promise<IMeeting[]> {
@@ -65,5 +93,9 @@ export class MeetingService implements IMeetingService {
         });
 
         return token;
+    }
+
+    async deleteMeeting(meetingId: string): Promise<IMeeting | null> {
+        return await this.meetingRepository.deleteById(meetingId);
     }
 }

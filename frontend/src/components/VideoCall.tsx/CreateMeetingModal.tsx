@@ -107,6 +107,11 @@ export const CreateMeetingModal = ({
             }
 
             onSuccess(createResponse.meeting);
+            setTitle('');
+            setSelectedParticipants([]);
+            setDate(new Date());
+            setTime('12:00');
+            setSelectionMode(ParticipantSelectionMode.INDIVIDUAL);
             onClose();
         } catch (error) {
             console.error("Failed to create meeting:", error);

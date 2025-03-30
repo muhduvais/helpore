@@ -13,6 +13,9 @@ router.get('/', volunteerController.getVolunteers);
 router.post('/', volunteerController.addVolunteer);
 router.patch('/:id/:action', volunteerController.toggleIsBlocked);
 router.get('/:id', volunteerController.getVolunteerDetails);
+router.put('/', volunteerController.updateVolunteerDetails);
+router.patch('/profilePicture', volunteerController.updateProfilePicture);
+router.patch('/password', volunteerController.changePassword);
 
 
 export default router;

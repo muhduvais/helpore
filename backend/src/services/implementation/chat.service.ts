@@ -23,7 +23,6 @@ export class ChatService implements IChatService {
             receiverType,
         });
 
-        // Update or create the conversation
         await this.chatRepository.createOrUpdateConversation({
             participants: [senderId, receiverId],
             requestId,
@@ -31,10 +30,10 @@ export class ChatService implements IChatService {
             lastMessageTime: new Date()
         });
 
-        // Emit the message via socket.io
+        // Emit new message
         io.to(`request-${requestId}`).emit('new-message', message);
 
-        // Also emit a notification to the receiver
+        // Emit new notification
         io.to(`notification-${receiverId}`).emit('new-notification', {
             type: 'message',
             content: content.length > 50 ? `${content.substring(0, 50)}...` : content,

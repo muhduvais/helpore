@@ -7,8 +7,8 @@ const ProfileSettings = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  // Delete account
   const handleDeleteAccount = () => {
-    // Account deleting logic
     console.log("Account deletion confirmed");
     closeModal();
   };

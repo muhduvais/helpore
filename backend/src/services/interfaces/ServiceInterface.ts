@@ -60,6 +60,7 @@ export interface IAdminService {
 export interface IVolunteerService {
     addVolunteer(formData: IAddUserForm): Promise<string | boolean | null>;
     fetchVolunteers(search: string, skip: number, limit: number, isActive: string): Promise<IUser[] | null>;
+    editVolunteer(volunteerId: string, formData: any): Promise<string | null | undefined>;
     countVolunteers(search: string): Promise<number>;
     fetchVolunteerDetails(volunteerId: string): Promise<IUser | null>;
     changeProfilePicture(volunteerId: string, profilePicture: string): Promise<boolean>;
@@ -67,6 +68,7 @@ export interface IVolunteerService {
     changePassword(volunteerId: string, newPassword: string): Promise<boolean>;
     toggleIsBlocked(action: boolean, volunteerId: string): Promise<boolean>;
     checkTasksLimit(volunteerId: string): Promise<boolean>;
+    fetchAddress(volunteerId: string): Promise<IAddress | null>;
 }
 
 export interface IAssetService {
@@ -154,4 +156,5 @@ export interface IMeetingService {
     getUserMeetings(userId: string): Promise<IMeeting[]>;
     updateMeetingStatus( meetingId: string, status: 'scheduled' | 'active' | 'completed' ): Promise<IMeeting | null>;
     generateToken(userId: string, roomId: string, userName: string): Promise<string>;
+    deleteMeeting(meetingId: string): Promise<IMeeting | null>;
 }

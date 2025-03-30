@@ -15,6 +15,7 @@ export class MeetingController implements IMeetingController {
         this.getMeetingById = this.getMeetingById.bind(this);
         this.updateMeetingStatus = this.updateMeetingStatus.bind(this);
         this.getUserMeetings = this.getUserMeetings.bind(this);
+        this.deleteMeeting = this.deleteMeeting.bind(this);
     }
 
     async createMeeting(req: Request, res: Response): Promise<void> {
@@ -114,6 +115,18 @@ export class MeetingController implements IMeetingController {
             res.status(200).json({ token });
         } catch (error) {
             res.status(500).json({ error: 'Token generation failed' });
+        }
+    }
+
+    async deleteMeeting(req: Request, res: Response): Promise<void> {
+        try {
+            const { meetingId } = req.params;
+
+            await this.meetingService.deleteMeeting(meetingId);
+
+            res.status(200).json({ message: 'Meeting deleted successfully!' });
+        } catch (error) {
+            res.status(500).json({ error: 'Error deletig meeting!' });
         }
     }
 }

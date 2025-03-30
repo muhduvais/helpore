@@ -6,6 +6,7 @@ import { FaUser, FaEnvelope, FaPhone, FaHome, FaCity, FaMap, FaFlag, FaMapMarker
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
+import { IUser } from '@/interfaces/userInterface';
 
 interface IAddress {
   street: string;
@@ -15,15 +16,15 @@ interface IAddress {
   pincode: string;
 }
 
-interface IUser {
-  name: string;
-  age: number;
-  gender: string;
-  phone: number;
-  email: string;
-  profilePicture?: string;
-  createdAt?: string;
-}
+// interface IUser {
+//   name: string;
+//   age: number;
+//   gender: string;
+//   phone: number;
+//   email: string;
+//   profilePicture?: string;
+//   createdAt?: string;
+// }
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ interface EditProfileModalProps {
   onUpdate: () => void;
 }
 
-interface FormData extends Omit<IUser, 'profilePicture' | 'email' | 'createdAt'>, IAddress {}
+interface FormData extends Omit<IUser, 'profilePicture' | 'email' | 'createdAt' | 'password' | 'isActive' | 'isBlocked' | 'isVerified' | 'role' | 'googleId' | 'resetToken' | 'resetTokenExpiry'>, IAddress {}
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ 
   isOpen, 

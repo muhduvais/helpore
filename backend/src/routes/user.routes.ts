@@ -1,7 +1,7 @@
 import express from 'express';
 import { container } from 'tsyringe';
 import { IUserController } from '../controllers/interfaces/IUserController';
-import { handleInvalidFile, uploadMiddleware } from '../middlewares';
+import { uploadMiddleware } from '../middlewares';
 
 const router = express.Router();
 
@@ -17,7 +17,6 @@ router.patch('/profilePicture', userController.updateProfilePicture);
 router.patch('/password', userController.changePassword);
 router.get('/:id', userController.getUserDetails);
 router.patch('/:id/:blockAction', userController.toggleIsBlocked);
-router.patch('/profilePicture', userController.updateProfilePicture);
 router.delete('/certificate', userController.deleteCertificate);
 
 

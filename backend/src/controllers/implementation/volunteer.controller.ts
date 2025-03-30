@@ -63,61 +63,72 @@ export class VolunteerController implements IVolunteerController {
 
     async getVolunteerDetails(req: Request, res: Response): Promise<void> {
         try {
-            const volunteerId = req.params.id;
-            const volunteerDetails = await this.volunteerService.fetchVolunteerDetails(volunteerId);
+            const volunteerId = req.params.id ? req.params.id : (req.user as JwtPayload).userId;
 
-            if (!volunteerDetails) {
-                res.status(404).json({ success: false, message: 'Volunteer not found!' });
-                return;
+            const [volunteer, address] = await Promise.all([
+                this.volunteerService.fetchVolunteerDetails(volunteerId),
+                this.volunteerService.fetchAddress(volunteerId)
+            ]);
+
+            if (volunteer) {
+                res.status(200).json({ success: true, volunteer, address });
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: 'Volunteer not found!'
+                });
             }
-
-            res.status(200).json({ success: true, volunteerDetails });
         } catch (error) {
-            console.error('Error fetching Volunteer details:', error);
-            res.status(500).json({ success: false, message: 'Error fetching Volunteer details' });
+            res.status(500).json({
+                success: false,
+                message: 'Error fetching the volunteer details',
+                error
+            });
         }
     }
 
     async updateProfilePicture(req: Request, res: Response): Promise<void> {
+
+        const { userId: volunteerId } = req.user as JwtPayload;
+
+        const { profilePicture } = req.body;
+
         try {
-            const { userId: volunteerId } = req.user as JwtPayload;
-            const { profilePicture } = req.body;
+            const changeProfilePicture = await this.volunteerService.changeProfilePicture(volunteerId, profilePicture);
 
-            const updated = await this.volunteerService.changeProfilePicture(volunteerId, profilePicture);
-
-            if (!updated) {
-                res.status(400).json({ success: false, message: 'Error updating profile picture!' });
+            if (!changeProfilePicture) {
+                res.status(400).json({ success: false, message: 'Error changing the profile!' });
                 return;
             }
 
-            res.status(200).json({ success: true, message: 'Profile picture updated successfully!' });
+            res.status(200).json({ success: true, message: 'profile updated successfully!' });
         } catch (error) {
-            console.error('Error updating profile picture:', error);
-            res.status(500).json({ success: false, message: 'Error updating profile picture' });
+            console.error('Error updating the profile picture: ', error);
+            res.status(500).json({ message: 'Error updating the profile picture: ', error });
         }
     }
 
     async changePassword(req: Request, res: Response): Promise<void> {
-        try {
-            const { userId: volunteerId } = req.user as JwtPayload;
-            const { currentPassword, newPassword } = req.body;
 
-            const isValid = await this.volunteerService.verifyCurrentPassword(volunteerId, currentPassword);
-            if (!isValid) {
+        const { userId: volunteerId } = req.user as JwtPayload;
+        const data = req.body;
+        const { currentPassword, newPassword } = data;
+
+        try {
+            const verifyCurrentPassword = await this.volunteerService.verifyCurrentPassword(volunteerId, currentPassword);
+
+            if (!verifyCurrentPassword) {
                 res.status(400).json({ success: false, message: 'Invalid current password!' });
                 return;
             }
+            const changePassword = await this.volunteerService.changePassword(volunteerId, newPassword);
 
-            const updated = await this.volunteerService.changePassword(volunteerId, newPassword);
-            if (!updated) {
-                res.status(400).json({ success: false, message: 'Error updating password!' });
-                return;
+            if (changePassword) {
+                res.status(200).json({ success: true, message: 'Password updated successfully!' });
             }
-
-            res.status(200).json({ success: true, message: 'Password updated successfully!' });
         } catch (error) {
-            console.error('Error updating password:', error);
-            res.status(500).json({ success: false, message: 'Error updating password' });
+            console.error('Error updating the password: ', error);
+            res.status(500).json({ message: 'Error updating the password: ', error });
         }
     }
 
@@ -139,6 +150,21 @@ export class VolunteerController implements IVolunteerController {
                 message: 'Error updating the block status',
                 error
             });
+        }
+    }
+
+    async updateVolunteerDetails(req: Request, res: Response): Promise<void> {
+        try {
+            const volunteerId = (req.user as JwtPayload)?.userId;
+            const { formData } = req.body;
+            const registeredMail = await this.volunteerService.editVolunteer(volunteerId, formData);
+
+            if (registeredMail) {
+                res.status(200).json({ success: true, registeredMail });
+            }
+        } catch (error) {
+            console.error('Error updating the volunteer:', error);
+            res.status(500).json({ message: 'Error updating volunteer', error });
         }
     }
 }

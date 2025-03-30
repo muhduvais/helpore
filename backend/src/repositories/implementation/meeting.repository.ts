@@ -2,7 +2,7 @@ import { injectable } from 'tsyringe';
 import Meeting from '../../models/meeting.model';
 import { IMeeting } from '../../interfaces/meeting.interface';
 import { IMeetingRepository } from '../interfaces/IMeetingRepository';
-import mongoose, { Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 @injectable()
 export class MeetingRepository implements IMeetingRepository {
@@ -60,6 +60,15 @@ export class MeetingRepository implements IMeetingRepository {
             );
         } catch (error) {
             console.error('Error updating meeting status:', error);
+            throw error;
+        }
+    }
+
+    async deleteById(meetingId: string): Promise<IMeeting | null> {
+        try {
+            return await Meeting.findByIdAndDelete(meetingId);
+        } catch (error) {
+            console.error('Error deleting the meeting:', error);
             throw error;
         }
     }

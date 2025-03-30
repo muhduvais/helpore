@@ -148,7 +148,6 @@ export const meetingService = {
   getUserMeetings: async () => {
     try {
       const response = await customAxios.get("/api/meetings/user");
-      console.log('user response: ', response)
       return response.data;
     } catch (error) {
       console.error("Error fetching user meetings:", error);
@@ -170,5 +169,15 @@ export const meetingService = {
       console.error('Failed to update meeting status:', error);
       throw new Error('Could not update meeting status');
     }
-  }
+  },
+
+  deleteMeeting: async (meetingId: string) => {
+    try {
+      const response = await customAxios.delete(`/api/meetings/${meetingId}`);
+      return response;
+    } catch (error) {
+      console.error("Error the meeting meeting:", error);
+      throw error;
+    }
+  },
 }

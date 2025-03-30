@@ -121,8 +121,8 @@ export class UserController implements IUserController {
         res.status(200).json({ success: true, registeredMail });
       }
     } catch (error) {
-      console.error('Error registering the user:', error);
-      res.status(500).json({ message: 'Error registering user', error });
+      console.error('Error updating the user:', error);
+      res.status(500).json({ message: 'Error updating user', error });
     }
   }
 

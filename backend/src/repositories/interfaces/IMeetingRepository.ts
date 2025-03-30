@@ -1,4 +1,4 @@
-import { IMeeting } from "../../interfaces/meeting.interface";
+import { IMeeting, IMeetingDocument } from "../../interfaces/meeting.interface";
 
 export interface IMeetingRepository {
   create(meeting: IMeeting): Promise<IMeeting>;
@@ -6,4 +6,5 @@ export interface IMeetingRepository {
   findMeetingsByParticipantId(userId: string): Promise<IMeeting[]>;
   findAll(): Promise<IMeeting[]>;
   updateStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed' | 'cancelled'): Promise<IMeeting | null>;
+  deleteById(meetingId: string): Promise<IMeeting | null>;
 }

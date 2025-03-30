@@ -14,8 +14,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
     Clock,
+    Copy,
+    Delete,
     Info,
     List,
+    Trash2,
     UserPlus,
     Video,
     XCircle
@@ -49,8 +52,12 @@ const MeetingsPage: React.FC = () => {
     const [volunteers, setVolunteers] = useState<Array<{ id: string, name: string }>>([]);
     const [isCreateMeetingModalOpen, setIsCreateMeetingModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
     const [cancelMeetingId, setCancelMeetingId] = useState<string | null>(null);
     const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+
+    const [deleteMeetingId, setDeleteMeetingId] = useState<string | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const [selectedMeeting, setSelectedMeeting] = useState<IMeeting | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -131,14 +138,49 @@ const MeetingsPage: React.FC = () => {
         }
     };
 
+    const handleDeleteMeeting = async () => {
+        if (!deleteMeetingId) return;
+
+        try {
+            await meetingService.deleteMeeting(deleteMeetingId);
+
+            setMeetings(meetings.filter(meeting => meeting._id !== deleteMeetingId));
+
+            toast.success('Meeting deleted!');
+        } catch (error) {
+            console.error('Failed to delete meeting:', error);
+            toast.error('Could not delete the meeting!');
+        } finally {
+            setIsDeleteDialogOpen(false);
+            setDeleteMeetingId(null);
+        }
+    };
+
     const openCancelDialog = (meetingId: string) => {
         setCancelMeetingId(meetingId);
         setIsCancelDialogOpen(true);
     };
 
+    const openDeleteDialog = (meetingId: string) => {
+        setDeleteMeetingId(meetingId);
+        setIsDeleteDialogOpen(true);
+    };
+
     const openDetailsModal = (meeting: IMeeting) => {
         setSelectedMeeting(meeting);
         setIsDetailsModalOpen(true);
+    };
+
+    const handleCreateModalClose = () => {
+        setIsCreateMeetingModalOpen(false);
+    }
+
+    const handleCopyLink = (meetingId: string) => {
+        const meetingUrl = `${import.meta.env.VITE_BASE_URL}/admin/meetings/${meetingId}`;
+
+        navigator.clipboard.writeText(meetingUrl)
+            .then(() => toast.success("Meeting link copied!"))
+            .catch(() => toast.error("Failed to copy link"));
     };
 
     const canJoinMeeting = (scheduledTime: string | Date, status: string) => {
@@ -156,7 +198,7 @@ const MeetingsPage: React.FC = () => {
             case 'active':
                 return <Badge variant="outline">In Progress</Badge>;
             case 'completed':
-                return <Badge variant="destructive">Completed</Badge>;
+                return <Badge variant="default">Completed</Badge>;
             case 'cancelled':
                 return <Badge variant="destructive">Cancelled</Badge>;
             default:
@@ -202,7 +244,7 @@ const MeetingsPage: React.FC = () => {
                         <CardHeader>
                             <CardTitle className='text-xl'>Upcoming and Ongoing Meetings</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className='max-h-[400px] overflow-y-auto'>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -210,6 +252,7 @@ const MeetingsPage: React.FC = () => {
                                         <TableHead>Scheduled Time</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Actions</TableHead>
+                                        <TableHead>Link</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -224,13 +267,21 @@ const MeetingsPage: React.FC = () => {
                                                 {renderMeetingStatus(meeting.status, meeting.scheduledTime)}
                                             </TableCell>
                                             <TableCell className="space-x-2">
-                                                {canJoinMeeting(meeting.scheduledTime, meeting.status) && (
+                                                {canJoinMeeting(meeting.scheduledTime, meeting.status) ? (
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
                                                         onClick={() => handleJoinMeeting(meeting._id)}
                                                     >
-                                                        <Video className="mr-2 w-4 h-4" /> Join
+                                                        <Video className="mr-2 w-4 h-4 text-green-500" /> Join
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => openDetailsModal(meeting)}
+                                                    >
+                                                        <Info className="mr-2 w-4 h-4" /> Details
                                                     </Button>
                                                 )}
                                                 <Button
@@ -241,6 +292,12 @@ const MeetingsPage: React.FC = () => {
                                                 >
                                                     <XCircle className="mr-2 w-4 h-4 text-red-500 hover:text-red-700" /> Cancel
                                                 </Button>
+                                            </TableCell>
+                                            <TableCell className="">
+                                                <button
+                                                    onClick={() => handleCopyLink(meeting._id)}>
+                                                    <Copy className="mr-2 w-4 h-4 opacity-70 hover:opacity-100 active:-scale-[80%]" />
+                                                </button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -253,7 +310,7 @@ const MeetingsPage: React.FC = () => {
                         <CardHeader>
                             <CardTitle className='text-xl'>Completed and Cancelled Meetings</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className='max-h-[400px] overflow-y-auto'>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -261,6 +318,7 @@ const MeetingsPage: React.FC = () => {
                                         <TableHead>Scheduled Time</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Actions</TableHead>
+                                        <TableHead></TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -283,6 +341,12 @@ const MeetingsPage: React.FC = () => {
                                                     <Info className="mr-2 w-4 h-4" /> Details
                                                 </Button>
                                             </TableCell>
+                                            <TableCell className="">
+                                                <button
+                                                    onClick={() => openDeleteDialog(meeting._id)}>
+                                                    <Trash2 className="mr-2 w-4 h-4 text-red-300 hover:text-red-500" />
+                                                </button>
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -294,7 +358,7 @@ const MeetingsPage: React.FC = () => {
 
             <CreateMeetingModal
                 isOpen={isCreateMeetingModalOpen}
-                onClose={() => setIsCreateMeetingModalOpen(false)}
+                onClose={() => handleCreateModalClose()}
                 users={users}
                 volunteers={volunteers}
                 currentUserId={userId}
@@ -304,18 +368,18 @@ const MeetingsPage: React.FC = () => {
                 }}
             />
 
-            <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+            <AlertDialog open={isCancelDialogOpen || isDeleteDialogOpen} onOpenChange={isCancelDialogOpen ? setIsCancelDialogOpen : setIsDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel Meeting</AlertDialogTitle>
+                        <AlertDialogTitle>{isCancelDialogOpen ? 'Cancel Meeting' : 'Delete Meeting'}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to cancel this meeting? This action cannot be undone.
+                            Are you sure you want to {isCancelDialogOpen ? 'cancel' : 'delete'} this meeting? This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>No, keep it</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleCancelMeeting} className="bg-red-600 hover:bg-red-700">
-                            Yes, cancel meeting
+                        <AlertDialogAction onClick={isCancelDialogOpen ? handleCancelMeeting : handleDeleteMeeting} className="bg-red-600 hover:bg-red-700">
+                            Yes, {isCancelDialogOpen ? 'cancel' : 'delete'} meeting
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

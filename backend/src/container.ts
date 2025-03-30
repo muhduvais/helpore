@@ -106,7 +106,8 @@ export function registerDependencies() {
                 const appId = process.env.ZEGO_APP_ID ? parseInt(process.env.ZEGO_APP_ID) : 0;
                 const serverSecret = process.env.ZEGO_SERVER_SECRET || '';
                 const meetingRepository = dependencyContainer.resolve<IMeetingRepository>('IMeetingRepository');
-                return new MeetingService(appId, serverSecret, meetingRepository);
+                const notificationRepository = dependencyContainer.resolve<INotificationRepository>('INotificationRepository');
+                return new MeetingService(appId, serverSecret, meetingRepository, notificationRepository);
             }
         });
 

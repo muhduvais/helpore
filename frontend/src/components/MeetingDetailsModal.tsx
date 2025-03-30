@@ -16,8 +16,10 @@ import {
     CheckCircle2,
     XCircle,
     CalendarClock,
+    Copy,
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import { toast } from 'sonner';
 
 interface MeetingDetailsModalProps {
     isOpen: boolean;
@@ -40,7 +42,7 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
     if (!meeting) return null;
 
     const allParticipants = [...users, ...volunteers];
-    
+
     const hasParticipantData = users.length > 0 || volunteers.length > 0;
 
     const participantInfo = meeting.participants.map((participantId: string) => {
@@ -49,6 +51,14 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
             return participant ? participant.name : `Unknown (ID: ${participantId})`;
         }
     });
+
+    const handleCopyLink = (meetingId: string) => {
+        const meetingUrl = `${import.meta.env.VITE_BASE_URL}/${role}/meetings/${meetingId}`;
+
+        navigator.clipboard.writeText(meetingUrl)
+            .then(() => toast.success("Meeting link copied!"))
+            .catch(() => toast.error("Failed to copy link"));
+    };
 
     // Helper function to render status badge
     const renderStatusBadge = (status: string) => {
@@ -96,11 +106,18 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
-                    <div className="flex items-start gap-2">
-                        {renderStatusBadge(meeting.status)}
-                        {meeting.status === 'cancelled' &&
-                            <p className="text-sm text-red-500">This meeting has been cancelled.</p>
-                        }
+                    <div className="flex items-center justify-between">
+                        <div className='flex items-center gap-2'>
+                            {renderStatusBadge(meeting.status)}
+                            {meeting.status === 'cancelled' &&
+                                <p className="text-[13px] text-red-500">This meeting has been cancelled.</p>
+                            }
+                        </div>
+                        <div className='flex items-center gap-[3px] cursor-pointer group'
+                            onClick={() => handleCopyLink(meeting._id)}>
+                            <Copy className="w-4 h-4 opacity-70 hover:opacity-100 group-active:scale-[80%] transition-transform duration-150" />
+                            <span className='text-xs'>Copy Link</span>
+                        </div>
                     </div>
 
                     <div className="space-y-3">

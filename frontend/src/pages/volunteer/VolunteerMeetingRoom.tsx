@@ -27,7 +27,7 @@ const VolunteerMeetingRoom: React.FC = () => {
             try {
                 // Fetch volunteer details
                 const volunteerResponse = await volunteerService.fetchVolunteerDetails(volunteerId);
-                const volunteer = volunteerResponse.data.volunteerDetails;
+                const volunteer = volunteerResponse.data.volunteer;
                 console.log('volunteer response: ', volunteerResponse)
 
                 // Fetch meeting details

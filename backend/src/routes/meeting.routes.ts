@@ -12,5 +12,6 @@ router.get('/', meetingController.getMeetings);
 router.get('/:meetingId', meetingController.getMeetingById);
 router.patch('/:meetingId/status', meetingController.updateMeetingStatus);
 router.post('/generateToken', meetingController.generateZegoToken);
+router.delete('/:meetingId', meetingController.deleteMeeting);
 
 export default router;

@@ -28,10 +28,10 @@ const AdminSidebar = () => {
             gsap.fromTo(oneRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" });
             gsap.fromTo(twoRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" });
             gsap.fromTo(threeRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.3, ease: "power2.out" });
-            gsap.fromTo(fourRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.5, ease: "power2.out" });
-            gsap.fromTo(fiveRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
-            gsap.fromTo(sixRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
-            gsap.fromTo(sevenRef.current, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
+            gsap.fromTo(fourRef.current, { opacity: 0, y: -40 }, { opacity: 1, y: 0, duration: 1.5, ease: "power2.out" });
+            gsap.fromTo(fiveRef.current, { opacity: 0, y: -40 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
+            gsap.fromTo(sixRef.current, { opacity: 0, y: -50 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
+            gsap.fromTo(sevenRef.current, { opacity: 0, y: -50 }, { opacity: 1, y: 0, duration: 1.6, ease: "power2.out" });
         }
     }, []);
 

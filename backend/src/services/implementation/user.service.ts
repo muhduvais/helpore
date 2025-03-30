@@ -159,7 +159,6 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 10);
 
             const result = await uploadToCloudinary(file, 'medical-certificates', uniqueId);
-            console.log('secureUrl: ', result.secure_url)
 
             await this.userRepository.updateUserCertificates(userId, result.secure_url)
 

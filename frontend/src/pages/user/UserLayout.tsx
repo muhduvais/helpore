@@ -1,7 +1,7 @@
 import { useState, ReactNode, useEffect, useRef } from 'react';
 import { Menu, X, Home, Box, FileText, Heart, Newspaper, Users, LogOut, User, Bell } from 'lucide-react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
 import logo from '../../assets/Logo.png';
 import 'react-toastify/dist/ReactToastify.css';
@@ -31,11 +31,13 @@ const Layout: React.FC = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const dispatch = useDispatch();
-  
+
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearAllNotifications, clearNotification } = useNotifications();
 
   const notificationRef = useRef<HTMLButtonElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
+
+  const { role } = useSelector((state: any) => state.auth);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -75,6 +77,18 @@ const Layout: React.FC = () => {
       window.location.href = `/user/assistanceRequests/${notification.requestId}?tab=chat`;
       setShowNotifications(false);
     }
+
+    if (notification.type === 'system' && notification.requestId) {
+      window.location.href = `/user/meetings`;
+      setShowNotifications(false);
+    }
+  };
+
+  const timeFormatter = (value: number, unit: string, suffix: string) => {
+    if (unit === 'second') {
+      return 'Just now';
+    }
+    return `${value} ${unit}${value !== 1 ? 's' : ''} ${suffix}`;
   };
 
   const menuItems: MenuItem[] = [
@@ -179,9 +193,9 @@ const Layout: React.FC = () => {
                             >
                               <div className="flex justify-between pr-6">
                                 <span className="font-medium text-gray-800">
-                                  {notification.type === 'message' ? 'New message' : 'System notification'}
+                                  {notification.type === 'message' ? 'New message' : 'Meeting Scheduled'}
                                 </span>
-                                <TimeAgo date={notification.timestamp} className="text-xs text-gray-500" />
+                                <TimeAgo date={notification.timestamp} formatter={timeFormatter} className="text-xs text-gray-500" />
                               </div>
                               <p className="text-sm text-gray-600 mt-1 truncate">
                                 {notification.content}

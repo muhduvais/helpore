@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
     Clock,
+    Copy,
     Info,
     List,
     Video
@@ -72,6 +73,14 @@ const UserMeetingsPage: React.FC = () => {
         setIsDetailsModalOpen(true);
     };
 
+    const handleCopyLink = (meetingId: string) => {
+        const meetingUrl = `${import.meta.env.VITE_BASE_URL}/user/meetings/${meetingId}`;
+
+        navigator.clipboard.writeText(meetingUrl)
+            .then(() => toast.success("Meeting link copied!"))
+            .catch(() => toast.error("Failed to copy link"));
+    };
+
     const renderMeetingStatus = (status: string, scheduledTime: string | Date) => {
         switch (status) {
             case 'scheduled':
@@ -121,7 +130,7 @@ const UserMeetingsPage: React.FC = () => {
                         <CardHeader>
                             <CardTitle className='text-xl'>Upcoming and Ongoing Meetings</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className='max-h-[400px] overflow-y-auto'>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -129,6 +138,7 @@ const UserMeetingsPage: React.FC = () => {
                                         <TableHead>Scheduled Time</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Actions</TableHead>
+                                        <TableHead>Link</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -143,15 +153,29 @@ const UserMeetingsPage: React.FC = () => {
                                                 {renderMeetingStatus(meeting.status, meeting.scheduledTime)}
                                             </TableCell>
                                             <TableCell className="space-x-2">
-                                                {canJoinMeeting(meeting.scheduledTime, meeting.status) && (
+                                                {canJoinMeeting(meeting.scheduledTime, meeting.status) ? (
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
                                                         onClick={() => handleJoinMeeting(meeting._id)}
                                                     >
-                                                        <Video className="mr-2 w-4 h-4" /> Join
+                                                        <Video className="mr-2 w-4 h-4 text-green-500" /> Join
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => openDetailsModal(meeting)}
+                                                    >
+                                                        <Info className="mr-2 w-4 h-4" /> Details
                                                     </Button>
                                                 )}
+                                            </TableCell>
+                                            <TableCell className="">
+                                                <button
+                                                    onClick={() => handleCopyLink(meeting._id)}>
+                                                    <Copy className="mr-2 w-4 h-4 opacity-70 hover:opacity-100 active:-scale-[80%]" />
+                                                </button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -164,7 +188,7 @@ const UserMeetingsPage: React.FC = () => {
                         <CardHeader>
                             <CardTitle className='text-xl'>Completed and Cancelled Meetings</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className='max-h-[400px] overflow-y-auto'>
                             <Table>
                                 <TableHeader>
                                     <TableRow>

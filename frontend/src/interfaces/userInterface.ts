@@ -43,6 +43,7 @@ export interface IUserDocument extends Document {
     resetToken: string;
     resetTokenExpiry: Date;
     uid?: string;
+    createdAt?: Date;
 }
 
 export interface IAddress {

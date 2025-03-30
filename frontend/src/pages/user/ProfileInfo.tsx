@@ -10,7 +10,6 @@ import { IUser } from '../../interfaces/userInterface';
 import { AxiosError } from 'axios';
 import { adminService } from '@/services/admin.service';
 import EditProfileModal from '@/components/EditUserProfile';
-import { Toaster } from 'sonner';
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('info');
@@ -451,14 +450,14 @@ const Profile = () => {
                                 <div className="flex items-center space-x-4">
                                     <button
                                         type="submit"
-                                        className="px-6 py-2 bg-[#688D48] text-white font-semibold hover:bg-[#435D2C] transition"
+                                        className="px-5 py-2 bg-green-700 text-white font-medium rounded-lg hover:bg-green-800 transition shadow-sm"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? "Updating..." : "Update Password"}
                                     </button>
                                     <button
                                         type="button"
-                                        className="px-6 py-2 bg-gray-200 text-gray-600 font-semibold hover:bg-gray-300 transition"
+                                        className="px-5 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition"
                                         onClick={clearFields}
                                     >
                                         Cancel
@@ -639,16 +638,16 @@ const Profile = () => {
                                         <p className="text-gray-500 mb-6">Are you sure you want to delete this certificate? This action cannot be undone.</p>
                                         <div className="flex justify-end space-x-3">
                                             <button
-                                                onClick={cancelDelete}
-                                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200"
+                                                onClick={() => cancelDelete()}
+                                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 onClick={confirmDelete}
-                                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200"
+                                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
                                             >
-                                                Delete
+                                                Delete Account
                                             </button>
                                         </div>
                                     </div>

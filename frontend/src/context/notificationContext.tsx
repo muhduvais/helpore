@@ -58,7 +58,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             try {
                 const response = await customAxios.get('/api/notifications');
                 if (response.data.success) {
-                    // Transform backend _id to id for frontend consistency
                     const transformedNotifications = response.data.data.map((notif: any) => ({
                         ...notif,
                         timestamp: new Date(notif.timestamp || notif.createdAt)
