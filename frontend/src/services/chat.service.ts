@@ -48,7 +48,7 @@ export const chatService = {
   },
 
   connectSocket: (token: string) => {
-    const socket: Socket = io('http://localhost:5000');
+    const socket: Socket = io(import.meta.env.SERVER_URL);
 
     socket.on('connect', () => {
       console.log('Socket connected');
@@ -57,6 +57,8 @@ export const chatService = {
     socket.on('connect_error', (error: any) => {
       console.error('Connection failed', error.message);
     });
+
+    console.log('token: ', token);
 
     return socket;
   },
@@ -74,8 +76,8 @@ export const chatService = {
   },
 
   setupListeners: (
-    socket: Socket, 
-    messageCallback: (message: IMessageDocument) => void, 
+    socket: Socket,
+    messageCallback: (message: IMessageDocument) => void,
     typingCallback: (data: { userId: string, isTyping: boolean }) => void
   ) => {
     socket.on('new-message', (message: IMessageDocument) => {
