@@ -6,6 +6,7 @@ const router = express.Router();
 
 const assistanceRequestController = container.resolve<IAssistanceRequestController>('IAssistanceRequestController');
 
+router.get('/pending', assistanceRequestController.getPendingRequests);
 router.get('/', assistanceRequestController.getAssistanceRequests);
 router.get('/nearBy', assistanceRequestController.getNearbyRequests);
 router.get('/processing', assistanceRequestController.getProcessingRequests);

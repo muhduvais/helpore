@@ -90,11 +90,12 @@ export interface IAssetRequest extends Document {
 }
 
 export interface IAssistanceRequest {
+    _id?: string;
     user: Types.ObjectId;
     type: 'volunteer' | 'ambulance';
     description?: string;
     status: 'pending' | 'approved' | 'rejected';
-    requestedDate: Date;
+    requestedDate: Date | string;
     requestedTime: string;
     priority: 'urgent' | 'normal';
     address?: IAddress;

@@ -127,6 +127,16 @@ export class DonationService extends BaseService<IDonation> implements IDonation
     }
   }
 
+  async getRecentDonations(): Promise<IDonation[] | null> {
+    try {
+      const donations = await this.donationRepository.findRecentDonations();
+      return donations;
+    } catch (error) {
+      console.error('Error fetcing recent donations:', error);
+      throw new Error('Error fetcing recent donations');
+    }
+  }
+
   async totalDonationsCount(search: string, campaign: string): Promise<number | null> {
     try {
       const query: any = {};

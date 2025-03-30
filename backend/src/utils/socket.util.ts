@@ -6,7 +6,7 @@ let io: Server;
 export const setupSocketIO = (server: http.Server) => {
   io = new Server(server, {
     cors: {
-      origin: 'http://localhost:5173',
+      origin: process.env.CLIENT_URL,
     },
   });
 

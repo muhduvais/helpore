@@ -8,6 +8,7 @@ const meetingController = container.resolve<IMeetingController>('IMeetingControl
 
 router.post('/', meetingController.createMeeting);
 router.get('/user', meetingController.getUserMeetings);
+router.get('/upcoming', meetingController.getUpcomingMeetings);
 router.get('/', meetingController.getMeetings);
 router.get('/:meetingId', meetingController.getMeetingById);
 router.patch('/:meetingId/status', meetingController.updateMeetingStatus);

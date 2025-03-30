@@ -2,18 +2,12 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IDonationController } from '../interfaces/IDonationController';
 import { IDonationService } from '../../services/interfaces/ServiceInterface';
-import { IDonationRepository } from '../../repositories/interfaces/IDonationRepository';
 import { createObjectCsvStringifier } from 'csv-writer';
-import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
-import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 
 @injectable()
 export class DonationController implements IDonationController {
   constructor(
     @inject('IDonationService') private readonly donationService: IDonationService,
-    @inject('IDonationRepository') private readonly donationRepository: IDonationRepository,
-    @inject('IUserRepository') private readonly userRepository: IUserRepository,
-    @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
   ) {
     this.createCheckoutSession = this.createCheckoutSession.bind(this);
     this.webhook = this.webhook.bind(this);
@@ -21,6 +15,7 @@ export class DonationController implements IDonationController {
     this.generateReceipt = this.generateReceipt.bind(this);
     this.getDonations = this.getDonations.bind(this);
     this.exportDonations = this.exportDonations.bind(this);
+    this.getRecentDonations = this.getRecentDonations.bind(this);
     // this.fechAllDonations = this.fechAllDonations.bind(this);
   }
 
@@ -77,15 +72,6 @@ export class DonationController implements IDonationController {
     }
   };
 
-  // async fechAllDonations(req: Request, res: Response): Promise<void> {
-  //   try {
-  //     const result = await this.donationService.getAllDonations();
-  //     res.status(200).json(result);
-  //   } catch (error) {
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // };
-
   async generateReceipt(req: Request, res: Response): Promise<void> {
     const { donationId } = req.params;
     const userId = !req.query.userId && req.user?.role !== 'admin' ? req.user?.userId : req.query.userId as string;
@@ -130,6 +116,19 @@ export class DonationController implements IDonationController {
       });
     } catch (error) {
       console.error('Error in getDonations controller:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
+  async getRecentDonations(req: Request, res: Response): Promise<void> {
+    try {
+      const donations = await this.donationService.getRecentDonations();
+
+      res.status(200).json({
+        donations: donations,
+      });
+    } catch (error) {
+      console.error('Error in getRecentDonations controller:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   };

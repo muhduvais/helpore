@@ -3,7 +3,7 @@ import { IAssistanceRequestService } from "../interfaces/ServiceInterface";
 import { IAssistanceRequest, IAssistanceRequestResponse } from "../../interfaces/user.interface";
 import { Types } from "mongoose";
 import { IAddressRepository } from "../../repositories/interfaces/IAddressRepository";
-import { calculateDistance, GeocodingService, MAX_DISTANCE, MIN_DISTANCE } from '../../utils';
+import { calculateDistance, MAX_DISTANCE, MIN_DISTANCE } from '../../utils';
 import { IAssistanceRequestRepository } from "../../repositories/interfaces/IAssistanceRequestRepository";
 
 @injectable()
@@ -74,7 +74,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
             }
 
             const requestsWithPromises = pendingRequests
-                .map(request => {
+                .map((request: any) => {
                     if (!request.address || !request.address.latitude || !request.address.longitude) {
                         console.warn(`Request ${request._id} has invalid address`);
                         return null;
@@ -171,6 +171,23 @@ export class AssistanceRequestService implements IAssistanceRequestService {
             if (!results) return null;
 
             return results.map((request: IAssistanceRequestResponse) => ({
+                ...request,
+                requestedDate: new Date(request.requestedDate).toISOString(),
+                address: request.address instanceof Types.ObjectId ? undefined : request.address,
+            }));
+        } catch (error) {
+            console.error("Error finding assistance requests:", error);
+            return null;
+        }
+    }
+
+    async fetchPendingRequests (): Promise<IAssistanceRequest[] | null> {
+        try {
+            const results = await this.assistanceRepository.findPendingAssistanceRequests();
+
+            if (!results) return null;
+
+            return results.map((request: IAssistanceRequest) => ({
                 ...request,
                 requestedDate: new Date(request.requestedDate).toISOString(),
                 address: request.address instanceof Types.ObjectId ? undefined : request.address,

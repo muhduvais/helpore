@@ -107,6 +107,7 @@ export interface IAssistanceRequestService {
     fetchAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequest | null>;
     checkTasksLimit(volunteerId: string): Promise<boolean | null>;
     assignVolunteer(requestId: string, volunteerId: string): Promise<boolean>;
+    fetchPendingRequests (): Promise<IAssistanceRequest[] | null>;
 }
 
 export interface IDonationService {
@@ -114,6 +115,7 @@ export interface IDonationService {
     verifySession(sessionId: string): Promise<any>;
     handleWebhookEvent(event: any): Promise<any>;
     getUserDonationHistory(userId: string): Promise<any>;
+    getRecentDonations(): Promise<IDonation[] | null>;
     constructEvent(payload: any, signature: any, secret: any): Promise<any>;
     generateAndSendReceipt(donationId: string, userId: string): Promise<Buffer>;
     getAllDonations(page: number, limit: number, search: string, campaign: string): Promise<IDonation[] | null>;
@@ -157,4 +159,5 @@ export interface IMeetingService {
     updateMeetingStatus( meetingId: string, status: 'scheduled' | 'active' | 'completed' ): Promise<IMeeting | null>;
     generateToken(userId: string, roomId: string, userName: string): Promise<string>;
     deleteMeeting(meetingId: string): Promise<IMeeting | null>;
+    getUpcomingMeetings(): Promise<IMeeting[] | null>;
 }

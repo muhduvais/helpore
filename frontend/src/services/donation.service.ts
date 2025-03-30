@@ -1,5 +1,4 @@
 import { customAxios } from '../utils/apiClient';
-import { saveAs } from 'file-saver';
 
 interface CheckoutSessionParams {
   amount: number;
@@ -11,6 +10,10 @@ interface CheckoutSessionParams {
 export const donationService = {
   fetchDonationHistory: async () => {
     return await customAxios.get('/api/donations/history');
+  },
+
+  fetchRecentDonations: async () => {
+    return await customAxios.get('/api/donations/recent');
   },
 
   createCheckoutSession: async (params: CheckoutSessionParams) => {

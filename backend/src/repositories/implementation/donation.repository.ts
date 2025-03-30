@@ -49,7 +49,7 @@ export class DonationRepository extends BaseRepository<IDonation> implements IDo
     });
   }
 
-  async findAll(query: any, skip: number, limit: number): Promise<IDonation[] | null>  {
+  async findAll(query: any, skip: number, limit: number): Promise<IDonation[] | null> {
     return await Donation.find(query).skip(skip).limit(limit).sort({ date: -1 }).populate('userId');
   }
 
@@ -57,6 +57,13 @@ export class DonationRepository extends BaseRepository<IDonation> implements IDo
     return await Donation.find({ userId: new mongoose.Types.ObjectId(userId) })
       .sort({ date: -1 })
       .select('amount date status campaign');
+  }
+
+  async findRecentDonations(): Promise<IDonation[] | null> {
+    return await Donation.find()
+      .populate('userId')
+      .sort({ createdAt: -1 })
+      .limit(10);
   }
 
   async findByDonationId(donationId: string): Promise<IDonationResponse | null> {

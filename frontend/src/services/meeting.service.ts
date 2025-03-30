@@ -155,6 +155,16 @@ export const meetingService = {
     }
   },
 
+  getUpcomingMeetings: async () => {
+    try {
+      const response = await customAxios.get("/api/meetings/upcoming");
+      return response;
+    } catch (error) {
+      console.error("Error fetching upcoming meetings:", error);
+      throw error;
+    }
+  },
+
   updateMeetingStatus: async (
     meetingId: string,
     status: 'scheduled' | 'active' | 'completed' | 'cancelled'

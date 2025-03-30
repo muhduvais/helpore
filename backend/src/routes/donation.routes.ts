@@ -6,6 +6,7 @@ const router = express.Router();
 
 const donationController = container.resolve<IDonationController>('IDonationController');
 
+router.get('/recent', donationController.getRecentDonations);
 router.get('/', donationController.getDonations);
 router.post('/create-checkout-session', donationController.createCheckoutSession);
 router.get('/history', donationController.fetchDontaionHistory);

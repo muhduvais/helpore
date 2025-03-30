@@ -13,6 +13,7 @@ export interface IMeeting extends Document {
   scheduledTime: Date | string;
   status: 'scheduled' | 'active' | 'completed' | 'cancelled';
   createdAt: Date;
+  requestedBy?: string;
 }
 
 export interface VideoConferenceConfig {

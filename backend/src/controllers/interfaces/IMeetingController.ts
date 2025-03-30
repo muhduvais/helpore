@@ -9,4 +9,5 @@ export interface IMeetingController {
     updateMeetingStatus(req: Request, res: Response): Promise<void>;
     updateMeetingStatus(req: Request, res: Response): Promise<void>;
     deleteMeeting(req: Request, res: Response): Promise<void>;
+    getUpcomingMeetings(req: Request, res: Response): Promise<void>
 }

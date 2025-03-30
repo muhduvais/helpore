@@ -9,4 +9,5 @@ export interface IDonationRepository extends IBaseRepository<IDonation> {
   findBySessionId(sessionId: string): Promise<any>;
   findByDonationId(donationId: string): Promise<IDonationResponse | null>;
   countDonations(query: object): Promise<number | null>;
+  findRecentDonations(): Promise<IDonation[] | null>;
 }

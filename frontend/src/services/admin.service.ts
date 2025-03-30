@@ -196,6 +196,14 @@ export const adminService = {
             throw error
         }
     },
+    fetchPendingAssistanceRequests: async () => {
+        try {
+            const response = await customAxios.get('/api/assistanceRequests/pending');
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
     fetchAssistanceRequestDetails: async (requestId: string) => {
         try {
             const response = await customAxios.get(`/api/assistanceRequests/${requestId}`)

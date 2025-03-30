@@ -62,6 +62,10 @@ export class MeetingService implements IMeetingService {
         return await this.meetingRepository.findAll();
     }
 
+    async getUpcomingMeetings(): Promise<IMeeting[] | null> {
+        return await this.meetingRepository.findUpcomingMeetings();
+    }
+
     async getMeetingById(meetingId: string): Promise<IMeeting | null> {
         return await this.meetingRepository.findById(meetingId);
     }

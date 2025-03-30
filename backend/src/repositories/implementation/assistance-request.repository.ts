@@ -95,6 +95,20 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
     }
   }
 
+  async findPendingAssistanceRequests (): Promise<IAssistanceRequest[] | null> {
+    try {
+      const requests = await AssistanceRequest.find({ status: 'pending' })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+
+      return requests;
+    } catch (error) {
+      console.error("Error finding pending requests:", error);
+      return null;
+    }
+  }
+
   async findProcessingRequests(
     search: string, filter: string, skip: number, limit: number, volunteerId: string
   ): Promise<IAssistanceRequestResponse[] | null> {
@@ -160,7 +174,7 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
     }
   }
 
-  async findPendingRequests(requestQuery: object, skip: number): Promise<IAssistanceRequestDocument[]> {
+  async findPendingRequests(requestQuery: object, skip: number): Promise<IAssistanceRequest[]> {
     return await AssistanceRequest.find(requestQuery).skip(skip)
       .populate('address')
       .populate('user');
@@ -202,7 +216,7 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
     }
   }
 
-  async findAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequestDocument | null> {
+  async findAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequest | null> {
     try {
       return await AssistanceRequest.findOne({ _id: requestId })
         .populate("user")

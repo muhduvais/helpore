@@ -15,6 +15,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
         this.getProcessingRequests = this.getProcessingRequests.bind(this);
         this.getAssistanceRequestDetails = this.getAssistanceRequestDetails.bind(this);
         this.assignVolunteer = this.assignVolunteer.bind(this);
+        this.getPendingRequests = this.getPendingRequests.bind(this);
     }
 
     async requestAssistance(req: Request, res: Response): Promise<void> {
@@ -120,6 +121,17 @@ export class AssistanceRequestController implements IAssistanceRequestController
         } catch (error) {
             console.error('Error fetching assistance requests:', error);
             res.status(500).json({ message: 'Error fetching assistance requests', error });
+        }
+    }
+
+    async getPendingRequests(req: Request, res: Response): Promise<void> {
+        try {
+            const pendingRequests = await this.assistanceRequestService.fetchPendingRequests();
+
+            res.status(200).json({ success: true, pendingRequests });
+        } catch (error) {
+            console.error('Error fetching pending requests:', error);
+            res.status(500).json({ message: 'Error fetching pending requests', error });
         }
     }
 

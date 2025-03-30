@@ -16,6 +16,7 @@ export class MeetingController implements IMeetingController {
         this.updateMeetingStatus = this.updateMeetingStatus.bind(this);
         this.getUserMeetings = this.getUserMeetings.bind(this);
         this.deleteMeeting = this.deleteMeeting.bind(this);
+        this.getUpcomingMeetings = this.getUpcomingMeetings.bind(this);
     }
 
     async createMeeting(req: Request, res: Response): Promise<void> {
@@ -43,6 +44,16 @@ export class MeetingController implements IMeetingController {
         } catch (error) {
             console.error('Error fetching meetings:', error);
             res.status(500).json({ error: 'Could not fetch meetings' });
+        }
+    }
+
+    async getUpcomingMeetings(req: Request, res: Response): Promise<void> {
+        try {
+            const upcomingMeetings = await this.meetingService.getUpcomingMeetings();
+            res.status(200).json({ upcomingMeetings });
+        } catch (error) {
+            console.error('Error fetching upcoming meetings:', error);
+            res.status(500).json({ error: 'Could not fetch upcoming meetings' });
         }
     }
 

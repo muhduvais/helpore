@@ -7,4 +7,5 @@ export interface IDonationController {
     generateReceipt(req: Request, res: Response): Promise<void>;
     getDonations(req: Request, res: Response): Promise<void>;
     exportDonations(req: Request, res: Response): Promise<void>;
+    getRecentDonations(req: Request, res: Response): Promise<void>;
 }

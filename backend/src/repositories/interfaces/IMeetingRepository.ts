@@ -7,4 +7,5 @@ export interface IMeetingRepository {
   findAll(): Promise<IMeeting[]>;
   updateStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed' | 'cancelled'): Promise<IMeeting | null>;
   deleteById(meetingId: string): Promise<IMeeting | null>;
+  findUpcomingMeetings(): Promise<IMeeting[] | null>;
 }

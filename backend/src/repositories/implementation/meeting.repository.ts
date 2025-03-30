@@ -51,6 +51,16 @@ export class MeetingRepository implements IMeetingRepository {
         }
     }
 
+    async findUpcomingMeetings(): Promise<IMeeting[] | null> {
+        try {
+            return await Meeting.find({ status: 'scheduled' })
+            .sort({ scheduledTime: 1 });
+        } catch (error) {
+            console.error('Error finding all meetings:', error);
+            throw error;
+        }
+    }
+
     async updateStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed' | 'cancelled'): Promise<IMeeting | null> {
         try {
             return await Meeting.findByIdAndUpdate(
