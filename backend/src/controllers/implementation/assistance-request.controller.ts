@@ -72,10 +72,6 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const requestId = req.params.id;
             const { action } = req.body;
 
-            console.log('volunteerId: ', volunteerId)
-            console.log('requestId: ', requestId)
-            console.log('action: ', action)
-
             const updatedRequest = await this.assistanceRequestService.updateRequestStatus(
                 requestId,
                 volunteerId,
