@@ -10,7 +10,7 @@ import { IAssetRequest, IUser } from "@/interfaces/userInterface";
 import { adminService } from "@/services/admin.service";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import AdminDashboardSkeleton from "@/components/AdminDashboardSkeleton";
+import AdminDashboardSkeleton from "@/components/Skeletons/AdminDashboardSkeleton";
 
 interface IDonationResponse {
     stripeSessionId: string;
@@ -200,7 +200,6 @@ const AdminDashboard = () => {
                             <Button
                                 size="sm"
                                 variant="outline"
-                                // onClick={}
                                 className="text-gray-500"
                             >
                                 <ArrowUpRight className="mr-2 w-4 h-4 text-green-500" /> Go to Meetings

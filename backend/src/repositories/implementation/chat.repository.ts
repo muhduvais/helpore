@@ -5,9 +5,10 @@ import { IMessageDocument, IConversationDocument } from '../../interfaces/chat.i
 import mongoose from 'mongoose';
 import { IChatRepository } from '../interfaces/IChatRepository';
 import { io } from "../../utils";
+import { BaseRepository } from "./base.repository";
 
 @injectable()
-export class ChatRepository implements IChatRepository {
+export class ChatRepository extends BaseRepository<IMessageDocument> implements IChatRepository {
 
     async createMessage(messageData: Partial<IMessageDocument>): Promise<IMessageDocument> {
         const message = new Message(messageData);

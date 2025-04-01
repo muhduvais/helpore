@@ -2,6 +2,7 @@ import { injectable } from "tsyringe";
 import User from "../../models/user.model";
 import { IUser, IUserDocument } from "../../interfaces/user.interface";
 import { IAuthRepository } from "../interfaces/IAuthRepository";
+import { BaseRepository } from "./base.repository";
 
 export interface IUserCreationData {
   email: string | undefined;
@@ -11,7 +12,7 @@ export interface IUserCreationData {
 }
 
 @injectable()
-export class AuthRepository implements IAuthRepository {
+export class AuthRepository extends BaseRepository<IUserDocument> implements IAuthRepository {
   async findUser(email: string): Promise<IUserDocument | null> {
     try {
       return await User.findOne({ email, isBlocked: false });

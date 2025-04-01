@@ -7,7 +7,7 @@ import { IOtpRepository } from '../interfaces/IOtpRepository';
 export class OtpRepository implements IOtpRepository {
     async storeOtp(email: string, otp: string) {
         try {
-            const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 minutes
+            const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
             await OTP.create({ email, otp, expiresAt });
         } catch (error) {
             console.error('Error storing OTP:', error);

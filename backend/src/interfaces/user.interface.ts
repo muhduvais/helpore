@@ -94,7 +94,7 @@ export interface IAssistanceRequest {
     user: Types.ObjectId;
     type: 'volunteer' | 'ambulance';
     description?: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'completed';
     requestedDate: Date | string;
     requestedTime: string;
     priority: 'urgent' | 'normal';
@@ -109,7 +109,7 @@ export interface IAssistanceRequestDocument extends Document {
     user: Types.ObjectId;
     type: 'volunteer' | 'ambulance';
     description?: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'completed';
     requestedDate: Date;
     requestedTime: string;
     priority: 'urgent' | 'normal';
@@ -124,7 +124,7 @@ export interface IAssistanceRequestResponse {
     user: Types.ObjectId;
     type: 'volunteer' | 'ambulance';
     description?: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'completed';
     requestedDate: string;
     requestedTime: string;
     priority: 'urgent' | 'normal';

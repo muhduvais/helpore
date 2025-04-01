@@ -1,9 +1,10 @@
 import { injectable } from 'tsyringe';
 import Notification, { INotificationDocument } from '../../models/notification.model';
 import { INotificationRepository } from '../interfaces/INotificationRepository';
+import { BaseRepository } from './base.repository';
 
 @injectable()
-export class NotificationRepository implements INotificationRepository {
+export class NotificationRepository extends BaseRepository<INotificationDocument> implements INotificationRepository {
   async createNotification(notificationData: Partial<INotificationDocument>): Promise<INotificationDocument> {
     const notification = new Notification(notificationData);
     return await notification.save();

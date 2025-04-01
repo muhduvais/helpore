@@ -95,12 +95,12 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
     }
   }
 
-  async findPendingAssistanceRequests (): Promise<IAssistanceRequest[] | null> {
+  async findPendingAssistanceRequests(): Promise<IAssistanceRequest[] | null> {
     try {
       const requests = await AssistanceRequest.find({ status: 'pending' })
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .lean();
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .lean();
 
       return requests;
     } catch (error) {
@@ -231,6 +231,12 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
   async incrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument | null> {
     return await AssistanceRequest.findByIdAndUpdate(volunteerId, {
       $inc: { tasks: 1 }
+    });
+  }
+
+  async decrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument | null> {
+    return await AssistanceRequest.findByIdAndUpdate(volunteerId, {
+      $inc: { tasks: -1 }
     });
   }
 

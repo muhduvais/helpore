@@ -130,6 +130,16 @@ export const CreateMeetingModal = ({
         );
     };
 
+    const handleCancelClick = () => {
+        setTitle('');
+        setSelectedParticipants([]);
+        setDate(new Date());
+        setTime('12:00');
+        setSelectionMode(ParticipantSelectionMode.INDIVIDUAL);
+        setErrorMessage('');
+        onClose();
+    }
+
     // Participant selection
     const renderParticipantSelection = () => {
         // Selection toggle
@@ -325,7 +335,7 @@ export const CreateMeetingModal = ({
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={onClose}
+                        onClick={handleCancelClick}
                         disabled={isLoading}
                     >
                         Cancel

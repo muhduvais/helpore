@@ -142,7 +142,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
             throw new Error('Request not found');
         }
 
-        if (request.status !== 'pending') {
+        if (action === 'approve' && request.status !== 'pending') {
             throw new Error('Request is no longer available');
         }
 
@@ -158,8 +158,21 @@ export class AssistanceRequestService implements IAssistanceRequestService {
             }
         }
 
+        if (action === 'complete') {
+            request.status = 'completed';
+            await this.assistanceRepository.decrementVolunteerTasks(volunteerId);
+        }
+
         await this.assistanceRepository.updateRequest(request);
-        return action === 'approve' ? 'Request approved' : 'Request rejected';
+
+        if (action === 'approve') {
+            return 'Request approved';
+        } else if (action === 'reject') {
+            return 'Request rejected';
+        } else if (action === 'complete') {
+            return 'Request completed';
+        }
+        return '';
     }
 
     async fetchAssistanceRequests(
@@ -181,7 +194,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         }
     }
 
-    async fetchPendingRequests (): Promise<IAssistanceRequest[] | null> {
+    async fetchPendingRequests(): Promise<IAssistanceRequest[] | null> {
         try {
             const results = await this.assistanceRepository.findPendingAssistanceRequests();
 
@@ -225,7 +238,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         }
     }
 
-    
+
     async countProcessingRequests(search: string, filter: string, volunteerId: string): Promise<number> {
         try {
             return await this.assistanceRepository.countProcessingRequests(search, filter, volunteerId);

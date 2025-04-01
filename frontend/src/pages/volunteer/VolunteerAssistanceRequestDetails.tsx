@@ -27,7 +27,11 @@ import {
     Ambulance,
     HeartHandshake,
     Send,
-    MessageSquare
+    MessageSquare,
+    Check,
+    CheckIcon,
+    CheckSquare,
+    CheckCircle2Icon
 } from 'lucide-react';
 import {
     Dialog,
@@ -51,12 +55,13 @@ import { IMessageDocument } from '@/interfaces/chatInterface';
 import { volunteerService } from '@/services/volunteer.service';
 import { io, Socket } from 'socket.io-client';
 import { useNotifications } from '@/context/notificationContext';
+import { adminService } from '@/services/admin.service';
 
 interface IAssistanceRequest {
     _id: string;
     type: 'volunteer' | 'ambulance';
     description: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'completed';
     requestedDate: string;
     requestedTime: string;
     priority: 'urgent' | 'normal';
@@ -275,19 +280,20 @@ const AssistanceRequestDetails: React.FC = () => {
         }
     };
 
-    const handleCancelRequest = async () => {
-        // try {
-        //     setIsSubmitting(true);
-        //     await userService.cancelAssistanceRequest(request?._id || '');
-        //     toast.success('Request cancelled successfully!');
-        //     setIsCancelModalOpen(false);
-        //     window.location.reload();
-        // } catch (error) {
-        //     toast.error('Error cancelling request');
-        //     console.error('Error:', error);
-        // } finally {
-        //     setIsSubmitting(false);
-        // }
+    const handleCompleteRequest = async () => {
+        try {
+            const updateResponse = await adminService.updateAssistanceRequestStatus(request?._id || '', 'complete');
+            if (updateResponse.status === 200) {
+                toast.success('Status updated!');
+                setRequest((request: any) => ({
+                    ...request,
+                    status: 'completed'
+                }));
+            }
+        } catch (error) {
+            toast.error('Error updating request');
+            console.error('Error updating request:', error);
+        }
     };
 
     const getStatusColor = (status: string) => {
@@ -395,7 +401,7 @@ const AssistanceRequestDetails: React.FC = () => {
                     </Button>
                     <Button
                         variant="destructive"
-                        onClick={handleCancelRequest}
+                        // onClick={handleCancelRequest}
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Cancelling...' : 'Yes, Cancel Request'}
@@ -428,14 +434,25 @@ const AssistanceRequestDetails: React.FC = () => {
 
                     <div className="flex gap-2">
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <Button
-                                onClick={handleShareRequest}
-                                variant="outline"
-                                className="border-[#688D48] text-[#688D48] hover:bg-[#688D48] hover:text-white"
-                            >
-                                <Share2 className="mr-2 h-4 w-4" />
-                                Share
-                            </Button>
+                            <div className='flex items-center gap-x-2'>
+                                {request?.status !== 'completed' &&
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-gray-500"
+                                        onClick={handleCompleteRequest}
+                                    >
+                                        <CheckCircle2Icon className="mr-2 w-4 h-4 text-green-500" /> Mark as completed
+                                    </Button>}
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-gray-500"
+                                    onClick={handleShareRequest}
+                                >
+                                    <Share2 className="mr-2 w-4 h-4" /> Share
+                                </Button>
+                            </div>
                         </motion.div>
                     </div>
                 </div>

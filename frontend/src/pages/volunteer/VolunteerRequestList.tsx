@@ -196,7 +196,7 @@ const VolunteerRequests: React.FC = () => {
                   <User className="h-4 w-4" />
                   <div>
                     <p className="font-medium">Assigned Volunteer</p>
-                    <p>{ request.volunteer.name || 'volunteer name' }</p>
+                    <p>{request.volunteer.name || 'volunteer name'}</p>
                   </div>
                 </div>
               )}
@@ -226,15 +226,19 @@ const VolunteerRequests: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue={"assistance"} className="w-full">
+      <Tabs defaultValue={"processing"} className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="assistance" className="flex items-center gap-2">
+          <TabsTrigger value="processing" className="flex items-center gap-2">
             <HandHeart className="h-4 w-4" />
-            Assistance Requests
+            Processing Requests
           </TabsTrigger>
+          {/* <TabsTrigger value="completed" className="flex items-center gap-2">
+            <HandHeart className="h-4 w-4" />
+            Completed Requests
+          </TabsTrigger> */}
         </TabsList>
 
-        <TabsContent value="assistance" className="space-y-6">
+        <TabsContent value="processing" className="space-y-6">
           {/* Filters */}
           <Card className="p-4">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -302,15 +306,15 @@ const VolunteerRequests: React.FC = () => {
           ) : assistanceRequests && assistanceRequests.length === 0 ? (
             <Card className="p-8 text-center">
               <HandHeart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Assistance Requests Found</h3>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Processing Requests Found</h3>
               <p className="text-gray-500 mb-4">
                 {assistanceSearchQuery || assistanceFilter !== 'all'
                   ? 'No requests match your search criteria'
                   : "You haven't made any assistance requests yet."}
               </p>
-              <Link to="/user/request-assistance">
+              <Link to="/volunteer/assistanceRequests">
                 <Button className="bg-[#688D48] hover:bg-[#557239] text-white">
-                  Request Assistance
+                  Check new requests
                 </Button>
               </Link>
             </Card>
@@ -367,6 +371,145 @@ const VolunteerRequests: React.FC = () => {
               {/* Total Count */}
               <div className="text-center text-sm text-gray-500">
                 Showing {assistanceRequests.length} assistance requests
+              </div>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Completed */}
+        <TabsContent value="completed" className="space-y-6">
+          {/* Filters */}
+          <Card className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search assistance requests..."
+                    value={assistanceSearchQuery}
+                    onChange={(e) => handleAssistanceSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <Select value={assistanceFilter} onValueChange={handleAssistanceFilterChange}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Requests</SelectItem>
+                    <SelectItem value="ambulance">Ambulance</SelectItem>
+                    <SelectItem value="medical">Medical</SelectItem>
+                    <SelectItem value="eldercare">Eldercare</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                    <SelectItem value="transportation">Transportation</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setView(view === 'card' ? 'table' : 'card')}
+                >
+                  <ListFilter className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </Card>
+
+          {/* Results Summary */}
+          {!isAssistanceLoading && assistanceRequests && assistanceRequests.length > 0 && (
+            <div className="text-sm text-gray-500">
+              Showing {((assistanceCurrentPage - 1) * limit) + 1} to {Math.min(assistanceCurrentPage * limit, assistanceTotalRequests)} of {assistanceTotalRequests} requests
+            </div>
+          )}
+
+          {/* Error Message */}
+          {assistanceError && (
+            <div className="text-red-500 text-center p-4">
+              {assistanceError}
+            </div>
+          )}
+
+          {/* Assistance Requests List */}
+          {isAssistanceLoading ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <DotLottieReact
+                src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
+                loop
+                autoplay
+                style={{ width: '100px', height: '100px' }}
+              />
+            </div>
+          ) : assistanceRequests && assistanceRequests.length === 0 ? (
+            <Card className="p-8 text-center">
+              <HandHeart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Completed Requests Found</h3>
+              <p className="text-gray-500 mb-4">
+                {assistanceSearchQuery || assistanceFilter !== 'all'
+                  ? 'No requests match your search criteria'
+                  : "You haven't made any assistance requests yet."}
+              </p>
+              <Link to="/volunteer/assistanceRequests">
+                <Button className="bg-[#688D48] hover:bg-[#557239] text-white">
+                  Check new requests
+                </Button>
+              </Link>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {assistanceRequests.map((request: IAssistanceRequestResponse) => (
+                  <AssistanceRequestCard key={request._id} request={request} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {assistanceTotalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 pt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAssistanceCurrentPage(assistanceCurrentPage - 1)}
+                    disabled={assistanceCurrentPage === 1}
+                    className="flex items-center gap-1"
+                  >
+                    <FaAngleLeft />
+                    Prev
+                  </Button>
+
+                  <div className="flex gap-2">
+                    {[...Array(assistanceTotalPages)].map((_, index) => (
+                      <Button
+                        key={index}
+                        variant={assistanceCurrentPage === index + 1 ? "default" : "outline"}
+                        onClick={() => setAssistanceCurrentPage(index + 1)}
+                        className={
+                          assistanceCurrentPage === index + 1
+                            ? "bg-[#688D48] hover:bg-[#557239]"
+                            : "hover:bg-gray-100"
+                        }
+                      >
+                        {index + 1}
+                      </Button>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setAssistanceCurrentPage(assistanceCurrentPage + 1)}
+                    disabled={assistanceCurrentPage === assistanceTotalPages}
+                    className="flex items-center gap-1"
+                  >
+                    Next
+                    <FaAngleRight />
+                  </Button>
+                </div>
+              )}
+
+              {/* Total Count */}
+              <div className="text-center text-sm text-gray-500">
+                Showing {assistanceRequests.length} completed requests
               </div>
             </div>
           )}

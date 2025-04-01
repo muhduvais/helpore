@@ -48,7 +48,7 @@ export const chatService = {
   },
 
   connectSocket: (token: string) => {
-    const socket: Socket = io(import.meta.env.SERVER_URL);
+    const socket: Socket = io(import.meta.env.VITE_SERVER_URL);
 
     socket.on('connect', () => {
       console.log('Socket connected');
@@ -58,7 +58,7 @@ export const chatService = {
       console.error('Connection failed', error.message);
     });
 
-    console.log('token: ', token);
+    token = '';
 
     return socket;
   },

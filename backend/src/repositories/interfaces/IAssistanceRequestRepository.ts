@@ -12,6 +12,7 @@ export interface IAssistanceRequestRepository {
   findRequestById(requestId: string): Promise<IAssistanceRequestDocument | null | undefined>
   findAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequest | null>;
   incrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument | null>;
+  decrementVolunteerTasks(volunteerId: string): Promise<IAssistanceRequestDocument | null>;
   updateRequest(request: IAssistanceRequestDocument): Promise<IAssistanceRequestDocument>;
   checkTasksLimit(volunteerId: string): Promise<boolean | null>;
   assignVolunteer(requestId: string, volunteerId: string): Promise<any>;

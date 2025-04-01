@@ -170,7 +170,6 @@ export const adminService = {
     },
     updateAssetRequestStatus: async (requestId: string, status: string, comment: string) => {
         try {
-            console.log('reqId: ', requestId)
             const response = await customAxios.patch(`/api/assetRequests/${requestId}`, { status, comment });
             return response;
         } catch (error) {
@@ -207,6 +206,14 @@ export const adminService = {
     fetchAssistanceRequestDetails: async (requestId: string) => {
         try {
             const response = await customAxios.get(`/api/assistanceRequests/${requestId}`)
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
+    updateAssistanceRequestStatus: async (requestId: string, status: string) => {
+        try {
+            const response = await customAxios.patch(`/api/assistanceRequests/${requestId}/status`, { action: status });
             return response;
         } catch (error) {
             throw error

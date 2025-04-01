@@ -72,34 +72,39 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const requestId = req.params.id;
             const { action } = req.body;
 
+            console.log('volunteerId: ', volunteerId)
+            console.log('requestId: ', requestId)
+            console.log('action: ', action)
+
             const updatedRequest = await this.assistanceRequestService.updateRequestStatus(
                 requestId,
                 volunteerId,
                 action,
             );
 
+            console.log('updatedRequest: ', updatedRequest)
+
+            let message = '';
+
             if (updatedRequest === 'Request approved') {
-                res.status(200).json({
-                    success: true,
-                    message: "Request approved!",
-                    data: updatedRequest
-                });
-                return;
+                message = 'Request approved';
+            } else if (updatedRequest === 'reject') {
+                message = 'Request rejected';
+            } else if (updatedRequest === 'complete') {
+                message = 'Request completed';
             }
 
-            if (updatedRequest === 'Request rejected') {
-                res.status(200).json({
-                    success: true,
-                    message: "Request declined!",
-                    data: updatedRequest
-                });
-                return;
-            }
+            res.status(200).json({
+                success: true,
+                message,
+                data: updatedRequest
+            });
         } catch (error: any) {
             res.status(400).json({
                 success: false,
                 message: error.message
             });
+            console.log('Error updating the request status: ', error)
         }
     }
 
