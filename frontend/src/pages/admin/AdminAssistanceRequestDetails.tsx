@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, Navigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AxiosError } from 'axios';
 import { Card } from "@/components/ui/card";
@@ -83,7 +83,6 @@ const AssistanceRequestDetails: React.FC = () => {
     const [request, setRequest] = useState<IAssistanceRequest | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
 
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);

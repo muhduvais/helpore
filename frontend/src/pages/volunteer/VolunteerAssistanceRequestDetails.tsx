@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AxiosError } from 'axios';
@@ -28,19 +28,8 @@ import {
     HeartHandshake,
     Send,
     MessageSquare,
-    Check,
-    CheckIcon,
-    CheckSquare,
     CheckCircle2Icon
 } from 'lucide-react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-} from "@/components/ui/dialog";
 import {
     Alert,
     AlertDescription,
@@ -53,7 +42,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { chatService } from '@/services/chat.service';
 import { IMessageDocument } from '@/interfaces/chatInterface';
 import { volunteerService } from '@/services/volunteer.service';
-import { io, Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import { useNotifications } from '@/context/notificationContext';
 import { adminService } from '@/services/admin.service';
 
@@ -108,8 +97,6 @@ const AssistanceRequestDetails: React.FC = () => {
     const [request, setRequest] = useState<IAssistanceRequest | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
 
     // Chat state
@@ -382,34 +369,6 @@ const AssistanceRequestDetails: React.FC = () => {
             </motion.div>
         );
     }
-
-    const CancelDialog = () => (
-        <Dialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Cancel Assistance Request</DialogTitle>
-                    <DialogDescription>
-                        Are you sure you want to cancel this request? This action cannot be undone.
-                    </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        onClick={() => setIsCancelModalOpen(false)}
-                    >
-                        No, Keep Request
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        // onClick={handleCancelRequest}
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Cancelling...' : 'Yes, Cancel Request'}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
 
     return (
         <>
@@ -801,8 +760,6 @@ const AssistanceRequestDetails: React.FC = () => {
                     </motion.div>
                 </div>
             </motion.div>
-
-            <CancelDialog />
         </>
     )
 }

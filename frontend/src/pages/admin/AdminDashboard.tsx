@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { LineChart, Users, Handshake, Package, Calendar, Clock, AlertTriangle, IndianRupee, Video, ArrowUpRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, Handshake, Calendar, Clock, AlertTriangle, IndianRupee, ArrowUpRight } from "lucide-react";
 import { meetingService } from "@/services/meeting.service";
 import { donationService } from "@/services/donation.service";
-import { userService } from "@/services/user.service";
 import { IAssistanceRequest } from "@/interfaces/adminInterface";
 import { IDonation } from "@/interfaces/donation.interface";
-import { IMeeting } from "@/interfaces/meeting.interface";
 import { IAssetRequest, IUser } from "@/interfaces/userInterface";
 import { adminService } from "@/services/admin.service";
 import { Button } from "@/components/ui/button";
@@ -35,9 +33,6 @@ const AdminDashboard = () => {
     ]);
 
     const [upcomingMeetings, setUpcomingMeetings] = useState<any>([]);
-    const [users, setUsers] = useState<IUser[]>([]);
-    const [volunteers, setVolunteers] = useState<IUser[]>([]);
-    const [donations, setDonations] = useState<IDonationResponse[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [recentDonations, setRecentDonations] = useState<IDonationResponse[]>([]);
     // const [pendingRequests, setPendingRequests] = useState<IAssistanceRequest[]>([]);
@@ -89,15 +84,12 @@ const AdminDashboard = () => {
 
             // Users data
             const users = usersResponse.data.users;
-            setUsers(users);
 
             // Volunteers data
             const volunteers = volunteersResponse.data.volunteers;
-            setVolunteers(volunteers);
 
             // Donations data
             const donations = donationsResponse.data.donations;
-            setDonations(donations);
 
             // Recent donations
             const recentDonations = recentDonationsResponse.data.donations;

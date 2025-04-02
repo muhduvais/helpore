@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactEventHandler } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Card } from "@/components/ui/card";
@@ -39,7 +39,6 @@ import {
   XCircle,
   Calendar,
   Search,
-  ListFilter,
   HandHeart,
   ChevronDown,
   ChevronUp,
@@ -61,15 +60,15 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useDebounce } from 'use-debounce';
 import asset_picture from '../../assets/asset_picture.png';
 import { adminService } from '@/services/admin.service';
-import { IAssistanceRequest, IAssistanceRequestResponse } from '@/interfaces/adminInterface';
+import { IAssistanceRequestResponse } from '@/interfaces/adminInterface';
 import { AxiosError } from 'axios';
-import { IAssetRequest } from '@/interfaces/userInterface';
+// import { IAssetRequest } from '@/interfaces/userInterface';
 
-interface IPaginatedResponse {
-  assetRequests: IAssetRequest[];
-  totalPages: number;
-  totalRequests: number;
-}
+// interface IPaginatedResponse {
+//   assetRequests: IAssetRequest[];
+//   totalPages: number;
+//   totalRequests: number;
+// }
 
 interface IAssistancePaginatedResponse {
   assistanceRequests: IAssistanceRequestResponse[];
@@ -86,7 +85,7 @@ const AdminRequests = () => {
 
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,7 +96,6 @@ const AdminRequests = () => {
   const [totalRequests, setTotalRequests] = useState(0);
   const [expandedCard, setExpandedCard] = useState(null);
   const [totalDisplay, setTotalDisplay] = useState(totalRequests);
-  const [view, setView] = useState<'card' | 'table'>('card');
   const [actionDialog, setActionDialog] = useState<{
     open: boolean;
     type: 'approved' | 'rejected' | null;
@@ -132,6 +130,8 @@ const AdminRequests = () => {
 
   const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
+  setUserFilter('all');
+
   if (!isLoggedIn) {
     return <Navigate to="/admin/login" />;
   }
@@ -163,7 +163,7 @@ const AdminRequests = () => {
       setTotalRequests(data.totalRequests);
       if (defaultTab !== 'assistance') setTotalDisplay(data.totalRequests);
     } catch (error: any) {
-      setError(error.message);
+      // setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -208,7 +208,7 @@ const AdminRequests = () => {
         setUserDetails(response.data.user);
       }
     } catch (error: any) {
-      setError(error.message);
+      // setError(error.message);
     } finally {
       setIsLoadingUser(false);
     }
@@ -222,7 +222,7 @@ const AdminRequests = () => {
       setActionComment('');
       fetchRequests();
     } catch (error: any) {
-      setError(error.message);
+      // setError(error.message);
     }
   };
 
@@ -293,9 +293,9 @@ const AdminRequests = () => {
     setAssistancePriorityFilter(value);
   };
 
-  const handleTotalRequests = (value: number) => {
-    setTotalDisplay(value);
-  };
+  // const handleTotalRequests = (value: number) => {
+  //   setTotalDisplay(value);
+  // };
  
   const UserDetailsModal = () => {
     const user = userDetails?.user;

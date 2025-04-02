@@ -1,7 +1,5 @@
 import { customAxios } from '../utils/apiClient';
 import { userService } from './user.service';
-import { VideoConferenceConfig } from '@/interfaces/meeting.interface';
-import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 
 export const meetingService = {
 
@@ -53,63 +51,6 @@ export const meetingService = {
     } catch (error) {
       console.error('Failed to create video conference room:', error);
       throw new Error('Could not create video conference room');
-    }
-  },
-
-  initializeVideoConference: async (config: VideoConferenceConfig) => {
-    try {
-      if (!config.roomID || !config.userID || !config.userName) {
-        throw new Error('Incomplete video conference configuration');
-      }
-
-      const appId = parseInt(import.meta.env.ZEGO_APP_ID) || 0;
-      const appSign = import.meta.env.ZEGO_APP_SIGN || '';
-
-      const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-        appId,
-        appSign,
-        config.roomID,
-        config.userID,
-        config.userName
-      );
-
-      const zegoInstance = ZegoUIKitPrebuilt.create(kitToken);
-
-      if (zegoInstance) {
-        const zegoModule = await import('@zegocloud/zego-uikit-prebuilt');
-
-        if (!zegoModule.ScenarioModel || !zegoModule.LiveRole) {
-          throw new Error('Zego module is missing required properties');
-        }
-
-        const roomConfig = {
-          container: document.getElementById('video-conference-container') || undefined,
-          scenario: {
-            mode: zegoModule.ScenarioModel.GroupCall as any,
-            config: {
-              role: zegoModule.LiveRole.Host
-            }
-          },
-          turnOnMicrophoneWhenJoining: true,
-          turnOnCameraWhenJoining: true,
-          onJoinRoom: () => {
-            console.log(`Joined room: ${config.roomID}`);
-          },
-          onLeaveRoom: () => {
-            console.log(`Left room: ${config.roomID}`);
-          },
-          onError: (error: Error) => {
-            console.error('Zego conference error:', error);
-          }
-        };
-
-        zegoInstance.joinRoom(roomConfig as any);
-      }
-
-      return zegoInstance;
-    } catch (error) {
-      console.error('Video conference initialization failed:', error);
-      return null;
     }
   },
 

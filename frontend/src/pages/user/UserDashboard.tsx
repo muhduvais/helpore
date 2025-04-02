@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 import { IUser } from '../../interfaces/userInterface';
 import { userService } from '../../services/user.service';
@@ -12,11 +12,9 @@ const UserDashboard: React.FC = () => {
   const dispatch = useDispatch();
 
   const [user, setUser] = useState<IUser>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchUserDetails = async () => {
     try {
-      setIsLoading(true);
       const response = await userService.fetchUserDetails();
       if (response.status === 200) {
         setUser(response.data.user);
@@ -25,8 +23,6 @@ const UserDashboard: React.FC = () => {
       if (error instanceof AxiosError) {
         console.log('Error fetching user details:', error.response?.data?.message || error.message);
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 

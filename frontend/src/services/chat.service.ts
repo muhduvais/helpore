@@ -1,6 +1,7 @@
 import { customAxios } from '../utils/apiClient';
 import { IMessageDocument } from '../interfaces/chatInterface';
 import { io, Socket } from 'socket.io-client';
+import { toast } from 'sonner';
 
 export const chatService = {
   // Messages
@@ -48,7 +49,9 @@ export const chatService = {
   },
 
   connectSocket: (token: string) => {
-    const socket: Socket = io(import.meta.env.VITE_SERVER_URL);
+    const socket: Socket = io(import.meta.env.VITE_SERVER_URL, {
+      auth: { token }
+    });
 
     socket.on('connect', () => {
       console.log('Socket connected');
@@ -56,9 +59,10 @@ export const chatService = {
 
     socket.on('connect_error', (error: any) => {
       console.error('Connection failed', error.message);
+      if (error.message.includes("Authentication error")) {
+        toast.error("Authentication failed!");
+      }
     });
-
-    token = '';
 
     return socket;
   },

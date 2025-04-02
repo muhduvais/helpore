@@ -17,8 +17,6 @@ const Profile = () => {
     const [address, setAddress] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isProfileUploading, setIsProfileUploading] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [file, setFile] = useState<File | string | null>(null);
     const [isImageHovered, setIsImageHovered] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -42,7 +40,6 @@ const Profile = () => {
                 const { userDetails } = response.data;
                 setUser(userDetails.user);
                 setAddress(userDetails.address);
-                setFile(user?.profilePicture || null)
             }
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -90,11 +87,6 @@ const Profile = () => {
         setMessage('');
     };
 
-    const handleDeleteAccount = () => {
-        console.log("Account deletion confirmed");
-        setIsModalOpen(false);
-    };
-
     const handleProfilePictureClick = () => {
         fileInputRef.current?.click();
     };
@@ -116,7 +108,6 @@ const Profile = () => {
                 const uploadedImageUrl = uploadResponse.data.imageUrl;
 
                 if (uploadedImageUrl) {
-                    setFile(uploadedImageUrl);
                     const updateProfilePicture = await userService.updateProfilePicture(uploadedImageUrl);
                     if (!updateProfilePicture) {
                         toast.error('Error updating the profile picture!');
@@ -357,7 +348,6 @@ const Profile = () => {
                                     Deleting your account is permanent and will remove all your data. This action cannot be undone.
                                 </p>
                                 <button
-                                    onClick={() => setIsModalOpen(true)}
                                     className="bg-red-700 text-white px-4 py-2 shadow-md hover:bg-red-800"
                                 >
                                     Delete Account

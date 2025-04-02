@@ -1,11 +1,9 @@
-import { injectable } from 'tsyringe';
 
 export interface IConfigService {
-    getZegoAppId(): number;
-    getZegoAppSign(): string;
+  getZegoAppId(): number;
+  getZegoAppSign(): string;
 }
 
-@injectable()
 export class ConfigService implements IConfigService {
   private zegoAppId: number;
   private zegoAppSign: string;

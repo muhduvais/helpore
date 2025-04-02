@@ -15,9 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import {
     Clock,
     Copy,
-    Delete,
     Info,
-    List,
     Trash2,
     UserPlus,
     Video,

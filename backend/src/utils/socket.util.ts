@@ -1,5 +1,8 @@
 import { Server } from 'socket.io';
 import http from 'http';
+import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+dotenv.config();
 
 let io: Server;
 
@@ -8,6 +11,22 @@ export const setupSocketIO = (server: http.Server) => {
     cors: {
       origin: process.env.CLIENT_URL,
     },
+  });
+
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+
+    if (!token) {
+      return next(new Error("Authentication error: No token provided"));
+    }
+
+    try {
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || '');
+      next();
+    } catch (error) {
+      console.log('error: ', error)
+      return next(new Error("Authentication error: Invalid token"));
+    }
   });
 
   io.on('connection', (socket: any) => {
@@ -31,7 +50,7 @@ export const setupSocketIO = (server: http.Server) => {
       try {
         // Emit to the conversation room
         socket.to(`request-${messageData.requestId}`).emit('new-message', messageData);
-        
+
         // Also emit a notification to the receiver
         socket.to(`notification-${messageData.receiverId}`).emit('new-notification', {
           type: 'message',

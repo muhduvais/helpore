@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { MdMessage } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
 import { FaUserCircle } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
 import { IoMdLogOut } from "react-icons/io";
 import { Link } from "react-router-dom";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PanelLeftDashed } from "lucide-react";
 import logo from '../assets/Logo-black.png';
 import gsap from 'gsap';

@@ -1,7 +1,7 @@
 import { useState, ReactNode, useEffect, useRef } from 'react';
 import { Menu, X, Home, Box, FileText, Heart, Newspaper, Users, LogOut, User, Bell } from 'lucide-react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
 import logo from '../../assets/Logo.png';
 import 'react-toastify/dist/ReactToastify.css';
@@ -36,8 +36,6 @@ const Layout: React.FC = () => {
 
   const notificationRef = useRef<HTMLButtonElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
-
-  const { role } = useSelector((state: any) => state.auth);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

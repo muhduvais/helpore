@@ -1,4 +1,4 @@
-import { ChangePasswordData, IAddress, IUser } from '../interfaces/userInterface';
+import { ChangePasswordData, IAddress } from '../interfaces/userInterface';
 import { customAxios } from '../utils/apiClient';
 
 
@@ -136,6 +136,14 @@ export const userService = {
                     filter
                 }
             })
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
+    fetchAssetRequestDetails: async (assetId: string) => {
+        try {
+            const response = await customAxios.get(`/api/assetRequests/${assetId}`);
             return response;
         } catch (error) {
             throw error

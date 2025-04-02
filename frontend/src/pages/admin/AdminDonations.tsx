@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDebounce } from 'use-debounce';
 import { format } from 'date-fns';
 import {
@@ -47,12 +47,12 @@ interface Donation {
   updatedAt: string;
 }
 
-interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  limit: number;
-}
+// interface PaginationInfo {
+//   currentPage: number;
+//   totalPages: number;
+//   totalItems: number;
+//   limit: number;
+// }
 
 const CAMPAIGN_OPTIONS = [
   {

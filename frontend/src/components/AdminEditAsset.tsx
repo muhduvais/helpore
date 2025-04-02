@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle,
     DialogDescription, DialogFooter
@@ -20,7 +20,6 @@ import { IAsset } from '@/interfaces/adminInterface';
 import { validateAddAsset } from '@/utils/validation';
 import { AddAssetFormData, AddAssetFormErrors } from '@/interfaces/authInterface';
 import { AxiosError } from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 
 interface EditAssetModalProps {
@@ -58,7 +57,6 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
     const [formData, setFormData] = useState<AddAssetFormData>(initialData);
     const [formErrors, setFormErrors] = useState<AddAssetFormErrors>(initialErrorData);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -141,7 +139,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
 
         if (!isValid) return;
 
-        setIsLoading(true);
+        setIsSubmitting(true);
 
         try {
             const response = await adminService.updateAsset(asset?._id as string, finalFormData);
@@ -161,7 +159,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                 setErrorMessage('An unexpected error occurred');
             }
         } finally {
-            setIsLoading(false);
+            setIsSubmitting(false);
         }
     };
 

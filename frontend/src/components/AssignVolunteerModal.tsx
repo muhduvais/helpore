@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserPlus, Search, Loader2 } from "lucide-react";
+import { UserPlus, Search } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 import { adminService } from "@/services/admin.service";
 import profile_pic from "../assets/profile_pic.png";
@@ -37,7 +37,6 @@ interface VolunteersResponse {
 
 const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({ requestId, onAssign }) => {
     const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
-    const [totalVolunteers, setTotalVolunteers] = useState<Number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [showAvailableOnly, setShowAvailableOnly] = useState<boolean>(true);
@@ -53,13 +52,11 @@ const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({ requestId, 
 
             if (reset) {
                 setVolunteers(response.data.volunteers);
-                setTotalVolunteers(response.data.totalVolunteers);
             } else {
                 setVolunteers((prev) => [
                     ...prev.filter((v) => !response.data.volunteers.some((newV) => newV._id === v._id)),
                     ...response.data.volunteers,
                 ]);
-                setTotalVolunteers(response.data.totalVolunteers);
             }
 
             setHasMore(response.data.volunteers.length > 0);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -312,7 +312,7 @@ const AdminAddVolunteer = () => {
                   error={formErrors.country}
                   disabled={isLoading}
                   options={
-                    Object.entries(countries).map(([code, country]) => ({
+                    Object.entries(countries).map(([, country]) => ({
                       label: country.name,
                       value: country.name,
                     }))

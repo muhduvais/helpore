@@ -17,8 +17,6 @@ const Profile = () => {
     const [address, setAddress] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isProfileUploading, setIsProfileUploading] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [file, setFile] = useState<File | string | null>(null);
     const [isImageHovered, setIsImageHovered] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -53,7 +51,6 @@ const Profile = () => {
             if (response.status === 200) {
                 setUser(response.data.user);
                 setAddress(response.data.address);
-                setFile(user?.profilePicture || null)
             }
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -169,11 +166,6 @@ const Profile = () => {
         setMessage('');
     };
 
-    const handleDeleteAccount = () => {
-        console.log("Account deletion confirmed");
-        setIsModalOpen(false);
-    };
-
     const handleProfilePictureClick = () => {
         fileInputRef.current?.click();
     };
@@ -195,7 +187,6 @@ const Profile = () => {
                 const uploadedImageUrl = uploadResponse.data.imageUrl;
 
                 if (uploadedImageUrl) {
-                    setFile(uploadedImageUrl);
                     const updateResponse = await userService.updateProfilePicture(uploadedImageUrl);
 
                     if (updateResponse.status === 200) {
@@ -664,7 +655,6 @@ const Profile = () => {
                                     Deleting your account is permanent and will remove all your data. This action cannot be undone.
                                 </p>
                                 <button
-                                    onClick={() => setIsModalOpen(true)}
                                     className="bg-red-700 text-white px-4 py-2 shadow-md hover:bg-red-800"
                                 >
                                     Delete Account

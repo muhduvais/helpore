@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { MdMessage } from "react-icons/md";
-import { IoNotifications } from "react-icons/io5";
 import { FaUserCircle } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
 import { IoMdLogOut } from "react-icons/io";
 import { Link } from "react-router-dom";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { PanelLeftDashed } from "lucide-react";
 import logo from '../assets/Logo-black.png';
 import gsap from 'gsap';
@@ -20,7 +19,6 @@ const UserTopbar: React.FC<any> = () => {
     const { sidebarState, toggleSidebar } = useSidebar();
     const messageRef = useRef(null);
     const profileRef = useRef(null);
-    const notificationRef = useRef(null);
     const logoutRef = useRef(null);
     const topBarLogoRef = useRef<HTMLDivElement>(null);
     const toggleRef = useRef<HTMLDivElement>(null);

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { User, Key, Cog, Upload, Camera, Edit } from 'lucide-react';
+import { User, Key, Cog, Camera, Edit } from 'lucide-react';
 import profile_pic from '../../assets/profile_pic.png';
 import loading_Profile from '../../assets/loadingProfile.webp';
 import { toast } from 'sonner';
@@ -18,7 +18,6 @@ const Profile = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isProfileUploading, setIsProfileUploading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [file, setFile] = useState<File | string | null>(null);
     const [isImageHovered, setIsImageHovered] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -43,7 +42,6 @@ const Profile = () => {
             if (response.status === 200) {
                 setVolunteer(response.data.volunteer);
                 setAddress(response.data.address);
-                setFile(volunteer?.profilePicture || null)
             }
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -119,7 +117,6 @@ const Profile = () => {
                 const uploadedImageUrl = uploadResponse.data.imageUrl;
 
                 if (uploadedImageUrl) {
-                    setFile(uploadedImageUrl);
                     const updateResponse = await volunteerService.updateProfilePicture(uploadedImageUrl);
 
                     if (updateResponse.status === 200) {

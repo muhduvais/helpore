@@ -1,12 +1,11 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { login } from '../../redux/slices/authSlice'
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useSelector } from 'react-redux';
 import { validateForm } from '../../utils/validation';
 import { Fields } from '../../interfaces/formInterface';
 import { authService } from '../../services/auth.service';
@@ -25,9 +24,6 @@ const AdminLoginPage: React.FC = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
-  const role = useSelector((state: any) => state.auth.role);
 
   // if (isLoggedIn && role === 'admin') {
   //   return <Navigate to={'/admin/dashboard'} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AxiosError } from 'axios';
@@ -25,14 +25,7 @@ import {
     Ambulance,
     HeartHandshake
 } from 'lucide-react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-} from "@/components/ui/dialog";
+
 import {
     Alert,
     AlertDescription,
@@ -81,8 +74,6 @@ const AssistanceRequestDetails: React.FC = () => {
     const [request, setRequest] = useState<IAssistanceRequest | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
 
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
@@ -139,21 +130,6 @@ const AssistanceRequestDetails: React.FC = () => {
                 .then(() => toast.success('Link copied to clipboard!'))
                 .catch(console.error);
         }
-    };
-
-    const handleCancelRequest = async () => {
-        // try {
-        //     setIsSubmitting(true);
-        //     await userService.cancelAssistanceRequest(request?._id || '');
-        //     toast.success('Request cancelled successfully!');
-        //     setIsCancelModalOpen(false);
-        //     window.location.reload();
-        // } catch (error) {
-        //     toast.error('Error cancelling request');
-        //     console.error('Error:', error);
-        // } finally {
-        //     setIsSubmitting(false);
-        // }
     };
 
     const getStatusColor = (status: string) => {
@@ -235,34 +211,6 @@ const AssistanceRequestDetails: React.FC = () => {
         );
     }
 
-    const CancelDialog = () => (
-        <Dialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Cancel Assistance Request</DialogTitle>
-                    <DialogDescription>
-                        Are you sure you want to cancel this request? This action cannot be undone.
-                    </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        onClick={() => setIsCancelModalOpen(false)}
-                    >
-                        No, Keep Request
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        onClick={handleCancelRequest}
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Cancelling...' : 'Yes, Cancel Request'}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-
     return (
         <>
             <motion.div
@@ -287,7 +235,6 @@ const AssistanceRequestDetails: React.FC = () => {
                     <div className="flex gap-2">
                         {(request?.status === 'pending' || request?.status === 'approved') && (
                             <Button
-                                onClick={() => setIsCancelModalOpen(true)}
                                 variant="destructive"
                                 className="bg-red-500 hover:bg-red-600"
                             >
@@ -522,7 +469,7 @@ const AssistanceRequestDetails: React.FC = () => {
             </motion.div >
 
             {/* Cancel Request Modal */}
-            < CancelDialog />
+            {/* Add CancelDialog */}
         </>
     );
 };

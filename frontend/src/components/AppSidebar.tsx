@@ -1,4 +1,4 @@
-import { ChartNoAxesGantt, HeartHandshake, LayoutDashboard, Users } from "lucide-react"
+import { HeartHandshake, LayoutDashboard, Users } from "lucide-react"
 import logo from '../assets/Logo-black.png'
 
 import {

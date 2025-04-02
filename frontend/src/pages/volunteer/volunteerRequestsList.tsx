@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
@@ -31,7 +31,6 @@ import {
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { volunteerService } from '@/services/volunteer.service';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
-import { useDebounce } from 'use-debounce';
 
 type VolunteerType = 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'default' | 'ambulance';
 
@@ -47,8 +46,6 @@ const VolunteerRequests = () => {
     const [totalRequests, setTotalRequests] = useState(0);
 
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
-
-    const debouncedSearch = useDebounce(searchQuery, 500);
 
     const fetchNearbyRequests = async () => {
         try {

@@ -16,7 +16,6 @@ import {
     Clock,
     Copy,
     Info,
-    List,
     Video
 } from 'lucide-react';
 

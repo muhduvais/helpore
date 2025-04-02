@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { useSelector } from 'react-redux';
 import { customAxios } from '../utils/apiClient';
 
@@ -43,7 +43,6 @@ interface NotificationProviderProps {
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [socket, setSocket] = useState<Socket | null>(null);
     const [showNewNotifications, setShowNewNotifications] = useState<boolean>(false);
     const auth = useSelector((state: any) => state.auth);
 
@@ -87,8 +86,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             addNotification(notification);
             setShowNewNotifications(true);
         });
-
-        setSocket(newSocket);
 
         return () => {
             newSocket.disconnect();

@@ -117,7 +117,7 @@ export class AssetRequestController implements IAssetRequestController {
                 userId, assetId
             );
             if (assetRequestDetails) {
-                res.status(200).json({ success: true, userDetails: assetRequestDetails });
+                res.status(200).json({ success: true, assetRequestDetails });
             } else {
                 res.status(400).json({ success: false, message: 'Request not found!' });
             }

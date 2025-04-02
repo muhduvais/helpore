@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { IUser } from "./userInterface";
 
 export interface IDonation extends Document {
     stripeSessionId: string;

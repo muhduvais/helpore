@@ -36,7 +36,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/user.service';
 import asset_picture from '../../assets/asset_picture.png';
-import { FaCalendar, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -56,7 +56,7 @@ interface IAsset {
 interface IRequest {
     _id: string;
     status: 'pending' | 'approved' | 'rejected';
-    requestDate: string;
+    requestedDate: string;
     startDate: string;
     endDate: string;
     quantity: number;
@@ -70,7 +70,7 @@ const UserAssetDetails: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-    const [currentRequest, setCurrentRequest] = useState<IRequest | null>(null);
+    const [currentRequest, setCurrentRequest] = useState<IRequest[] | null>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
@@ -85,17 +85,18 @@ const UserAssetDetails: React.FC = () => {
             try {
                 setIsLoading(true);
                 const assetId = id || '';
-                const [assetResponse] = await Promise.all([
+                const [assetResponse, requestResponse] = await Promise.all([
                     userService.fetchAssetDetails(assetId),
-                    // userService.fetchCurrentRequest(assetId)
+                    userService.fetchAssetRequestDetails(assetId),
                 ]);
 
                 if (assetResponse.status === 200) {
                     setAsset(assetResponse.data.asset);
                 }
-                // if (requestResponse.status === 200) {
-                //     setCurrentRequest(requestResponse.data.request);
-                // }
+
+                if (requestResponse.status === 200) {
+                    setCurrentRequest(requestResponse.data.assetRequestDetails);
+                }
             } catch (error) {
                 if (error instanceof AxiosError) {
                     setError(error.response?.data.message || 'Error fetching asset details');
@@ -448,36 +449,6 @@ const UserAssetDetails: React.FC = () => {
                         </Card>
 
                         {/* Request Status Card */}
-                        {currentRequest && (
-                            <Card className="p-4 shadow-md">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-3">Current Request Status</h3>
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-600">Status</span>
-                                        <Badge className={getRequestStatusColor(currentRequest.status)}>
-                                            <span className="flex items-center gap-1">
-                                                {getRequestStatusIcon(currentRequest.status)}
-                                                {currentRequest.status.charAt(0).toUpperCase() + currentRequest.status.slice(1)}
-                                            </span>
-                                        </Badge>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <CalendarDays className="h-4 w-4" />
-                                        <span>
-                                            {new Date(currentRequest.startDate).toLocaleDateString()} - {new Date(currentRequest.endDate).toLocaleDateString()}
-                                        </span>
-                                    </div>
-                                    <div className="text-sm text-gray-600">
-                                        <span className="font-medium">Quantity:</span> {currentRequest.quantity}
-                                    </div>
-                                    {currentRequest.reason && (
-                                        <div className="text-sm text-gray-600">
-                                            <span className="font-medium">Reason:</span> {currentRequest.reason}
-                                        </div>
-                                    )}
-                                </div>
-                            </Card>
-                        )}
 
                         {/* Request Button */}
                         {!currentRequest && (
@@ -518,7 +489,7 @@ const UserAssetDetails: React.FC = () => {
 
                             <TabsContent value="details">
                                 <Card>
-                                    <div className="p-6 space-y-6">
+                                    <div className="p-6 space-y-7">
                                         <div>
                                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Description</h3>
                                             <p className="text-gray-600">{asset?.description}</p>
@@ -576,6 +547,36 @@ const UserAssetDetails: React.FC = () => {
                                                     )}
                                                 </div>
                                             </div>
+                                        </div>
+                                        <hr />
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                            {currentRequest && currentRequest.map((request: IRequest) => (
+                                                <div>
+                                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Current Request Status</h3>
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm">
+                                                            <span className="text-gray-500">Status:</span>{' '}
+                                                            <Badge className={getRequestStatusColor(request.status)}>
+                                                                <span className="flex items-center gap-1">
+                                                                    {getRequestStatusIcon(request.status)}
+                                                                    {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                                                </span>
+                                                            </Badge>
+                                                        </p>
+                                                        <p className="text-sm flex items-center gap-x-3">
+                                                            <span className="text-gray-500">Requested for:</span>{' '}
+                                                            <span className="text-gray-700 flex items-center gap-x-1">
+                                                                <CalendarDays className="h-4 w-4" />
+                                                                {new Date(request.requestedDate).toLocaleDateString()}
+                                                            </span>
+                                                        </p>
+                                                        <p className="text-sm">
+                                                            <span className="text-gray-500">Quantity:</span>{' '}
+                                                            <span className="text-gray-700">{request?.quantity || ''}{request.quantity > 1 ? ' units' : ' unit'}</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </Card>

@@ -2,7 +2,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
-import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe, FaCertificate, FaDownload, FaTimes, FaCheck, FaCalendarAlt } from "react-icons/fa";
+import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe, FaCertificate, FaDownload, FaTimes, FaCalendarAlt } from "react-icons/fa";
 import { IUser } from '../../interfaces/userInterface';
 import profile_pic from '../../assets/profile_pic.png';
 import { Link } from 'react-router-dom';
