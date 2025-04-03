@@ -39,8 +39,24 @@ export class MeetingController implements IMeetingController {
 
     async getMeetings(req: Request, res: Response): Promise<void> {
         try {
-            const meetings = await this.meetingService.getMeetings();
-            res.json(meetings);
+            const page = parseInt(req.query.page as string) || 1;
+            const search = req.query.search as string;
+            const filter = req.query.filter as string;
+
+            const meetings = await this.meetingService.getMeetings(
+                page,
+                5,
+                search,
+                filter
+            );
+
+            const documentsCount = await this.meetingService.totalMeetingsCount(search, filter) || 0;
+
+            res.json({
+                meetings,
+                totalPages: Math.ceil(documentsCount / 5),
+                totalItems: documentsCount,
+            });
         } catch (error) {
             console.error('Error fetching meetings:', error);
             res.status(500).json({ error: 'Could not fetch meetings' });

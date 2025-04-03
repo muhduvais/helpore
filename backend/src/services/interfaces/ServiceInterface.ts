@@ -153,7 +153,8 @@ export interface IOtpService {
 
 export interface IMeetingService {
     createMeeting( adminId: string, title: string, participants: string[], scheduledTime: Date | string ): Promise<IMeeting>;
-    getMeetings(): Promise<IMeeting[]>;
+    getMeetings(page: number, limit: number, search: string, filter: string): Promise<IMeeting[] | null>;
+    totalMeetingsCount(search: string, filter: string): Promise<number | null>;
     getMeetingById(meetingId: string): Promise<IMeeting | null>;
     getUserMeetings(userId: string): Promise<IMeeting[]>;
     updateMeetingStatus( meetingId: string, status: 'scheduled' | 'active' | 'completed' ): Promise<IMeeting | null>;

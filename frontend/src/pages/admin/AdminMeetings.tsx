@@ -19,7 +19,8 @@ import {
     Trash2,
     UserPlus,
     Video,
-    XCircle
+    XCircle,
+    Search
 } from 'lucide-react';
 import {
     AlertDialog,
@@ -31,6 +32,14 @@ import {
     AlertDialogHeader,
     AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 import { CreateMeetingModal } from '@/components/VideoCall.tsx/CreateMeetingModal';
 import { meetingService } from '@/services/meeting.service';
@@ -40,6 +49,9 @@ import { adminService } from '@/services/admin.service';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { IMeeting } from '@/interfaces/meeting.interface';
 import { MeetingDetailsModal } from '@/components/MeetingDetailsModal';
+import { useDebounce } from 'use-debounce';
+
+type Filter = 'all' | 'scheduled' | 'active' | 'completed' | 'cancelled';
 
 const MeetingsPage: React.FC = () => {
     const navigate = useNavigate();
@@ -60,17 +72,29 @@ const MeetingsPage: React.FC = () => {
     const [selectedMeeting, setSelectedMeeting] = useState<IMeeting | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
+    // Pagination
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [totalPages, setTotalPages] = useState<number>(0);
+    const [totalItems, setTotalItems] = useState<number>(0);
+
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [filter, setFilter] = useState<Filter>('all');
+
+    const [debouncedSearch] = useDebounce(searchTerm, 300);
+
     useEffect(() => {
         const fetchMeetingsAndUsers = async () => {
             try {
-                const meetingsResponse = await meetingService.getMeetings();
+                const meetingsResponse = await meetingService.getMeetings(currentPage, searchTerm, filter);
 
-                const filteredMeetings = meetingsResponse.filter((meeting: any) =>
+                const filteredMeetings = meetingsResponse.meetings.filter((meeting: any) =>
                     meeting.adminId === userId ||
                     meeting.participants.includes(userId)
                 );
 
                 setMeetings(filteredMeetings);
+                setTotalPages(meetingsResponse.totalPages);
+                setTotalItems(meetingsResponse.totalItems);
 
                 const usersResponse = await adminService.fetchUsers(1, 0, '');
                 const volunteersResponse = await adminService.fetchVolunteers(1, 0, '');
@@ -98,7 +122,19 @@ const MeetingsPage: React.FC = () => {
         };
 
         fetchMeetingsAndUsers();
-    }, [userId]);
+    }, [userId, currentPage, debouncedSearch, filter]);
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prev => prev + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prev => prev - 1);
+        }
+    };
 
     const handleJoinMeeting = async (meetingId: string) => {
         try {
@@ -204,6 +240,10 @@ const MeetingsPage: React.FC = () => {
         }
     };
 
+    const handleFilterChange = (value: string) => {
+        setFilter(value as Filter);
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-[400px]">
@@ -219,30 +259,64 @@ const MeetingsPage: React.FC = () => {
 
     return (
         <div className="container mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">My Meetings</h1>
-                <Button
-                    onClick={() => setIsCreateMeetingModalOpen(true)}
-                    className="bg-[#688D48] hover:bg-[#435D2C]"
-                >
-                    <UserPlus className="mr-2" /> Schedule Meeting
-                </Button>
+            <div className="flex justify-between items-center gap-x-3 mb-6">
+                <h1 className="text-xl font-bold min-w-100">My Meetings</h1>
+                <div className='flex items-center justify-end gap-x-3'>
+                    <div className="relative w-full md:w-1/2">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <Input
+                            type="text"
+                            placeholder="Search by meeting title..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 w-full"
+                        />
+                    </div>
+                    <div className="w-full md:w-1/4">
+                        <Select value={filter} onValueChange={handleFilterChange}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem className='cursor-pointer' value="all">All Meetings</SelectItem>
+                                <SelectItem className='cursor-pointer' value="scheduled">Scheduled</SelectItem>
+                                <SelectItem className='cursor-pointer' value="active">Active</SelectItem>
+                                <SelectItem className='cursor-pointer' value="completed">Completed</SelectItem>
+                                <SelectItem className='cursor-pointer' value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Button
+                        onClick={() => setIsCreateMeetingModalOpen(true)}
+                        className="bg-[#688D48] hover:bg-[#435D2C]"
+                    >
+                        <UserPlus className="mr-2" /> Schedule Meeting
+                    </Button>
+                </div>
             </div>
 
             {meetings.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center p-10">
                         <Clock className="w-12 h-12 text-gray-400 mb-4" />
-                        <p className="text-gray-600">No meetings scheduled</p>
+                        <p className="text-gray-600">No meetings found</p>
                     </CardContent>
                 </Card>
             ) : (
                 <div>
                     <Card className='mb-2'>
                         <CardHeader>
-                            <CardTitle className='text-xl'>Upcoming and Ongoing Meetings</CardTitle>
+                            <CardTitle className={`${filter !== 'all' || searchTerm !== '' ? 'text-lg italic text-gray-800 font-normal underline' : 'text-xl'}`}>
+                                {filter === 'all' && searchTerm === ''
+                                    ? 'Listing All Meetings'
+                                    : filter === 'all' && searchTerm !== ''
+                                        ? <>Results for <span className="font-semibold">'{searchTerm}'</span></>
+                                        : filter !== 'all' && searchTerm !== ''
+                                            ? <>Results for <span className="font-semibold">'{searchTerm}'</span> in <span className="font-semibold">{filter}</span> meetings</>
+                                            : <><span className="font-semibold">{filter[0].toUpperCase() + filter.slice(1)}</span> Meetings</>}
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className='max-h-[400px] overflow-y-auto'>
+                        <CardContent className=''>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -251,11 +325,11 @@ const MeetingsPage: React.FC = () => {
                                         <TableHead>Status</TableHead>
                                         <TableHead>Actions</TableHead>
                                         <TableHead>Link</TableHead>
+                                        <TableHead>Action</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {meetings.map((meeting) => (
-                                        (meeting.status === 'scheduled' || meeting.status === 'active') &&
                                         <TableRow key={meeting._id}>
                                             <TableCell>{meeting.title}</TableCell>
                                             <TableCell>
@@ -297,48 +371,6 @@ const MeetingsPage: React.FC = () => {
                                                     <Copy className="mr-2 w-4 h-4 opacity-70 hover:opacity-100 active:-scale-[80%]" />
                                                 </button>
                                             </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className='text-xl'>Completed and Cancelled Meetings</CardTitle>
-                        </CardHeader>
-                        <CardContent className='max-h-[400px] overflow-y-auto'>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Title</TableHead>
-                                        <TableHead>Scheduled Time</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                        <TableHead></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {meetings.map((meeting) => (
-                                        (meeting.status === 'completed' || meeting.status === 'cancelled') &&
-                                        <TableRow key={meeting._id}>
-                                            <TableCell>{meeting.title}</TableCell>
-                                            <TableCell>
-                                                {format(new Date(meeting.scheduledTime), 'PPp')}
-                                            </TableCell>
-                                            <TableCell>
-                                                {renderMeetingStatus(meeting.status, meeting.scheduledTime)}
-                                            </TableCell>
-                                            <TableCell className="space-x-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => openDetailsModal(meeting)}
-                                                >
-                                                    <Info className="mr-2 w-4 h-4" /> Details
-                                                </Button>
-                                            </TableCell>
                                             <TableCell className="">
                                                 <button
                                                     onClick={() => openDeleteDialog(meeting._id)}>
@@ -349,6 +381,29 @@ const MeetingsPage: React.FC = () => {
                                     ))}
                                 </TableBody>
                             </Table>
+                            {meetings.length > 0 && (
+                                <div className="flex items-center justify-between mt-6">
+                                    <span className="text-sm text-gray-600">
+                                        Showing {Math.min((currentPage - 1) * 5 + 1, totalItems)} to {Math.min(currentPage * 5, totalItems)} of {totalItems} meetings
+                                    </span>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            onClick={handlePrevPage}
+                                            disabled={currentPage === 1}
+                                        >
+                                            Previous
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={handleNextPage}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

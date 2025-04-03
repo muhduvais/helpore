@@ -41,15 +41,26 @@ export class MeetingRepository implements IMeetingRepository {
         }
     }
 
-    async findAll(): Promise<IMeeting[]> {
+    async findAll(query: any, skip: number, limit: number): Promise<IMeeting[]> {
         try {
-            return await Meeting.find()
-            .sort({ scheduledTime: 1 });
+            return await Meeting.find(query)
+            .skip(skip)
+            .limit(limit)
+            .sort({ scheduledTime: 1 })
         } catch (error) {
-            console.error('Error finding all meetings:', error);
+            console.error('Error finding meetings:', error);
             throw error;
         }
     }
+
+    async countMeetings(query: object): Promise<number | null> {
+        try {
+          return await Meeting.countDocuments(query);
+        } catch (error) {
+          console.log('Error counting meetingsZ: ', error)
+          return null;
+        }
+      }
 
     async findUpcomingMeetings(): Promise<IMeeting[] | null> {
         try {

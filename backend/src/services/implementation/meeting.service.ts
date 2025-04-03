@@ -6,6 +6,7 @@ import { IMeeting } from '../../interfaces/meeting.interface';
 import { Types } from 'mongoose';
 import { io } from '../../utils';
 import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
+import { error } from 'console';
 
 @injectable()
 export class MeetingService implements IMeetingService {
@@ -58,8 +59,40 @@ export class MeetingService implements IMeetingService {
         return newMeeting;
     }
 
-    async getMeetings(): Promise<IMeeting[]> {
-        return await this.meetingRepository.findAll();
+    async getMeetings(page: number, limit: number, search: string, filter: string): Promise<IMeeting[] | null> {
+        try {
+            let skip = (page - 1) * limit;
+            let query: any = {};
+
+            if (search) {
+                query = search ? { title: { $regex: search, $options: 'i' } } : {};
+            }
+
+            if (filter && filter !== 'all') {
+                query.status = filter;
+            }
+
+            return await this.meetingRepository.findAll(query, skip, limit);
+        } catch (err) {
+            console.log('Error fetching meetings: ', error);
+            return null;
+        }
+    }
+
+    async totalMeetingsCount(search: string, filter: string): Promise<number | null> {
+        try {
+            let query: any = {};
+            if (search) {
+                query = search ? { title: { $regex: search, $options: 'i' } } : {};
+            }
+            if (filter && filter !== 'all') {
+                query.status = filter;
+            }
+            return await this.meetingRepository.countMeetings(query);
+        } catch (error) {
+            console.error('Error counting donations:', error);
+            throw new Error('Error counting donations');
+        }
     }
 
     async getUpcomingMeetings(): Promise<IMeeting[] | null> {

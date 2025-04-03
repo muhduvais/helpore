@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { Calendar } from "../ui/calendar";
 import { meetingService } from "@/services/meeting.service";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, CheckCircle2, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Command,
@@ -55,6 +55,28 @@ export const CreateMeetingModal = ({
 
     const [selectionMode, setSelectionMode] = useState<ParticipantSelectionMode>(ParticipantSelectionMode.INDIVIDUAL);
     const [open, setOpen] = useState(false);
+
+    const [minTime, setMinTime] = useState("");
+
+    useEffect(() => {
+        if (!date) return;
+
+        const now = new Date();
+        const selectedDate = new Date(date);
+
+        if (selectedDate.toDateString() === now.toDateString()) {
+            now.setMinutes(now.getMinutes() + 5);
+
+            const roundedMinutes = Math.floor(now.getMinutes() / 5) * 5;
+            now.setMinutes(roundedMinutes, 0, 0);
+
+            const formattedTime = now.toTimeString().slice(0, 5);
+            setMinTime(formattedTime);
+            setTime(formattedTime);
+        } else {
+            setMinTime("");
+        }
+    }, [date]);
 
     useEffect(() => {
         switch (selectionMode) {
@@ -123,6 +145,17 @@ export const CreateMeetingModal = ({
 
     // Handle individual participant selection
     const handleParticipantSelect = (selectedId: string) => {
+        if (selectedId === 'all') {
+            setSelectedParticipants((prev) => {
+                const hasAllIds = [...users.map(user => user.id), ...volunteers.map(volunteer => volunteer.id)].every(id => [...prev].includes(id));
+                if (hasAllIds) {
+                    return []
+                } else {
+                    return [...users.map(user => user.id), ...volunteers.map(volunteer => volunteer.id)];
+                }
+            });
+            return;
+        }
         setSelectedParticipants(prev =>
             prev.includes(selectedId)
                 ? prev.filter(id => id !== selectedId)
@@ -189,6 +222,20 @@ export const CreateMeetingModal = ({
                                 <CommandList>
                                     <CommandEmpty>No participants found.</CommandEmpty>
                                     <CommandGroup title="Users">
+                                        <CommandItem
+                                            key={`user-all`}
+                                            value={'userId'}
+                                            onSelect={() => handleParticipantSelect('all')}
+                                            className="text-[#435D2C] font-bold border-b-[0.5px] bg-gray-100"
+                                        >
+                                            <CheckCircle2
+                                                className={cn(
+                                                    "mr-2 h-4 w-4",
+                                                    selectedParticipants.length === (users.length + volunteers.length) ? "opacity-100" : "opacity-20"
+                                                )}
+                                            />
+                                            Select All
+                                        </CommandItem>
                                         {users.map((user) => (
                                             <CommandItem
                                                 key={`user-${user.id}`}
@@ -229,26 +276,31 @@ export const CreateMeetingModal = ({
 
                     {selectedParticipants.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
-                            {selectedParticipants.map((participantId) => {
-                                const user = users.find(u => u.id === participantId);
-                                const volunteer = volunteers.find(v => v.id === participantId);
-                                const name = user?.name || volunteer?.name || 'Unknown';
-                                const type = user ? 'User' : 'Volunteer';
+                            {selectedParticipants.map((participantId, index) => {
+                                if (index < 5) {
+                                    const user = users.find(u => u.id === participantId);
+                                    const volunteer = volunteers.find(v => v.id === participantId);
+                                    const name = user?.name || volunteer?.name || 'Unknown';
+                                    const type = user ? 'User' : 'Volunteer';
 
-                                return (
-                                    <div
-                                        key={participantId}
-                                        className="bg-[#688D48] text-white px-2 py-1 rounded-md text-xs flex items-center gap-1"
-                                    >
-                                        {name} ({type})
-                                        <button
-                                            onClick={() => handleParticipantSelect(participantId)}
-                                            className="ml-1 hover:text-gray-200"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-                                );
+                                    return (
+                                        <>
+                                            <div
+                                                key={participantId}
+                                                className="bg-[#688D48] text-white px-2 py-1 rounded-md text-xs flex items-center gap-1"
+                                            >
+                                                {name} ({type})
+                                                <button
+                                                    onClick={() => handleParticipantSelect(participantId)}
+                                                    className="ml-1 hover:text-gray-200"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                            <span className="text-[#435D2C] text-xs pt-2">{index === 4 && selectedParticipants.length > 5 ? '... and more' : ''}</span>
+                                        </>
+                                    );
+                                }
                             })}
                         </div>
                     )}
@@ -325,6 +377,7 @@ export const CreateMeetingModal = ({
                             id="time"
                             type="time"
                             value={time}
+                            min={minTime}
                             onChange={(e) => setTime(e.target.value)}
                             className="col-span-3"
                         />
