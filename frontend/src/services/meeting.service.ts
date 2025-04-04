@@ -84,7 +84,7 @@ export const meetingService = {
           search,
           filter,
         }
-      });
+      }); 
       return response.data;
     } catch (error) {
       console.error("Error fetching meetings:", error);

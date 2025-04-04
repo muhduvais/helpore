@@ -130,11 +130,13 @@ const AdminRequests = () => {
 
   const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
-  setUserFilter('all');
-
   if (!isLoggedIn) {
     return <Navigate to="/admin/login" />;
   }
+
+  useEffect(() => {
+    setUserFilter('all');
+  }, []);
 
   useEffect(() => {
     fetchRequests();
@@ -296,7 +298,7 @@ const AdminRequests = () => {
   // const handleTotalRequests = (value: number) => {
   //   setTotalDisplay(value);
   // };
- 
+
   const UserDetailsModal = () => {
     const user = userDetails?.user;
     const address = userDetails?.address;

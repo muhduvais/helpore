@@ -9,7 +9,7 @@ let io: Server;
 export const setupSocketIO = (server: http.Server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL,
+      origin: [process.env.CLIENT_URL || '', process.env.SERVER_URL || ''],
     },
   });
 

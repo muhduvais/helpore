@@ -370,14 +370,14 @@ const AssistanceRequestDetails: React.FC = () => {
                     </div>
 
                     <div className="flex gap-2">
-                        {(request?.status === 'pending' || request?.status === 'approved') && (
+                        {/* {(request?.status === 'pending' || request?.status === 'approved') && (
                             <Button
                                 variant="destructive"
                                 className="bg-red-500 hover:bg-red-600"
                             >
                                 Cancel Request
                             </Button>
-                        )}
+                        )} */}
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             <Button
                                 onClick={handleShareRequest}

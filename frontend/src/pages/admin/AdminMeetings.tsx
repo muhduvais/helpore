@@ -87,30 +87,29 @@ const MeetingsPage: React.FC = () => {
             try {
                 const meetingsResponse = await meetingService.getMeetings(currentPage, searchTerm, filter);
 
-                const filteredMeetings = meetingsResponse.meetings.filter((meeting: any) =>
-                    meeting.adminId === userId ||
-                    meeting.participants.includes(userId)
-                );
-
-                setMeetings(filteredMeetings);
-                setTotalPages(meetingsResponse.totalPages);
-                setTotalItems(meetingsResponse.totalItems);
+                if (meetingsResponse && meetingsResponse.meetings) {
+                    setMeetings(meetingsResponse.meetings);
+                    setTotalPages(meetingsResponse.totalPages || 0);
+                    setTotalItems(meetingsResponse.totalItems || 0);
+                } else {
+                    setMeetings([]);
+                }
 
                 const usersResponse = await adminService.fetchUsers(1, 0, '');
                 const volunteersResponse = await adminService.fetchVolunteers(1, 0, '');
 
                 setUsers(
-                    usersResponse.data.users.map((user: any) => ({
+                    usersResponse.data?.users?.map((user: any) => ({
                         id: user._id,
                         name: user.name
-                    }))
+                    })) || []
                 );
 
                 setVolunteers(
-                    volunteersResponse.data.volunteers.map((volunteer: any) => ({
+                    volunteersResponse.data?.volunteers?.map((volunteer: any) => ({
                         id: volunteer._id,
                         name: volunteer.name
-                    }))
+                    })) || []
                 );
 
                 setIsLoading(false);
@@ -164,7 +163,7 @@ const MeetingsPage: React.FC = () => {
                     return updatedMeeting;
                 }
                 return meeting;
-            }));
+            }) || []);
 
             toast.success('Meeting cancelled!');
         } catch (error) {
@@ -295,7 +294,7 @@ const MeetingsPage: React.FC = () => {
                 </div>
             </div>
 
-            {meetings.length === 0 ? (
+            {meetings && meetings.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center p-10">
                         <Clock className="w-12 h-12 text-gray-400 mb-4" />
@@ -329,7 +328,7 @@ const MeetingsPage: React.FC = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {meetings.map((meeting) => (
+                                    {meetings && meetings.map((meeting) => (
                                         <TableRow key={meeting._id}>
                                             <TableCell>{meeting.title}</TableCell>
                                             <TableCell>
@@ -383,7 +382,7 @@ const MeetingsPage: React.FC = () => {
                             </Table>
 
                             {/* Pagination */}
-                            {meetings.length > 0 && (
+                            {meetings && meetings.length > 0 && (
                                 <div className="flex items-center justify-between mt-6">
                                     <span className="text-sm text-gray-600">
                                         Showing {Math.min((currentPage - 1) * 5 + 1, totalItems)} to {Math.min(currentPage * 5, totalItems)} of {totalItems} meetings
