@@ -2,8 +2,9 @@ import { IAssistanceRequest, IAssistanceRequestDocument, IAssistanceRequestRespo
 
 export interface IAssistanceRequestRepository {
   createAssistanceRequest(formData: IAssistanceRequest): Promise<boolean>;
-  findAssistanceRequests(search: string, filter: string, skip: number, limit: number, sort: string, priority: string): Promise<IAssistanceRequestResponse[] | null>;
-  countAssistanceRequests(search: string, filter: string, priority: string): Promise<number>;
+  findAssistanceRequests(search: string, filter: string, skip: number, limit: number, sort: string, priority: string, userId?: string
+  ): Promise<IAssistanceRequestResponse[] | null>;
+  countAssistanceRequests(search: string, filter: string, priority: string, userId?: string): Promise<number>;
   countProcessingRequests(search: string, filter: string, volunteerId: string): Promise<number>
   findPendingRequests(requestQuery: object, skip: number): Promise<IAssistanceRequest[]> | null;
   findPendingAssistanceRequests (): Promise<IAssistanceRequest[] | null>;

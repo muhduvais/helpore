@@ -174,6 +174,21 @@ export const userService = {
             throw error
         }
     },
+    fetchMyAssistanceRequests: async (page: number, limit: number, search: string, filter: string) => {
+        try {
+            const response = await customAxios.get('/api/assistanceRequests/me', {
+                params: {
+                    page,
+                    limit,
+                    search,
+                    filter
+                }
+            })
+            return response;
+        } catch (error) {
+            throw error
+        }
+    },
     fetchAssistanceRequestDetails: async (requestId: string) => {
         try {
             const response = await customAxios.get(`/api/assistanceRequests/${requestId}`)

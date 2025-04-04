@@ -4,7 +4,7 @@ import { IAssistanceRequestRepository } from "../interfaces/IAssistanceRequestRe
 import AssistanceRequest from "../../models/assistance-request.model";
 import User from "../../models/user.model";
 import { BaseRepository } from "./base.repository";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 @injectable()
 export class AssistanceRequestRepository extends BaseRepository<IAssistanceRequestDocument> implements IAssistanceRequestRepository {
@@ -29,10 +29,14 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
   }
 
   async findAssistanceRequests(
-    search: string, filter: string, skip: number, limit: number, sort: string, priority: string
+    search: string, filter: string, skip: number, limit: number, sort: string, priority: string, userId: string = ''
   ): Promise<IAssistanceRequestResponse[] | null> {
     try {
       const matchStage: any = {};
+
+      if (userId) {
+        matchStage.user = new Types.ObjectId(userId);
+      }
 
       if (filter && filter !== "all") {
         matchStage.status = filter;
@@ -180,10 +184,11 @@ export class AssistanceRequestRepository extends BaseRepository<IAssistanceReque
       .populate('user');
   }
 
-  async countAssistanceRequests(search: string, filter: string, priority: string): Promise<number> {
+  async countAssistanceRequests(search: string, filter: string, priority: string, userId: string = ''): Promise<number> {
     try {
       let query: any = {};
 
+      if (userId) query.user = userId;
       if (search) query["user.name"] = { $regex: search, $options: "i" };
       if (priority && priority !== "all") query.priority = priority;
       if (filter && filter !== "all") query.status = filter;

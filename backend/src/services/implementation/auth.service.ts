@@ -17,7 +17,7 @@ export class AuthService implements IAuthService {
     constructor(
         @inject('IAuthRepository') private readonly authRepository: IAuthRepository,
         @inject('IOtpRepository') private readonly otpRepository: IOtpRepository
-    ) {}
+    ) { }
 
     async registerUser(name: string, email: string, password: string): Promise<string | boolean | null> {
         try {
@@ -181,6 +181,7 @@ export class AuthService implements IAuthService {
             const existingUser = await this.authRepository.findUser(email);
 
             if (existingUser) {
+                if (existingUser?.isBlocked) return null;
                 return existingUser;
             }
 

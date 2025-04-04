@@ -109,11 +109,21 @@ export const CreateMeetingModal = ({
 
         if (!date) return false;
 
+        const now = new Date();
+        const dateTime = new Date(date);
+
+        console.log('Today?: ', dateTime.toDateString(), now.toDateString())
+        console.log('Past Time?: ', (Number(time.split(':')[0]) * 100)+Number(time.split(':')[1]), (now.getHours() * 100)+now.getMinutes())
+
+        if (dateTime.toDateString() === now.toDateString() && time.split(':')[0]+time.split(':')[1] < now.getHours().toString()+now.getMinutes().toString()) {
+            setErrorMessage('Cannot schedule at past time!');
+            valid = false;
+        }
+
         if (!valid) return;
 
         setIsLoading(true);
         try {
-            const dateTime = new Date(date);
             const [hours, minutes] = time.split(":").map(Number);
             dateTime.setHours(hours, minutes);
 
@@ -134,6 +144,7 @@ export const CreateMeetingModal = ({
             setDate(new Date());
             setTime('12:00');
             setSelectionMode(ParticipantSelectionMode.INDIVIDUAL);
+            setErrorMessage('');
             onClose();
         } catch (error) {
             console.error("Failed to create meeting:", error);

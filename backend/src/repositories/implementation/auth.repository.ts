@@ -15,7 +15,7 @@ export interface IUserCreationData {
 export class AuthRepository extends BaseRepository<IUserDocument> implements IAuthRepository {
   async findUser(email: string): Promise<IUserDocument | null> {
     try {
-      return await User.findOne({ email, isBlocked: false });
+      return await User.findOne({ email });
     } catch (error) {
       console.error('Error finding user:', error);
       throw error;

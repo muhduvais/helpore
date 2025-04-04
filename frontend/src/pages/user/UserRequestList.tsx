@@ -89,14 +89,6 @@ const UserRequests: React.FC = () => {
     return <Navigate to="/login" />;
   }
 
-  useEffect(() => {
-    fetchRequests();
-  }, [currentPage, debouncedSearch, filter]);
-
-  useEffect(() => {
-    fetchAssistanceRequests();
-  }, [assistanceCurrentPage, debouncedAssistanceSearch, assistanceFilter]);
-
   const fetchRequests = async () => {
     try {
       setIsLoading(true);
@@ -127,7 +119,7 @@ const UserRequests: React.FC = () => {
   const fetchAssistanceRequests = async () => {
     try {
       setIsAssistanceLoading(true);
-      const response = await userService.fetchAssistanceRequests(
+      const response = await userService.fetchMyAssistanceRequests(
         assistanceCurrentPage,
         limit,
         debouncedAssistanceSearch.trim(),
@@ -150,6 +142,14 @@ const UserRequests: React.FC = () => {
       setIsAssistanceLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchRequests();
+  }, [currentPage, debouncedSearch, filter]);
+
+  useEffect(() => {
+    fetchAssistanceRequests();
+  }, [assistanceCurrentPage, debouncedAssistanceSearch, assistanceFilter]);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
@@ -321,7 +321,7 @@ const UserRequests: React.FC = () => {
                   <User className="h-4 w-4" />
                   <div>
                     <p className="font-medium">Assigned Volunteer</p>
-                    <p>{ request.volunteer.name || 'volunteer name' }</p>
+                    <p>{request.volunteer.name || 'volunteer name'}</p>
                   </div>
                 </div>
               )}

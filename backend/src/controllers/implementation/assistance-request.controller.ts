@@ -16,6 +16,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
         this.getAssistanceRequestDetails = this.getAssistanceRequestDetails.bind(this);
         this.assignVolunteer = this.assignVolunteer.bind(this);
         this.getPendingRequests = this.getPendingRequests.bind(this);
+        this.getMyAssistanceRequests = this.getMyAssistanceRequests.bind(this);
     }
 
     async requestAssistance(req: Request, res: Response): Promise<void> {
@@ -116,6 +117,28 @@ export class AssistanceRequestController implements IAssistanceRequestController
         try {
             const assistanceRequests = await this.assistanceRequestService.fetchAssistanceRequests(search, filter, skip, limit, sort, priority);
             const documentsCount = await this.assistanceRequestService.countAssistanceRequests(search, filter, priority);
+            const totalPages = Math.ceil(documentsCount / limit);
+
+            res.status(200).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });
+        } catch (error) {
+            console.error('Error fetching assistance requests:', error);
+            res.status(500).json({ message: 'Error fetching assistance requests', error });
+        }
+    }
+
+    async getMyAssistanceRequests(req: Request, res: Response): Promise<void> {
+        try {
+            const { userId } = req.user as JwtPayload;
+            const page = parseInt(req.query.page as string, 10) || 1;
+            let limit = parseInt(req.query.limit as string, 10) || 5;
+            const search = req.query.search as string;
+            const filter = req.query.filter as string;
+            const priority = req.query.priority as string;
+            const sort = req.query.sort as string;
+            let skip = !search ? (page - 1) * limit : 0;
+
+            const assistanceRequests = await this.assistanceRequestService.fetchMyAssistanceRequests(userId, search, filter, skip, limit, sort, priority);
+            const documentsCount = await this.assistanceRequestService.countMyAssistanceRequests(userId, search, filter, priority);
             const totalPages = Math.ceil(documentsCount / limit);
 
             res.status(200).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });

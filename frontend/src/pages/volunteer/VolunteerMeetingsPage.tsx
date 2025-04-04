@@ -204,7 +204,7 @@ const VolunteerMeetingsPage: React.FC = () => {
                                             : <><span className="font-semibold">{filter[0].toUpperCase() + filter.slice(1)}</span> Meetings</>}
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className='max-h-[400px] overflow-y-auto'>
+                        <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow>

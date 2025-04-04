@@ -194,6 +194,25 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         }
     }
 
+    async fetchMyAssistanceRequests(
+        userId: string, search: string, filter: string, skip: number, limit: number, sort: string, priority: string
+    ): Promise<IAssistanceRequestResponse[] | null> {
+        try {
+            const results = await this.assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority, userId);
+
+            if (!results) return null;
+
+            return results.map((request: IAssistanceRequestResponse) => ({
+                ...request,
+                requestedDate: new Date(request.requestedDate).toISOString(),
+                address: request.address instanceof Types.ObjectId ? undefined : request.address,
+            }));
+        } catch (error) {
+            console.error("Error finding assistance requests:", error);
+            return null;
+        }
+    }
+
     async fetchPendingRequests(): Promise<IAssistanceRequest[] | null> {
         try {
             const results = await this.assistanceRepository.findPendingAssistanceRequests();
@@ -238,6 +257,14 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         }
     }
 
+    async countMyAssistanceRequests(userId: string, search: string, filter: string, priority: string): Promise<number> {
+        try {
+            return await this.assistanceRepository.countAssistanceRequests(search, filter, priority, userId);
+        } catch (error) {
+            console.error("Error counting assistance requests:", error);
+            return 0;
+        }
+    }
 
     async countProcessingRequests(search: string, filter: string, volunteerId: string): Promise<number> {
         try {
