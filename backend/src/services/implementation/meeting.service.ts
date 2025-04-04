@@ -90,8 +90,25 @@ export class MeetingService implements IMeetingService {
             }
             return await this.meetingRepository.countMeetings(query);
         } catch (error) {
-            console.error('Error counting donations:', error);
-            throw new Error('Error counting donations');
+            console.error('Error counting meetings:', error);
+            throw new Error('Error counting meetings');
+        }
+    }
+
+    async totalUserMeetingsCount(userId: string, search: string, filter: string): Promise<number | null> {
+        try {
+            const userObjectId = new Types.ObjectId(userId);
+            let query: any = { participants: userObjectId };
+            if (search) {
+                query = search ? { title: { $regex: search, $options: 'i' } } : {};
+            }
+            if (filter && filter !== 'all') {
+                query.status = filter;
+            }
+            return await this.meetingRepository.countMeetings(query);
+        } catch (error) {
+            console.error('Error counting meetings:', error);
+            throw new Error('Error counting meetings');
         }
     }
 
@@ -103,8 +120,27 @@ export class MeetingService implements IMeetingService {
         return await this.meetingRepository.findById(meetingId);
     }
 
-    async getUserMeetings(userId: string): Promise<IMeeting[]> {
-        return await this.meetingRepository.findMeetingsByParticipantId(userId);
+    async getUserMeetings(userId: string, page: number, limit: number, search: string, filter: string): Promise<IMeeting[] | null> {
+        try {
+            let skip = (page - 1) * limit;
+            let query: any = {};
+
+            if (search) {
+                query = search ? { title: { $regex: search, $options: 'i' } } : {};
+            }
+
+            if (filter && filter !== 'all') {
+                query.status = filter;
+            }
+
+            const userObjectId = new Types.ObjectId(userId);
+            query.participants = userObjectId
+
+            return await this.meetingRepository.findAll(query, skip, limit);
+        } catch (error) {
+            console.log('Error fetching user meetings: ', error);
+            return null;
+        }
     }
 
     async updateMeetingStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed'): Promise<IMeeting | null> {

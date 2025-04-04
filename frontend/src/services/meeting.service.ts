@@ -92,9 +92,15 @@ export const meetingService = {
     }
   },
 
-  getUserMeetings: async () => {
+  getUserMeetings: async (page: number, search: string, filter: string) => {
     try {
-      const response = await customAxios.get("/api/meetings/user");
+      const response = await customAxios.get("/api/meetings/user", {
+        params: {
+          page,
+          search,
+          filter,
+        }
+      });
       return response.data;
     } catch (error) {
       console.error("Error fetching user meetings:", error);

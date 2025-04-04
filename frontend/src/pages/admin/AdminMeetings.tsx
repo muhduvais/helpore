@@ -72,7 +72,7 @@ const MeetingsPage: React.FC = () => {
     const [selectedMeeting, setSelectedMeeting] = useState<IMeeting | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-    // Pagination
+    // Pagination & Filter
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(0);
     const [totalItems, setTotalItems] = useState<number>(0);
@@ -134,6 +134,10 @@ const MeetingsPage: React.FC = () => {
         if (currentPage > 1) {
             setCurrentPage(prev => prev - 1);
         }
+    };
+
+    const handleFilterChange = (value: string) => {
+        setFilter(value as Filter);
     };
 
     const handleJoinMeeting = async (meetingId: string) => {
@@ -238,10 +242,6 @@ const MeetingsPage: React.FC = () => {
             default:
                 return <Badge>Unknown</Badge>;
         }
-    };
-
-    const handleFilterChange = (value: string) => {
-        setFilter(value as Filter);
     };
 
     if (isLoading) {
@@ -356,14 +356,14 @@ const MeetingsPage: React.FC = () => {
                                                         <Info className="mr-2 w-4 h-4" /> Details
                                                     </Button>
                                                 )}
-                                                <Button
+                                                {meeting.status === 'scheduled' && <Button
                                                     size="sm"
                                                     variant="outline"
                                                     className='text-red-500 hover:text-red-700'
                                                     onClick={() => openCancelDialog(meeting._id)}
                                                 >
                                                     <XCircle className="mr-2 w-4 h-4 text-red-500 hover:text-red-700" /> Cancel
-                                                </Button>
+                                                </Button>}
                                             </TableCell>
                                             <TableCell className="">
                                                 <button
@@ -381,6 +381,8 @@ const MeetingsPage: React.FC = () => {
                                     ))}
                                 </TableBody>
                             </Table>
+
+                            {/* Pagination */}
                             {meetings.length > 0 && (
                                 <div className="flex items-center justify-between mt-6">
                                     <span className="text-sm text-gray-600">

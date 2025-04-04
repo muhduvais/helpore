@@ -25,28 +25,12 @@ export class MeetingRepository implements IMeetingRepository {
         }
     }
 
-    async findMeetingsByParticipantId(userId: string): Promise<IMeeting[]> {
-        try {
-            const userObjectId = new Types.ObjectId(userId);
-
-            const meetings = await Meeting.find({
-                participants: userObjectId
-            })
-            .sort({ scheduledTime: 1 });
-
-            return meetings;
-        } catch (error) {
-            console.error('Error fetching meetings for participant:', error);
-            throw error;
-        }
-    }
-
     async findAll(query: any, skip: number, limit: number): Promise<IMeeting[]> {
         try {
             return await Meeting.find(query)
-            .skip(skip)
-            .limit(limit)
-            .sort({ scheduledTime: 1 })
+                .skip(skip)
+                .limit(limit)
+                .sort({ scheduledTime: 1 })
         } catch (error) {
             console.error('Error finding meetings:', error);
             throw error;
@@ -55,17 +39,17 @@ export class MeetingRepository implements IMeetingRepository {
 
     async countMeetings(query: object): Promise<number | null> {
         try {
-          return await Meeting.countDocuments(query);
+            return await Meeting.countDocuments(query);
         } catch (error) {
-          console.log('Error counting meetingsZ: ', error)
-          return null;
+            console.log('Error counting meetingsZ: ', error)
+            return null;
         }
-      }
+    }
 
     async findUpcomingMeetings(): Promise<IMeeting[] | null> {
         try {
             return await Meeting.find({ status: 'scheduled' })
-            .sort({ scheduledTime: 1 });
+                .sort({ scheduledTime: 1 });
         } catch (error) {
             console.error('Error finding all meetings:', error);
             throw error;

@@ -16,6 +16,7 @@ import {
     Clock,
     Copy,
     Info,
+    Search,
     Video
 } from 'lucide-react';
 
@@ -25,6 +26,17 @@ import { useSelector } from 'react-redux';
 import { IMeeting } from '@/interfaces/meeting.interface';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { MeetingDetailsModal } from '@/components/MeetingDetailsModal';
+import { useDebounce } from 'use-debounce';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
+type Filter = 'all' | 'scheduled' | 'active' | 'completed' | 'cancelled';
 
 const UserMeetingsPage: React.FC = () => {
     const navigate = useNavigate();
@@ -36,11 +48,23 @@ const UserMeetingsPage: React.FC = () => {
     const [selectedMeeting, setSelectedMeeting] = useState<IMeeting | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
+    // Pagination & Filter
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [totalPages, setTotalPages] = useState<number>(0);
+    const [totalItems, setTotalItems] = useState<number>(0);
+
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [filter, setFilter] = useState<Filter>('all');
+
+    const [debouncedSearch] = useDebounce(searchTerm, 300);
+
     useEffect(() => {
         const fetchUserMeetings = async () => {
             try {
-                const userMeetingsResponse = await meetingService.getUserMeetings();
+                const userMeetingsResponse = await meetingService.getUserMeetings(currentPage, searchTerm, filter);
                 setMeetings(userMeetingsResponse.meetings);
+                setTotalPages(userMeetingsResponse.totalPages);
+                setTotalItems(userMeetingsResponse.totalItems);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Failed to fetch user meetings:', error);
@@ -50,7 +74,23 @@ const UserMeetingsPage: React.FC = () => {
         };
 
         fetchUserMeetings();
-    }, [userId]);
+    }, [userId, currentPage, debouncedSearch, filter]);
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prev => prev + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prev => prev - 1);
+        }
+    };
+
+    const handleFilterChange = (value: string) => {
+        setFilter(value as Filter);
+    };
 
     const handleJoinMeeting = async (meetingId: string) => {
         try {
@@ -64,7 +104,7 @@ const UserMeetingsPage: React.FC = () => {
     const canJoinMeeting = (scheduledTime: string | Date, status: string) => {
         const meetingTime = new Date(scheduledTime);
         const now = new Date();
-        return meetingTime <= now && status !== 'completed';
+        return meetingTime <= now && status !== 'completed' && status !== 'cancelled';
     };
 
     const openDetailsModal = (meeting: IMeeting) => {
@@ -116,6 +156,33 @@ const UserMeetingsPage: React.FC = () => {
                 <h1 className="text-2xl font-bold">My Meetings</h1>
             </div>
 
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <Input
+                        type="text"
+                        placeholder="Search by meeting title..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-full"
+                    />
+                </div>
+                <div className="w-full sm:w-48">
+                    <Select value={filter} onValueChange={handleFilterChange}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem className="cursor-pointer" value="all">All Meetings</SelectItem>
+                            <SelectItem className="cursor-pointer" value="scheduled">Scheduled</SelectItem>
+                            <SelectItem className="cursor-pointer" value="active">Active</SelectItem>
+                            <SelectItem className="cursor-pointer" value="completed">Completed</SelectItem>
+                            <SelectItem className="cursor-pointer" value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
             {meetings && meetings.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center p-10">
@@ -127,9 +194,17 @@ const UserMeetingsPage: React.FC = () => {
                 <div>
                     <Card className='mb-2'>
                         <CardHeader>
-                            <CardTitle className='text-xl'>Upcoming and Ongoing Meetings</CardTitle>
+                            <CardTitle className={`${filter !== 'all' || searchTerm !== '' ? 'text-lg italic text-gray-800 font-normal underline' : 'text-xl'}`}>
+                                {filter === 'all' && searchTerm === ''
+                                    ? 'Listing All Meetings'
+                                    : filter === 'all' && searchTerm !== ''
+                                        ? <>Results for <span className="font-semibold">'{searchTerm}'</span></>
+                                        : filter !== 'all' && searchTerm !== ''
+                                            ? <>Results for <span className="font-semibold">'{searchTerm}'</span> in <span className="font-semibold">{filter}</span> meetings</>
+                                            : <><span className="font-semibold">{filter[0].toUpperCase() + filter.slice(1)}</span> Meetings</>}
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className='max-h-[400px] overflow-y-auto'>
+                        <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -142,7 +217,6 @@ const UserMeetingsPage: React.FC = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {meetings.map((meeting) => (
-                                        (meeting.status === 'scheduled' || meeting.status === 'active') &&
                                         <TableRow key={meeting._id}>
                                             <TableCell>{meeting.title}</TableCell>
                                             <TableCell>
@@ -183,46 +257,30 @@ const UserMeetingsPage: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className='text-xl'>Completed and Cancelled Meetings</CardTitle>
-                        </CardHeader>
-                        <CardContent className='max-h-[400px] overflow-y-auto'>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Title</TableHead>
-                                        <TableHead>Scheduled Time</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {meetings.map((meeting) => (
-                                        (meeting.status === 'completed' || meeting.status === 'cancelled') &&
-                                        <TableRow key={meeting._id}>
-                                            <TableCell>{meeting.title}</TableCell>
-                                            <TableCell>
-                                                {format(new Date(meeting.scheduledTime), 'PPp')}
-                                            </TableCell>
-                                            <TableCell>
-                                                {renderMeetingStatus(meeting.status, meeting.scheduledTime)}
-                                            </TableCell>
-                                            <TableCell className="space-x-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => openDetailsModal(meeting)}
-                                                >
-                                                    <Info className="mr-2 w-4 h-4" /> Details
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+                    {/* Pagination */}
+                    {meetings.length > 0 && (
+                        <div className="flex items-center justify-between mt-6">
+                            <span className="text-sm text-gray-600">
+                                Showing {Math.min((currentPage - 1) * 5 + 1, totalItems)} to {Math.min(currentPage * 5, totalItems)} of {totalItems} meetings
+                            </span>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={handlePrevPage}
+                                    disabled={currentPage === 1}
+                                >
+                                    Previous
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleNextPage}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

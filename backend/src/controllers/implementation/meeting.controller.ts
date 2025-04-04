@@ -92,15 +92,31 @@ export class MeetingController implements IMeetingController {
 
     getUserMeetings = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { userId, role } = req.user as JwtPayload;
+            const { userId } = req.user as JwtPayload;
+            const page = parseInt(req.query.page as string) || 1;
+            const search = req.query.search as string;
+            const filter = req.query.filter as string;
 
             if (!userId) {
-                res.status(401).json({ message: 'User not authenticated' });
+                res.status(401).json({ message: 'User not authenticated!' });
                 return;
             }
 
-            const meetings = await this.meetingService.getUserMeetings(userId);
-            res.status(200).json({ meetings });
+            const meetings = await this.meetingService.getUserMeetings(
+                userId,
+                page,
+                5,
+                search,
+                filter
+            );
+            
+            const userMeetingsCount = await this.meetingService.totalUserMeetingsCount(userId, search, filter) || 0;
+
+            res.json({
+                meetings,
+                totalPages: Math.ceil(userMeetingsCount / 5),
+                totalItems: userMeetingsCount,
+            });
         } catch (error) {
             console.error('Error fetching user meetings:', error);
             res.status(500).json({ message: 'Failed to fetch user meetings' });
