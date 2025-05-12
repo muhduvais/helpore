@@ -129,7 +129,7 @@ const VolunteerMeetingsPage: React.FC = () => {
             case 'active':
                 return <Badge variant="outline">In Progress</Badge>;
             case 'completed':
-                return <Badge variant="destructive">Completed</Badge>;
+                return <Badge variant="completed">Completed</Badge>;
             case 'cancelled':
                 return <Badge variant="destructive">Cancelled</Badge>;
             default:

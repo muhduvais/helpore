@@ -9,24 +9,8 @@ let io: Server;
 export const setupSocketIO = (server: http.Server) => {
   io = new Server(server, {
     cors: {
-      origin: [process.env.CLIENT_URL || '', process.env.SERVER_URL || ''],
+      origin: [process.env.CLIENT_URL || '*', process.env.SERVER_URL || '*'],
     },
-  });
-
-  io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
-
-    if (!token) {
-      return next(new Error("Authentication error: No token provided"));
-    }
-
-    try {
-      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || '');
-      next();
-    } catch (error) {
-      console.log('error: ', error)
-      return next(new Error("Authentication error: Invalid token"));
-    }
   });
 
   io.on('connection', (socket: any) => {

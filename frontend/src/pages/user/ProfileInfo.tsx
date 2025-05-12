@@ -227,7 +227,10 @@ const Profile = () => {
             try {
                 const response = await userService.deleteCertificate(certificateToDelete.url);
                 if (response.status === 200) {
-                    fetchUserDetails();
+                    setUser((prevUser: IUser) => ({
+                        ...prevUser,
+                        certificates: prevUser.certificates?.filter(cert => cert !== certificateToDelete.url)
+                    }))
                     toast.success("Certificate deleted!");
                 }
             } catch (error) {
@@ -440,15 +443,15 @@ const Profile = () => {
 
                                 <div className="flex items-center space-x-4">
                                     <button
+                                        className='px-8 py-2 bg-[#688D48] rounded text-white'
                                         type="submit"
-                                        className="px-5 py-2 bg-green-700 text-white font-medium rounded-lg hover:bg-green-800 transition shadow-sm"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? "Updating..." : "Update Password"}
                                     </button>
                                     <button
                                         type="button"
-                                        className="px-5 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition"
+                                        className="px-8 py-2 bg-gray-100 text-gray-700 font-medium rounded hover:bg-gray-200 transition"
                                         onClick={clearFields}
                                     >
                                         Cancel
@@ -638,7 +641,7 @@ const Profile = () => {
                                                 onClick={confirmDelete}
                                                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
                                             >
-                                                Delete Account
+                                                Delete
                                             </button>
                                         </div>
                                     </div>

@@ -104,10 +104,6 @@ const AssistanceRequestDetails: React.FC = () => {
     const authToken = useSelector((state: any) => state.auth.accessToken);
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
-    if (!isLoggedIn) {
-        return <Navigate to="/login" />;
-    }
-
     const { markAllAsRead } = useNotifications();
 
     useEffect(() => {
@@ -308,6 +304,10 @@ const AssistanceRequestDetails: React.FC = () => {
     const formatMessageTime = (dateString: string) => {
         return format(new Date(dateString), 'h:mm a');
     };
+
+    if (!isLoggedIn) {
+        return <Navigate to="/login" />;
+    }
 
     if (isLoading) {
         return (

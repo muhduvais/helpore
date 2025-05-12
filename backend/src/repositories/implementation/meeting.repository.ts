@@ -30,7 +30,7 @@ export class MeetingRepository implements IMeetingRepository {
             return await Meeting.find(query)
                 .skip(skip)
                 .limit(limit)
-                .sort({ scheduledTime: 1 })
+                .sort({ scheduledTime: -1 })
         } catch (error) {
             console.error('Error finding meetings:', error);
             throw error;
@@ -41,7 +41,7 @@ export class MeetingRepository implements IMeetingRepository {
         try {
             return await Meeting.countDocuments(query);
         } catch (error) {
-            console.log('Error counting meetingsZ: ', error)
+            console.log('Error counting meetings: ', error)
             return null;
         }
     }

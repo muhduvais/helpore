@@ -42,7 +42,6 @@ const DonationPage = () => {
 
     // Donation success modal
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-    const [successDonationAmount, setSuccessDonationAmount] = useState(0);
     const [successDonationCampaign, setSuccessDonationCampaign] = useState('');
 
     const donationAmounts = [50, 100, 500, 1000];
@@ -121,7 +120,7 @@ const DonationPage = () => {
         const success = query.get('success');
 
         if (success === 'true' && sessionId) {
-            setSuccessDonationAmount(amount);
+            console.log('amount after success: ', amount)
             setSuccessDonationCampaign(campaign);
             setIsSuccessModalOpen(true);
 
@@ -158,7 +157,6 @@ const DonationPage = () => {
                     setIsSuccessModalOpen(false);
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }}
-                amount={successDonationAmount}
                 campaign={successDonationCampaign}
             />
             <div className="p-6 lg:p-8 space-y-6">
@@ -302,7 +300,7 @@ const DonationPage = () => {
 
                                 {/* Donation history */}
                                 {showHistory && (
-                                    <div>
+                                    <div className='h-96 overflow-y-auto'>
                                         {isHistoryLoading ? (
                                             <div className="flex justify-center items-center py-8">
                                                 <DotLottieReact

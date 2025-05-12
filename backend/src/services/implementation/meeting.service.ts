@@ -7,6 +7,7 @@ import { Types } from 'mongoose';
 import { io } from '../../utils';
 import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
 import { error } from 'console';
+import { generateToken04 } from '../../utils/zegoToken.util';
 
 @injectable()
 export class MeetingService implements IMeetingService {
@@ -148,24 +149,18 @@ export class MeetingService implements IMeetingService {
     }
 
     async generateToken(userId: string, roomId: string, userName: string): Promise<string> {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const expireTime = currentTime + 3600;
+        const effectiveTimeInSeconds = 3600;
 
-        const payload = {
-            app_id: this.appId,
-            user_id: userId,
-            room_id: roomId,
-            user_name: userName,
-            timestamp: currentTime,
-            nonce: Math.floor(Math.random() * 100000),
-            expire: expireTime
-        };
+        const token = generateToken04(
+            this.appId,
+            userId,
+            this.serverSecret,
+            effectiveTimeInSeconds,
+            roomId,
+        );
 
-        const token = jwt.sign(payload, this.serverSecret, {
-            algorithm: 'HS256'
-        });
-
-        return token;
+        const kitToken = `04${this.appId}${token}`;
+        return kitToken;
     }
 
     async deleteMeeting(meetingId: string): Promise<IMeeting | null> {

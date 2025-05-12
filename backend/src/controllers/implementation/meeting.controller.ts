@@ -109,7 +109,7 @@ export class MeetingController implements IMeetingController {
                 search,
                 filter
             );
-            
+
             const userMeetingsCount = await this.meetingService.totalUserMeetingsCount(userId, search, filter) || 0;
 
             res.json({

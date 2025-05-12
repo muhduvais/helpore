@@ -1,216 +1,197 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
-import { toast } from 'sonner';
-import { useSelector } from 'react-redux';
-
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-
-import { meetingService } from '@/services/meeting.service';
-import { userService } from '@/services/user.service';
-import { volunteerService } from '@/services/volunteer.service';
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { meetingService } from "@/services/meeting.service";
+import { toast } from "sonner";
 
 interface MeetingRoomProps {
   userType: 'admin' | 'user' | 'volunteer';
 }
 
 const UnifiedMeetingRoom: React.FC<MeetingRoomProps> = ({ userType }) => {
+
   const { meetingId } = useParams<{ meetingId: string }>();
+
+  const [searchParams] = useSearchParams();
+  const roomID = searchParams.get("roomID") || "defaultRoom";
+  const callContainer = useRef(null);
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const navigate = useNavigate();
-  const meetingContainerRef = useRef<HTMLDivElement>(null);
-
-  const [meeting, setMeeting] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(true);
-
-  const volunteerId = useSelector((state: any) => state.auth?.userId);
 
   useEffect(() => {
-    const initializeMeeting = async () => {
+    if (!callContainer.current) return;
+
+    let zp: ZegoUIKitPrebuilt | null = null;
+
+    const initializeCall = async () => {
       try {
-        let user;
-        
-        if (userType === 'admin') {
-          const userResponse = await userService.fetchUserDetails();
-          user = userResponse.data.user;
-        } else if (userType === 'user') {
-          const userResponse = await userService.fetchUserDetails();
-          user = userResponse.data.user;
-        } else if (userType === 'volunteer') {
-          const volunteerResponse = await volunteerService.fetchVolunteerDetails(volunteerId);
-          user = volunteerResponse.data.volunteer;
+        const appID = Number(import.meta.env.VITE_ZEGO_APP_ID);
+        const serverSecret = import.meta.env.VITE_ZEGO_SERVER_SECRET;
+
+        if (!appID || isNaN(appID)) {
+          throw new Error("Invalid App ID. Check your environment variables.");
         }
 
-        if (userType !== 'admin') {
-          const meetingDetails = await meetingService.fetchMeetingDetails(meetingId || '');
-          setMeeting(meetingDetails);
-
-          // Authorization for non-admin users
-          const isParticipant = meetingDetails.participants.includes(user._id);
-          if (!isParticipant) {
-            setIsAuthorized(false);
-            toast.error("You are not authorized to join this meeting");
-            setTimeout(() => navigate(`/${userType}/meetings`), 3000);
-            return;
-          }
+        if (!serverSecret) {
+          throw new Error(
+            "Missing Server Secret. Check your environment variables.",
+          );
         }
 
-        // Token generation for admin
-        if (userType === 'admin') {
-          const tokenResponse = await meetingService.generateZegoToken(meetingId || '');
-          const token = tokenResponse.data.token;
-
-          if (!token) {
-            console.error('Failed to generate token');
-            toast.error('Meeting token generation failed');
-            return;
-          }
-        }
-
-        // Zego credentials
-        const appId = parseInt(import.meta.env.VITE_ZEGO_APP_ID || '0');
-        const appSign = import.meta.env.VITE_ZEGO_APP_SIGN || '';
-
-        if (!appId || !appSign) {
-          console.error('Zego credentials are missing or invalid');
-          toast.error('Video conference configuration is incomplete');
-          return;
-        }
-
-        // Kit token generation
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-          appId,
-          appSign,
-          meetingId || '',
-          user._id || 'guest',
-          user.name || 'Guest User'
+          appID,
+          serverSecret,
+          roomID,
+          "UserID_" + Date.now(),
+          userType === 'admin' ? "Admin" : "Guest",
         );
 
-        // Zego video conference initialization
-        if (meetingContainerRef.current) {
-          const zegoInstance = ZegoUIKitPrebuilt.create(kitToken);
+        zp = ZegoUIKitPrebuilt.create(kitToken);
 
-          if (!zegoInstance) {
-            console.error('Failed to create Zego instance');
-            toast.error('Failed to initialize video conference');
-            return;
-          }
-
-          // Role based room configuration
-          const roomConfig: any = {
-            container: meetingContainerRef.current,
-            scenario: {
-              mode: ZegoUIKitPrebuilt.GroupCall,
+        // Set up permission controls based on user type
+        const config = {
+          container: callContainer.current,
+          sharedLinks: [
+            {
+              name: "Meeting Link",
+              url: `${window.location.origin}/video-call?roomID=${roomID}`,
             },
-            turnOnMicrophoneWhenJoining: true,
-            turnOnCameraWhenJoining: true,
-            showRemoteAudioVolume: true,
-            showScreenSharingButton: true,
-
-            // Callbacks
-            onJoinRoom: () => {
-              console.log('Joined meeting room');
-              toast.success('Successfully joined the meeting');
-            },
-            onLeaveRoom: async () => {
-              console.log('Left meeting room');
-              
-              // Admin: update meeting status
-              if (userType === 'admin') {
-                try {
-                  await meetingService.updateMeetingStatus(meetingId || '', 'completed');
-                  console.log('Meeting status updated to completed!');
-                } catch (error) {
-                  console.error('Failed to update meeting status:', error);
-                }
+          ],
+          scenario: {
+            mode: ZegoUIKitPrebuilt.GroupCall,
+          },
+          showScreenSharingButton: true,
+          showRemoveUserButton: userType === 'admin',
+          showTurnOffRemoteCameraButton: false,
+          showTurnOffRemoteMicrophoneButton: false,
+          
+          onJoinRoom: () => {
+            console.log("Successfully joined room:", roomID);
+            toast.success('Successfully joined the meeting');
+            setIsReady(true);
+            setError(null);
+          },
+          onLeaveRoom: async () => {
+            console.log('Left meeting room');
+            if (userType === 'admin') {
+              try {
+                await meetingService.updateMeetingStatus(meetingId as string, 'completed');
+                console.log('Meeting status updated to completed!');
+              } catch (err) {
+                console.error('Failed to update meeting status:', err);
               }
-              
-              navigate(`/${userType}/meetings`);
-              window.location.reload();
-            },
-            onError: (error: any) => {
-              console.error('Meeting room error:', error);
-              toast.error('An error occurred in the meeting');
-            },
-          };
+            }
+          },
+        };
 
-          // Non-admin restrictions
-          if (userType !== 'admin') {
-            roomConfig.showTurnOffRemoteCameraButton = false;
-            roomConfig.showTurnOffRemoteMicrophoneButton = false;
-            roomConfig.showRemoveUserButton = false;
-          }
-
-          zegoInstance.joinRoom(roomConfig);
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Meeting initialization error:', error);
-        toast.error('Failed to join meeting');
-        navigate(`/${userType}/meetings`);
+        await zp.joinRoom(config);
+      } catch (err: any) {
+        console.error("Failed to initialize video call:", err);
+        setError(`Error: ${err.message || "Failed to initialize meeting"}`);
+        setIsReady(false);
       }
     };
 
-    if (meetingId) {
-      initializeMeeting();
-    }
+    initializeCall();
 
     return () => {
-      if (meetingContainerRef.current) {
-        meetingContainerRef.current.innerHTML = '';
+      if (zp) {
+        console.log("Cleaning up Zego instance");
+        try {
+          zp.destroy();
+        } catch (err) {
+          console.error("Error destroying Zego instance:", err);
+        }
       }
     };
-  }, [meetingId, navigate, userType, volunteerId]);
+  }, [roomID, userType, meetingId]);
 
-  if (!isAuthorized) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <h2 className="text-xl font-semibold mb-4">Unauthorized Access</h2>
-        <p className="mb-4">You are not authorized to join this meeting.</p>
-        <Button onClick={() => navigate(`/${userType}/meetings`)}>Return to Dashboard</Button>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <DotLottieReact
-          src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
-          loop
-          autoplay
-          style={{ width: '60px', height: '60px' }}
-        />
-      </div>
-    );
-  }
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   return (
-    <div className="flex flex-col h-screen p-4">
-      {/* Meeting title */}
-      {meeting && (
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">{meeting.title}</h2>
-          {meeting.status === 'scheduled' && (
-            <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded mt-2 inline-block">
-              Waiting for host to start the meeting
-            </div>
-          )}
+    <div
+      style={{
+        width: "100%",
+        height: "100vh",
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      <button
+        onClick={handleGoBack}
+        style={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          zIndex: 100,
+          background: "rgba(255, 255, 255, 0.7)",
+          border: "none",
+          borderRadius: "4px",
+          padding: "8px 12px",
+          display: "flex",
+          alignItems: "center",
+          cursor: "pointer",
+          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+        }}
+      >
+        <ArrowLeft style={{ marginRight: "5px" }} size={18} />
+        Back to Meetings
+      </button>
+
+      {!isReady && !error && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            textAlign: "center",
+          }}
+        >
+          <p>Loading video call...</p>
         </div>
       )}
 
-      <Card className="flex-1 flex flex-col">
-        <CardContent className="flex-1 flex flex-col p-4">
-          <div
-            ref={meetingContainerRef}
-            className="flex-1 bg-gray-100 rounded-lg"
-            id="video-conference-container"
-          />
-        </CardContent>
-      </Card>
+      {error && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            textAlign: "center",
+            color: "red",
+            background: "rgba(255,255,255,0.9)",
+            padding: "20px",
+            borderRadius: "8px",
+            maxWidth: "80%",
+          }}
+        >
+          <h3>Failed to join meeting</h3>
+          <p>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: "15px",
+              padding: "8px 16px",
+              background: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      )}
+
+      <div ref={callContainer} style={{ width: "100%", height: "100%" }} />
     </div>
   );
 };

@@ -6,14 +6,12 @@ import { ThumbsUp, HeartHandshake } from 'lucide-react';
 interface DonationSuccessModalProps {
     isOpen: boolean;
     onClose: () => void;
-    amount: number;
     campaign?: string;
 }
 
 const DonationSuccessModal: React.FC<DonationSuccessModalProps> = ({ 
     isOpen, 
     onClose, 
-    amount, 
     campaign = 'General Fund' 
 }) => {
     return (
@@ -34,8 +32,7 @@ const DonationSuccessModal: React.FC<DonationSuccessModalProps> = ({
                     
                     <DialogDescription className="text-center text-gray-600 space-y-4">
                         <p>
-                            Your generous contribution of <span className="font-bold text-[#688D48]">₹{amount.toFixed(2)}</span> 
-                            {' '}to the <span className="font-semibold">{campaign}</span> campaign will make a real difference.
+                            Your generous contribution to the <span className="font-semibold">{campaign}</span> campaign will make a real difference.
                         </p>
                         
                         <div className="bg-[#688D48] bg-opacity-10 p-4 rounded-lg">
