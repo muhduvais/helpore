@@ -44,9 +44,8 @@
     "socket.io": "^4.8.1",
     "sonner": "^2.0.1",
     "stripe": "^17.7.0",
-    "ws": "^8.18.1"
-  },
-  "devDependencies": {
+    "ws": "^8.18.1",
+
     "@types/axios": "^0.14.4",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
@@ -63,5 +62,8 @@
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    
   }
 }
