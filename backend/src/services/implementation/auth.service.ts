@@ -10,12 +10,15 @@ import { IAuthRepository } from '../../repositories/interfaces/IAuthRepository';
 import { IOtpRepository } from '../../repositories/interfaces/IOtpRepository';
 import { IAuthService } from '../interfaces/ServiceInterface';
 import { IUserCreationData } from '../../repositories/implementation/auth.repository';
+import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
+import { Types } from 'mongoose';
 
 @injectable()
 export class AuthService implements IAuthService {
 
     constructor(
         @inject('IAuthRepository') private readonly authRepository: IAuthRepository,
+        @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
         @inject('IOtpRepository') private readonly otpRepository: IOtpRepository
     ) { }
 
@@ -114,7 +117,19 @@ export class AuthService implements IAuthService {
                 googleId: null,
             };
 
-            await this.authRepository.createUser(user);
+            const newUser = await this.authRepository.createUser(user);
+            if (!newUser) {
+                return false;
+            }
+
+            const addressData = {
+                entity: newUser._id as Types.ObjectId,
+                type: 'user',
+                fname: newUser.name.split(' ')[0],
+                lname: newUser.name.split(' ')[1],
+            }
+            const addressResult = await this.addressRepository.addAddress(addressData);
+            console.log('addressResult: ', addressResult)
 
             await redisClient.del(`temp_registration:${email}`);
 

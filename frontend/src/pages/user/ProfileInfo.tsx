@@ -337,31 +337,36 @@ const Profile = () => {
                             {/* Personal Information */}
                             <div className="relative md:col-span-2 bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
 
-                                <h2 className="text-2xl font-bold mb-6 text-gray-700">Personal Information</h2>
+                                <div className="profile-header flex flex-col gap-y-2">
+                                    {[user?.age, user?.phone, user?.gender, address?.street, address?.state, address?.pincode, address?.country].some(field => !field) &&
+                                        <p className='complete-profile text-sm text-black font-semibold px-4 py-1 transform animate-pulse -translate-x-1 bg-yellow-300 rounded-2xl'>Please complete your profile to avail our full services.</p>}
+                                    <h2 className="text-2xl font-bold mb-6 text-gray-700">Personal Information</h2>
+                                </div>
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
                                         <p className="text-sm text-gray-500">Name</p>
-                                        <p className="text-lg font-medium text-gray-700">{user?.name || 'N/A'}</p>
+                                        <p className={`text-lg font-medium text-gray-700 ${user?.name ? '' : 'bg-yellow-100'}`}>{user?.name || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Age</p>
-                                        <p className="text-lg font-medium text-gray-700">{user?.age || 'N/A'}</p>
+                                        <p className={`text-lg font-medium text-gray-700 ${user?.age ? '' : 'bg-yellow-100'}`}>{user?.age || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Phone</p>
-                                        <p className="text-lg font-medium text-gray-700">{user?.phone || 'N/A'}</p>
+                                        <p className={`text-lg font-medium text-gray-700 ${user?.phone ? '' : 'bg-yellow-100'}`}>{user?.phone || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Gender</p>
-                                        <p className="text-lg font-medium text-gray-700">{user?.gender || 'N/A'}</p>
+                                        <p className={`text-lg font-medium text-gray-700 ${user?.gender ? '' : 'bg-yellow-100'}`}>{user?.gender || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Email</p>
-                                        <p className="text-lg font-medium text-gray-700">{user?.email || 'N/A'}</p>
+                                        <p className={`text-lg font-medium text-gray-700 ${user?.email ? '' : 'bg-yellow-100'}`}>{user?.email || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">DOJ</p>
-                                        <p className="text-lg font-medium text-gray-700">
+                                        <p className={`text-lg font-medium text-gray-700`}>
                                             {user?.createdAt?.toString().slice(0, 10) || 'N/A'}
                                         </p>
                                     </div>
@@ -374,18 +379,18 @@ const Profile = () => {
                                 <h2 className="text-xl font-bold mb-4 text-gray-500">Address</h2>
                                 <div className="text-gray-700">
                                     <p className="text-sm text-gray-500">Street</p>
-                                    <p className="text-lg font-medium">{address?.street || 'N/A'}</p>
+                                    <p className={`text-lg font-medium ${address?.street ? '' : 'bg-yellow-100'} `}>{address?.street || 'N/A'}</p>
 
                                     <p className="mt-2 text-sm text-gray-500">City</p>
-                                    <p className="text-lg font-medium">
+                                    <p className={`text-lg font-medium ${address?.city ? '' : 'bg-yellow-100'} `}>
                                         {address?.city || 'N/A'}, {address?.state || 'N/A'}
                                     </p>
 
                                     <p className="mt-2 text-sm text-gray-500">Postal Code</p>
-                                    <p className="text-lg font-medium">{address?.pincode || 'N/A'}</p>
+                                    <p className={`text-lg font-medium ${address?.pincode ? '' : 'bg-yellow-100'} `}>{address?.pincode || 'N/A'}</p>
 
                                     <p className="mt-2 text-sm text-gray-500">Country</p>
-                                    <p className="text-lg font-medium">{address?.country || 'N/A'}</p>
+                                    <p className={`text-lg font-medium ${address?.country ? '' : 'bg-yellow-100'} `}>{address?.country || 'N/A'}</p>
                                 </div>
                             </div>
                         </div>
@@ -671,7 +676,7 @@ const Profile = () => {
                 {activeTab === 'info' ? (
                     <div className="bg-gray-100 p-4 flex items-center justify-between border-t">
                         <button
-                            className='ml-3 px-8 py-2 bg-[#688D48] rounded text-white'
+                            className={`ml-3 px-8 py-2 bg-[#688D48] rounded text-white ${[user?.age, user?.phone, user?.gender, address?.street, address?.state, address?.pincode, address?.country].some(field => !field) ? 'animate-pulse' : ''}`}
                             onClick={() => setIsEditModalOpen(true)}
                         >Edit Profile</button>
                         <p className="text-sm text-gray-600 px-3">Profile - {user?.name}</p>
