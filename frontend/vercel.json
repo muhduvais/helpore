@@ -1,17 +1,9 @@
 {
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static-build"
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "ignoreCommand": "exit 1", 
   "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/.*",
-      "dest": "/"
-    }
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/" }
   ]
 }
