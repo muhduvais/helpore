@@ -58,7 +58,7 @@ export class GeocodingService {
                 latitude: result.geometry.lat,
                 longitude: result.geometry.lng
             };
-        } catch (error) {
+        } catch (error: any) {
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 402) {
                     throw new Error('OpenCage API quota exceeded');
@@ -84,7 +84,7 @@ export class GeocodingService {
             }
 
             return response.data.results[0];
-        } catch (error) {
+        } catch (error: any) {
             console.error('Reverse geocoding error:', error);
             throw error;
         }
