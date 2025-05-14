@@ -1,37 +1,35 @@
-version: "3.8"
-
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: helpore-backend
-    restart: always
+    container_name: mern-backend
+    restart: unless-stopped
     ports:
       - "5000:5000"
     env_file:
       - ./backend/.env
     depends_on:
-      - mongo
       - redis
     volumes:
-    command: node dist/app.js
-
-  mongo:
-    image: mongo:6.0
-    container_name: helpore-mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+      - ./backend/node_modules:/app/node_modules  
+    networks:
+      - treatme-network
 
   redis:
-    image: redis:7.2
-    container_name: helpore-redis
-    restart: always
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - treatme-network
 
 volumes:
-  mongo_data:
+  redis_data:
+
+networks:
+  treatme-network:
+    driver: bridge
