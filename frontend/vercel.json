@@ -1,12 +1,17 @@
 {
-    "build": {
-      "command": "npm run build",
-      "env": {
-        "NODE_ENV": "production"
-      }
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static-build"
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
     },
-    "routes": [
-      { "handle": "filesystem" },
-      { "src": "/.*", "dest": "/" }
-    ]
-  }
+    {
+      "src": "/.*",
+      "dest": "/"
+    }
+  ]
+}
