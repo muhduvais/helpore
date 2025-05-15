@@ -90,7 +90,7 @@ const VolunteerRequests: React.FC = () => {
         setAssistanceTotalPages(data.totalPages);
         setAssistanceTotalRequests(data.totalRequests);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof AxiosError) {
         setAssistanceError(error.response?.data.message || 'Error fetching assistance requests. Please try again.');
       } else {

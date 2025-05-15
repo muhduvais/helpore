@@ -37,11 +37,11 @@ const Profile = () => {
             const response = await userService.fetchUserDetails();
 
             if (response.status === 200) {
-                const { userDetails } = response.data;
+                const userDetails = response.data;
                 setUser(userDetails.user);
                 setAddress(userDetails.address);
             }
-        } catch (error) {
+        } catch (error: unknown) {
             if (error instanceof AxiosError) {
                 console.log('Error fetching user details:', error.response?.data?.message || error.message);
             }
@@ -67,7 +67,7 @@ const Profile = () => {
                     toast.success('Password reset successfully!');
                     clearFields();
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 if (error instanceof AxiosError) {
                     if (error.response?.status === 400) {
                         setMessage(error.response?.data?.message || 'Invalid current password!');
@@ -112,17 +112,24 @@ const Profile = () => {
                     if (!updateProfilePicture) {
                         toast.error('Error updating the profile picture!');
                     };
+
+                    toast.success('Profile picture updated successfully!');
+                    fetchUserDetails();
                 }
 
-            } catch (error) {
+            } catch (error: unknown) {
                 toast.error('Failed to upload asset image!');
-                console.error('File uploading error: ', error);
+                if (error instanceof AxiosError) {
+                    console.error('Axios error:', error.response?.status, error.message);
+                } else if (error instanceof Error) {
+                    console.error('Error:', error.message);
+                } else {
+                    console.error('Unknown error:', error);
+                }
                 return;
             } finally {
                 setIsProfileUploading(false);
             }
-            toast.success('Profile picture updated successfully!');
-            fetchUserDetails();
         }
     };
 
