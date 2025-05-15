@@ -1,4 +1,5 @@
-import { ChangePasswordData, IAddress } from '../interfaces/userInterface';
+import { IAsset, IAssistanceRequest } from '@/interfaces/adminInterface';
+import { ChangePasswordData, IAddress, IAssetRequest, IUser } from '../interfaces/userInterface';
 import { customAxios } from '../utils/apiClient';
 
 
@@ -7,7 +8,7 @@ export const userService = {
     // Profile
     fetchUserDetails: async () => {
         try {
-            const response = await customAxios.get('/api/users/me')
+            const response = await customAxios.get<{ user: IUser, address: IAddress }>('/api/users/me')
             return response;
         } catch (error) {
             throw error
@@ -49,7 +50,7 @@ export const userService = {
     // Certificates
     uploadCertificateImage: async (formData: any) => {
         try {
-            const response = await customAxios.post('/api/users/certificate', formData, {
+            const response = await customAxios.post<{ certificateUrl: string }>('/api/users/certificate', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
@@ -75,7 +76,7 @@ export const userService = {
     // Addresses
     createAddress: async (addressData: IAddress) => {
         try {
-            const createdAddressId = await customAxios.post('/api/addresses', { addressData });
+            const createdAddressId = await customAxios.post<{ _id: string }>('/api/addresses', { addressData });
             return createdAddressId;
         } catch (error) {
             throw error
@@ -83,7 +84,7 @@ export const userService = {
     },
     getUserAddresses: async () => {
         try {
-            const response = await customAxios.get('/api/addresses');
+            const response = await customAxios.get<{ addresses: IAddress[] }>('/api/addresses');
             console.log('addresses: ', response)
             return response;
         } catch (error) {
@@ -94,7 +95,7 @@ export const userService = {
     // Assets
     fetchAssets: async (page: number, limit: number, search: string, sortBy: string, filterByAvailability: string) => {
         try {
-            const response = await customAxios.get('/api/assets', {
+            const response = await customAxios.get<{ assets: IAsset[], totalPages: number }>('/api/assets', {
                 params: {
                     page,
                     limit,
@@ -110,7 +111,7 @@ export const userService = {
     },
     fetchAssetDetails: async (assetId: string) => {
         try {
-            const response = await customAxios.get(`/api/assets/${assetId}`);
+            const response = await customAxios.get<{ asset: IAsset }>(`/api/assets/${assetId}`);
             return response;
         } catch (error) {
             throw error
@@ -128,7 +129,7 @@ export const userService = {
     },
     fetchMyAssetRequests: async (page: number, limit: number, search: string, filter: string) => {
         try {
-            const response = await customAxios.get('/api/assetRequests/me', {
+            const response = await customAxios.get<{ assetRequests: IAssetRequest[], totalPages: number, totalRequests: number }>('/api/assetRequests/me', {
                 params: {
                     page,
                     limit,
@@ -143,7 +144,7 @@ export const userService = {
     },
     fetchAssetRequestDetails: async (assetId: string) => {
         try {
-            const response = await customAxios.get(`/api/assetRequests/${assetId}`);
+            const response = await customAxios.get<{ assetRequestDetails: IAssetRequest[] }>(`/api/assetRequests/${assetId}`);
             return response;
         } catch (error) {
             throw error
@@ -176,7 +177,7 @@ export const userService = {
     },
     fetchMyAssistanceRequests: async (page: number, limit: number, search: string, filter: string) => {
         try {
-            const response = await customAxios.get('/api/assistanceRequests/me', {
+            const response = await customAxios.get<{ assistanceRequests: IAssistanceRequest[], totalPages: number, totalRequests: number }>('/api/assistanceRequests/me', {
                 params: {
                     page,
                     limit,
@@ -191,7 +192,7 @@ export const userService = {
     },
     fetchAssistanceRequestDetails: async (requestId: string) => {
         try {
-            const response = await customAxios.get(`/api/assistanceRequests/${requestId}`)
+            const response = await customAxios.get<{ requestDetails: IAssistanceRequest }>(`/api/assistanceRequests/${requestId}`)
             return response;
         } catch (error) {
             throw error

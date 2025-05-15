@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,32 +43,7 @@ import { chatService } from '@/services/chat.service';
 import { IMessageDocument } from '@/interfaces/chatInterface';
 import { Socket } from 'socket.io-client';
 import { useNotifications } from '@/context/notificationContext';
-
-interface IAssistanceRequest {
-    _id: string;
-    type: 'volunteer' | 'ambulance';
-    description: string;
-    status: 'pending' | 'approved' | 'rejected';
-    requestedDate: string;
-    requestedTime: string;
-    priority: 'urgent' | 'normal';
-    volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
-    volunteer?: {
-        _id: string;
-        name: string;
-        phone: string;
-        email: string;
-        profilePicture: string;
-    };
-    address: {
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
-    };
-    createdAt: string;
-    updatedAt: string;
-}
+import { IAssistanceRequest } from '@/interfaces/adminInterface';
 
 interface HistoryEntry {
     date: string;
@@ -141,7 +116,7 @@ const AssistanceRequestDetails: React.FC = () => {
                     }
                 }
             } catch (error) {
-                if (error instanceof AxiosError) {
+                if (axios.isAxiosError(error)) {
                     setError(error.response?.data.message || 'Error fetching request details');
                 } else {
                     setError('An unexpected error occurred');
@@ -191,7 +166,7 @@ const AssistanceRequestDetails: React.FC = () => {
                     const response = await chatService.getConversationMessages(id);
 
                     if (response.status === 200) {
-                        setMessages(response.data.data);
+                        setMessages(response.data.messages);
                     }
                 } catch (error) {
                     console.error('Error fetching messages:', error);

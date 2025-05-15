@@ -28,31 +28,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Download, RefreshCw } from 'lucide-react';
 import { adminService } from '@/services/admin.service';
-import { IUser } from '@/interfaces/userInterface';
 import { FaDownload } from 'react-icons/fa';
 import { donationService } from '@/services/donation.service';
-
-interface Donation {
-  _id: string;
-  stripeSessionId: string;
-  stripePaymentId: string;
-  amount: number;
-  campaign: string;
-  message: string;
-  isAnonymous: boolean;
-  userId: IUser | null;
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
-  date: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// interface PaginationInfo {
-//   currentPage: number;
-//   totalPages: number;
-//   totalItems: number;
-//   limit: number;
-// }
+import { IDonation } from '@/interfaces/donation.interface';
 
 const CAMPAIGN_OPTIONS = [
   {
@@ -82,7 +60,7 @@ const CAMPAIGN_OPTIONS = [
 ];
 
 const DonationManagementPage: React.FC = () => {
-  const [donations, setDonations] = useState<Donation[]>([]);
+  const [donations, setDonations] = useState<IDonation[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
   const [selectedCampaign, setSelectedCampaign] = useState<string>("all");

@@ -123,8 +123,8 @@ const RequestAssistanceForm = () => {
             const response = await userService.getUserAddresses();
             if (response.status === 200) {
                 setAddresses(response.data.addresses);
-                if (response.data.length > 0) {
-                    setFormData(prev => ({ ...prev, selectedAddressId: response.data[0]._id }));
+                if (response.data.addresses.length > 0) {
+                    setFormData(prev => ({ ...prev, selectedAddressId: response.data.addresses[0]._id || '' }));
                 }
             }
         } catch (error) {

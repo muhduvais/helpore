@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { useDebounce } from 'use-debounce';
 import { format } from 'date-fns';
 import {
@@ -72,7 +72,7 @@ const AssetListing = () => {
         setTotalPages(response.data.totalPages);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         console.error('Error fetching the assets:', error.response?.data.message);
       } else {
         console.error('Unknown error:', error);
@@ -112,7 +112,7 @@ const AssetListing = () => {
       }
     } catch (error) {
       setIsRequestModalOpen(false);
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || 'Error requesting asset!');
       } else {
         toast.error('Error requesting asset!');

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +50,7 @@ const AdminAssetDetails = () => {
                 setAsset(response.data.asset);
             }
         } catch (error) {
-            if (error instanceof AxiosError) {
+            if (axios.isAxiosError(error)) {
                 setError(error.response?.data.message || 'Error fetching asset details');
             } else {
                 setError('An unexpected error occurred');

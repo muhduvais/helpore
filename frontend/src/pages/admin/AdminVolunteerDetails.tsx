@@ -1,9 +1,8 @@
 import { Navigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { FaAngleRight, FaUser, FaEnvelope, FaPhone } from "react-icons/fa";
-import { IUser } from '../../interfaces/userInterface';
 import profile_pic from '../../assets/profile_pic.png';
 import { Link } from 'react-router-dom';
 import { adminService } from '@/services/admin.service';
@@ -22,12 +21,13 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { IVolunteer } from '@/components/AssignVolunteerModal';
 
 const AdminVolunteerDetails = () => {
     const params = useParams();
     const volunteerId = params.id || '';
 
-    const [volunteer, setVolunteer] = useState<IUser | null>(null);
+    const [volunteer, setVolunteer] = useState<IVolunteer | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>('');
 
@@ -46,7 +46,7 @@ const AdminVolunteerDetails = () => {
                 setVolunteer(response.data.volunteer);
             }
         } catch (error) {
-            if (error instanceof AxiosError) {
+            if (axios.isAxiosError(error)) {
                 setError(error.response?.data?.message || 'Error fetching volunteer details');
             }
         } finally {
@@ -62,7 +62,7 @@ const AdminVolunteerDetails = () => {
             if (response.status === 200) {
                 setVolunteer({
                     ...volunteer,
-                    isActive: volunteer.isBlocked,
+                    isActive: volunteer.isBlocked || false,
                     isBlocked: !volunteer.isBlocked,
                 });
             }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Link, useSearchParams } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { useDebounce } from 'use-debounce';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ const AdminAssetManagement = () => {
         setTotalPages(response.data.totalPages);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         console.error('Error fetching the assets:', error.response?.data.message);
       } else {
         console.error('Unknown error:', error);

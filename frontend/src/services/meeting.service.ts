@@ -1,5 +1,21 @@
+import { IMeeting } from '@/interfaces/meeting.interface';
 import { customAxios } from '../utils/apiClient';
 import { userService } from './user.service';
+
+interface ICreateResponse {
+  meeting: IMeeting;
+  status: number;
+}
+
+interface IUpcomingMeetingsResponse {
+  upcomingMeetings: IMeeting[];
+}
+
+interface IMeetingsResponse {
+  meetings: IMeeting[];
+  totalPages: number;
+  totalItems: number;
+}
 
 export const meetingService = {
 
@@ -54,8 +70,6 @@ export const meetingService = {
     }
   },
 
-  ////////////////////////////////////////
-
   fetchMeetingDetails: async (meetingId: string) => {
     try {
       const response = await customAxios.get(`/api/meetings/${meetingId}`);
@@ -68,7 +82,7 @@ export const meetingService = {
 
   createMeeting: async (adminId: string, title: string, participants: string[], scheduledTime: Date | string) => {
     try {
-      const response = await customAxios.post("/api/meetings", { adminId, title, participants, scheduledTime });
+      const response = await customAxios.post<ICreateResponse>("/api/meetings", { adminId, title, participants, scheduledTime });
       return response.data;
     } catch (error) {
       console.error("Error creating meeting:", error);
@@ -78,7 +92,7 @@ export const meetingService = {
 
   getMeetings: async (page: number, search: string, filter: string) => {
     try {
-      const response = await customAxios.get("/api/meetings", {
+      const response = await customAxios.get<IMeetingsResponse>("/api/meetings", {
         params: {
           page,
           search,
@@ -94,7 +108,7 @@ export const meetingService = {
 
   getUserMeetings: async (page: number, search: string, filter: string) => {
     try {
-      const response = await customAxios.get("/api/meetings/user", {
+      const response = await customAxios.get<{ meetings: IMeeting[], totalPages: number, totalItems: number }>("/api/meetings/user", {
         params: {
           page,
           search,
@@ -110,7 +124,7 @@ export const meetingService = {
 
   getUpcomingMeetings: async () => {
     try {
-      const response = await customAxios.get("/api/meetings/upcoming");
+      const response = await customAxios.get<IUpcomingMeetingsResponse>("/api/meetings/upcoming");
       return response;
     } catch (error) {
       console.error("Error fetching upcoming meetings:", error);

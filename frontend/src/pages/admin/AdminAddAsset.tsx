@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa";
 import { validateAddAsset } from "@/utils/validation";
 import { toast } from "sonner";
-import { AxiosError } from "axios";
+import axios from "axios";
 import { adminService } from "@/services/admin.service";
 import { FormField } from "@/components/FormField";
 import { AddAssetFormData, AddAssetFormErrors } from "@/interfaces/authInterface";
@@ -129,7 +129,7 @@ const AddAsset = () => {
       }
     }
 
-    const finalFormData = {
+    const finalFormData: AddAssetFormData = {
       ...formData,
       image: uploadedImageUrl,
       stocks: Number(formData.stocks),
@@ -153,7 +153,7 @@ const AddAsset = () => {
       }
 
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || 'An error occurred';
         setErrorMessage(errorMessage);
       } else {

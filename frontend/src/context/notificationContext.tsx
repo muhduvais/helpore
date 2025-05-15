@@ -3,6 +3,11 @@ import { io } from 'socket.io-client';
 import { useSelector } from 'react-redux';
 import { customAxios } from '../utils/apiClient';
 
+interface INotificationResponse {
+    success: boolean;
+    data: any
+}
+
 interface Notification {
     _id: string;
     type: 'message' | 'system';
@@ -55,7 +60,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             if (!auth.accessToken) return;
 
             try {
-                const response = await customAxios.get('/api/notifications');
+                const response = await customAxios.get<INotificationResponse>('/api/notifications');
                 if (response.data.success) {
                     const transformedNotifications = response.data.data.map((notif: any) => ({
                         ...notif,

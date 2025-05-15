@@ -19,8 +19,13 @@ import { adminService } from '@/services/admin.service';
 import { IAsset } from '@/interfaces/adminInterface';
 import { validateAddAsset } from '@/utils/validation';
 import { AddAssetFormData, AddAssetFormErrors } from '@/interfaces/authInterface';
-import { AxiosError } from 'axios';
+
 import { toast } from "sonner";
+import axios from 'axios';
+
+export interface UploadAssetImageResponse {
+    imageUrl: string;
+}
 
 interface EditAssetModalProps {
     isOpen: boolean;
@@ -119,9 +124,17 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
             try {
                 const uploadResponse = await adminService.uploadAssetImage(formFileData);
                 uploadedImageUrl = uploadResponse.data.imageUrl;
-            } catch (error: any) {
-                setErrorMessage( error.response?.data?.message || 'Failed to upload asset image!');
-                console.error('File uploading error: ', error);
+            } catch (error: unknown) {
+                if (axios.isAxiosError(error)) {
+                    setErrorMessage(error.response?.data?.message || 'Failed to upload asset image!');
+                    console.error('File uploading error: ', error);
+                } else if (error instanceof Error) {
+                    setErrorMessage('An unexpected error occurred during file upload');
+                    console.error('Unexpected error: ', error);
+                } else {
+                    setErrorMessage('An unknown error occurred during file upload');
+                    console.error('Unknown error: ', error);
+                }
                 return;
             } finally {
                 setIsImageLoading(false);
@@ -134,7 +147,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
             stocks: Number(formData.stocks) ? Number(formData.stocks) : 0,
         };
 
-        const { isValid, errors } = validateAddAsset(finalFormData);
+        const { isValid, errors } = validateAddAsset(finalFormData as AddAssetFormData);
         setFormErrors(errors);
 
         if (!isValid) return;
@@ -149,9 +162,8 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                 toast.success('Asset updated successfully!');
                 onAssetUpdated(response.data.asset);
             }
-        } catch (error) {
-            console.log('err response: ', error)
-            if (error instanceof AxiosError) {
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
                 const errorMessage = error.response?.data?.message || 'An error occurred';
                 setErrorMessage(errorMessage);
             } else {

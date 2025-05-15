@@ -9,20 +9,7 @@ import { adminService } from "@/services/admin.service";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import AdminDashboardSkeleton from "@/components/Skeletons/AdminDashboardSkeleton";
-
-interface IDonationResponse {
-    stripeSessionId: string;
-    stripePaymentId: string;
-    amount: number;
-    campaign: string;
-    message?: string;
-    isAnonymous: boolean;
-    userId?: IUser | null;
-    status: 'pending' | 'completed' | 'failed' | 'refunded';
-    date: Date;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import { IVolunteer } from "@/components/AssignVolunteerModal";
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState([
@@ -34,9 +21,8 @@ const AdminDashboard = () => {
 
     const [upcomingMeetings, setUpcomingMeetings] = useState<any>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [recentDonations, setRecentDonations] = useState<IDonationResponse[]>([]);
-    // const [pendingRequests, setPendingRequests] = useState<IAssistanceRequest[]>([]);
-    const [pendingRequests, setPendingRequests] = useState({
+    const [recentDonations, setRecentDonations] = useState<IDonation[]>([]);
+    const [pendingRequests, setPendingRequests] = useState<{ assistanceRequests: IAssistanceRequest[], assetRequests: IAssetRequest[] }>({
         assistanceRequests: [],
         assetRequests: []
     });
@@ -82,26 +68,19 @@ const AdminDashboard = () => {
             };
             setUpcomingMeetings(transformMeetings(meetings));
 
-            // Users data
-            const users = usersResponse.data.users;
+            const users = usersResponse.data.users || [];
 
-            // Volunteers data
-            const volunteers = volunteersResponse.data.volunteers;
+            const volunteers = volunteersResponse.data.volunteers || [];
 
-            // Donations data
-            const donations = donationsResponse.data.donations;
+            const donations = donationsResponse.data.donations || [];
 
-            // Recent donations
-            const recentDonations = recentDonationsResponse.data.donations;
+            const recentDonations = recentDonationsResponse.data.donations || [];
             setRecentDonations(recentDonations);
 
-            // Assistance requests
-            const assistanceRequests = assistanceRequestsResponse.data.pendingRequests;
+            const assistanceRequests = assistanceRequestsResponse.data.pendingRequests || [];
 
-            // Asset requests
             const assetRequests = assetRequestsResponse.data.assetRequests;
 
-            // Pending requests
             setPendingRequests({
                 assistanceRequests: assistanceRequests.filter((req: any) => req.type === 'volunteer' || req.type === 'ambulance'),
                 assetRequests: assetRequests.filter((req: any) => req.status === 'pending')
@@ -110,7 +89,7 @@ const AdminDashboard = () => {
             // Calculates stats values
             const totalDonations = donations.reduce((sum: number, donation: IDonation) => sum + donation.amount, 0);
             const activeUsers = users.reduce((count: number, user: IUser) => count + (!user.isBlocked ? 1 : 0), 0);
-            const activeVolunteers = volunteers.reduce((count: number, volunteer: IUser) => count + (!volunteer.isBlocked ? 1 : 0), 0);
+            const activeVolunteers = volunteers.reduce((count: number, volunteer: IVolunteer) => count + (!volunteer.isBlocked ? 1 : 0), 0);
             const totalPendingRequests =
                 assistanceRequests.filter((req: IAssistanceRequest) => req.status === 'pending').length +
                 assetRequests.filter((req: IAssetRequest) => req.status === 'pending').length;

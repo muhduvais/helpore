@@ -1,9 +1,9 @@
 import { Navigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe, FaCertificate, FaDownload, FaTimes, FaCalendarAlt } from "react-icons/fa";
-import { IUser } from '../../interfaces/userInterface';
+import { IAddress, IUser } from '../../interfaces/userInterface';
 import profile_pic from '../../assets/profile_pic.png';
 import { Link } from 'react-router-dom';
 import { adminService } from '@/services/admin.service';
@@ -23,17 +23,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface IAddress {
-    street: string;
-    city: string;
-    state: string;
-    country: string;
-    pincode: number;
-    latitude: string;
-    longtitude: string;
-}
-
-interface ICertificate {
+export interface ICertificate {
     url: string;
     type: string;
     name: string;
@@ -50,7 +40,7 @@ const AdminUserDetails = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>('');
 
-    const [certificates, setCertificates] = useState<ICertificate[]>([]);
+    const [certificates, setCertificates] = useState<any>([]);
     const [showPreview, setShowPreview] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string>('');
     const [previewName, setPreviewName] = useState<string>('');
@@ -69,7 +59,7 @@ const AdminUserDetails = () => {
             const response = await adminService.fetchUserDetails(userId);
             if (response.status === 200) {
                 setUser(response.data.user);
-                setAddress(response.data.address);
+                setAddress(response.data?.address || null);
                 
                 // Handle if certificates are an array of strings (urls)
                 if (response.data.user?.certificates) {
@@ -82,7 +72,7 @@ const AdminUserDetails = () => {
                                 return {
                                     url: url,
                                     type: fileType,
-                                    name: `Certificate ${index + 1}`,
+                                    name: `Certificate ${ index + 1 } `,
                                     uploadedAt: new Date().toISOString(),
                                     isVerified: true
                                 };
@@ -96,7 +86,7 @@ const AdminUserDetails = () => {
                 }
             }
         } catch (error) {
-            if (error instanceof AxiosError) {
+            if (axios.isAxiosError(error)) {
                 setError(error.response?.data?.message || 'Error fetching user details');
             }
         } finally {
@@ -115,7 +105,7 @@ const AdminUserDetails = () => {
                     isBlocked: !user.isBlocked,
                 });
             }
-        } catch (error) {
+        } catch (error: unknown) {
             setError('Error updating user status');
         }
     };
@@ -166,8 +156,8 @@ const AdminUserDetails = () => {
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                         {user?.isBlocked
-                            ? `Are you sure you want to unblock ${user?.name}? They will regain access to all features.`
-                            : `Are you sure you want to block ${user?.name}? This will prevent them from accessing the platform.`}
+                            ? `Are you sure you want to unblock ${ user?.name }? They will regain access to all features.`
+                            : `Are you sure you want to block ${ user?.name }? This will prevent them from accessing the platform.`}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -292,7 +282,7 @@ const AdminUserDetails = () => {
                                         alt="Profile"
                                         className="w-48 h-48 rounded-full object-cover border-4 border-gray-100"
                                     />
-                                    <span className={`absolute bottom-2 right-2 w-4 h-4 rounded-full ${user?.isBlocked ? 'bg-gray-400' : 'bg-green-500'}`} />
+                                    <span className={`absolute bottom - 2 right - 2 w - 4 h - 4 rounded - full ${ user?.isBlocked ? 'bg-gray-400' : 'bg-green-500' } `} />
                                 </div>
                                 <div className="text-center">
                                     <h2 className="text-2xl font-bold">{user?.name}</h2>
@@ -361,7 +351,7 @@ const AdminUserDetails = () => {
                             <UserInfoField
                                 icon={FaMapMarkerAlt}
                                 label="Location"
-                                value={`${address.latitude}, ${address.longtitude}`}
+                                value={`${ address.latitude }, ${ address.longtitude } `}
                             />
                         </div>
                     ) : (
@@ -383,7 +373,7 @@ const AdminUserDetails = () => {
                     {certificates.length > 0 ? (
                         <div className="max-h-[32rem] overflow-y-auto pr-2">
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                {certificates.map((certificate, index) => (
+                                {certificates.map((certificate: ICertificate, index: number) => (
                                     <CertificateCard key={index} certificate={certificate} />
                                 ))}
                             </div>

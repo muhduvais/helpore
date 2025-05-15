@@ -21,18 +21,37 @@ export interface IAsset {
 }
 
 export interface IAssistanceRequest {
-    _id?: string;
-    user: Types.ObjectId;
-    type: string;
-    description?: string;
+    _id: string;
+    type: 'volunteer' | 'ambulance';
+    description: string;
     status: 'pending' | 'approved' | 'rejected';
-    requestedDate: Date;
+    requestedDate: string;
     requestedTime: string;
-    priority: 'normal' | 'urgent';
-    address?: Types.ObjectId;
-    volunteerType?: string;
-    volunteer?: Types.ObjectId;
-    createdAt?: Date;
+    priority: 'urgent' | 'normal';
+    volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
+    user?: {
+        _id: string;
+        name: string;
+        phone: string;
+        email: string;
+        profilePicture: string;
+    };
+    volunteer?: {
+        _id: string;
+        name: string;
+        phone: string;
+        email: string;
+        profilePicture: string;
+    };
+    address: {
+        _id: string;
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+    };
+    createdAt: string;
+    updatedAt?: string;
 }
 
 export interface IAssistanceRequestResponse {

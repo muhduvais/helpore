@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { login } from '../../redux/slices/authSlice'
 import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -80,7 +80,7 @@ const AdminLoginPage: React.FC = () => {
         return;
       }
     } catch (error: unknown) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || 'An error occurred';
         setErrorMessage(errorMessage);
       } else {

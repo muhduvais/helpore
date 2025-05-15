@@ -60,7 +60,7 @@ export const authService = {
     },
     forgotPassword: async (email: string) => {
         try {
-            const response = await customAxios.post('/api/auth/forgotPassword', { email });
+            const response = await customAxios.post<{ message: string }>('/api/auth/forgotPassword', { email });
             return response;
         } catch (error) {
             throw error;
@@ -68,7 +68,7 @@ export const authService = {
     },
     resetPassword: async (token: string, newPassword: string) => {
         try {
-            const response = await customAxios.post('/api/auth/resetPassword', { token, newPassword });
+            const response = await customAxios.post<{ message: string }>('/api/auth/resetPassword', { token, newPassword });
             return response;
         } catch (error) {
             throw error;
@@ -76,7 +76,7 @@ export const authService = {
     },
     resendOtp: async (email: string) => {
         try {
-            const response = await customAxios.post('/api/auth/resendOtp', { email });
+            const response = await customAxios.post<{ success: boolean }>('/api/auth/resendOtp', { email });
             return response;
         } catch (error) {
             throw error;

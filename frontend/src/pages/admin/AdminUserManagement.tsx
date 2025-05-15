@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Link } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { useDebounce } from 'use-debounce';
 import { FaUsers, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { CiSearch } from 'react-icons/ci';
@@ -21,7 +21,7 @@ import { IUser } from '@/interfaces/userInterface';
 import profile_pic from '../../assets/profile_pic.png'
 
 const AdminUserManagement = () => {
-  const [users, setUsers] = useState<IUser[]>([]);
+  const [users, setUsers] = useState<IUser[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -48,7 +48,7 @@ const AdminUserManagement = () => {
         setTotalUsers(response.data.totalUsers);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         if (error.response?.status === 400) {
           console.log('No users found!', error);
         }

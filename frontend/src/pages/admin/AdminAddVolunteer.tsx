@@ -9,7 +9,7 @@ import { FaAngleRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaLock, FaEy
 import { validateForm } from "@/utils/validation";
 import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
-import { AxiosError } from "axios";
+import axios from "axios";
 import { AddUserFormData } from "@/types/admin.types";
 import { FormField } from "@/components/FormField";
 import { FormSelect } from "@/components/FormSelect";
@@ -93,7 +93,7 @@ const AdminAddVolunteer = () => {
       });
 
     } catch (error: unknown) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || 'An error occurred';
         if (error.response?.data?.existingMail) {
           setFormErrors({ ...formErrors, ['email']: 'Email Address' });

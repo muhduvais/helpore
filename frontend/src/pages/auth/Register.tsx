@@ -7,7 +7,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { authService } from '../../services/auth.service';
 import { validateForm } from '../../utils/validation';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { login } from '../../redux/slices/authSlice';
 import { authController } from '../../controllers/authController';
@@ -76,7 +76,7 @@ const SignupPage: React.FC = () => {
         setErrorMessage(response?.data?.message || 'Registration failed');
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         if (error.response?.status === 400) {
           setErrorMessage(error.response?.data?.message || 'Email is already registered!');
         }
@@ -104,7 +104,7 @@ const SignupPage: React.FC = () => {
 
       navigate('/user');
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           const errorMessage = error.response?.data?.message || 'An error occurred';
           setErrorMessage(errorMessage);

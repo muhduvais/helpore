@@ -1,7 +1,7 @@
 import { FirebaseError } from 'firebase/app';
 import { auth, googleProvider, signInWithPopup } from '../config/firebase.config';
 import customAxios from '../utils/urlProxy'
-import { AxiosError } from 'axios';
+import axios from 'axios';
 
 export const authController = {
     async handleGoogleLogin() {
@@ -14,7 +14,7 @@ export const authController = {
         } catch (error) {
             if (error instanceof FirebaseError) {
                 console.error('Firebase error during Google login:', error.message);
-            } else if (error instanceof AxiosError) {
+            } else if (axios.isAxiosError(error)) {
                 if (error.response?.status === 401) {
                     return error?.response.data;
                 }

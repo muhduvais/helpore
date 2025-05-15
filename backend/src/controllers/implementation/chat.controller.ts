@@ -32,7 +32,7 @@ export class ChatController implements IChatController {
         try {
             const { requestId } = req.params;
             const messages = await this.chatService.getConversationMessages(requestId);
-            res.status(200).json({ success: true, data: messages });
+            res.status(200).json({ success: true, messages });
         } catch (error) {
             console.error('Error fetching messages:', error);
             res.status(500).json({ success: false, message: 'Error fetching messages', error: error instanceof Error ? error.message : 'Unknown error' });

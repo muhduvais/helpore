@@ -11,7 +11,7 @@ import profile_pic from "../assets/profile_pic.png";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 
-interface Volunteer {
+export interface IVolunteer {
     _id: string;
     name: string;
     email: string;
@@ -19,7 +19,9 @@ interface Volunteer {
     tasks: number;
     profilePicture?: string;
     isActive: boolean;
+    isBlocked?: boolean;
     volunteerType?: "medical" | "eldercare" | "maintenance" | "transportation" | "general";
+    createdAt?: Date;
 }
 
 interface AssignVolunteerModalProps {
@@ -27,16 +29,8 @@ interface AssignVolunteerModalProps {
     onAssign: () => void;
 }
 
-interface VolunteersResponse {
-    data: {
-        volunteers: Volunteer[];
-        totalVolunteers: Number;
-    };
-    status: number;
-}
-
 const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({ requestId, onAssign }) => {
-    const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+    const [volunteers, setVolunteers] = useState<IVolunteer[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [showAvailableOnly, setShowAvailableOnly] = useState<boolean>(true);
@@ -48,13 +42,13 @@ const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({ requestId, 
     const fetchVolunteers = async (pageNum: number = 1, search: string = "", reset = false): Promise<void> => {
         try {
             setIsLoading(true);
-            const response: VolunteersResponse = await adminService.fetchVolunteersList(pageNum, search, showAvailableOnly);
+            const response = await adminService.fetchVolunteersList(pageNum, search, showAvailableOnly);
 
             if (reset) {
                 setVolunteers(response.data.volunteers);
             } else {
                 setVolunteers((prev) => [
-                    ...prev.filter((v) => !response.data.volunteers.some((newV) => newV._id === v._id)),
+                    ...prev.filter((v) => !response.data.volunteers.some((newV: IVolunteer) => newV._id === v._id)),
                     ...response.data.volunteers,
                 ]);
             }
@@ -130,7 +124,7 @@ const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({ requestId, 
 
                     <ScrollArea className="h-[60vh] sm:h-[400px] rounded-md border p-2 sm:p-4">
                         <div className="space-y-4">
-                            {volunteers.map((volunteer: Volunteer) => (
+                            {volunteers.map((volunteer: IVolunteer) => (
                                 <div
                                     key={volunteer._id}
                                     className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow gap-4"

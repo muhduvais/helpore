@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,29 +39,31 @@ import asset_picture from '../../assets/asset_picture.png';
 import { FaTimes } from 'react-icons/fa';
 import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
+import { IAsset } from '@/interfaces/adminInterface';
+import { IAssetRequest } from '@/interfaces/userInterface';
 
-interface IAsset {
-    _id: string;
-    name: string;
-    description: string;
-    image: string;
-    category: string;
-    stocks: number;
-    createdAt: string;
-    updatedAt: string;
-    condition?: string;
-    location?: string;
-}
+// interface IAsset {
+//     _id: string;
+//     name: string;
+//     description: string;
+//     image: string;
+//     category: string;
+//     stocks: number;
+//     createdAt: string;
+//     updatedAt: string;
+//     condition?: string;
+//     location?: string;
+// }
 
-interface IRequest {
-    _id: string;
-    status: 'pending' | 'approved' | 'rejected';
-    requestedDate: string;
-    startDate: string;
-    endDate: string;
-    quantity: number;
-    reason?: string;
-}
+// interface IRequest {
+//     _id: string;
+//     status: 'pending' | 'approved' | 'rejected';
+//     requestedDate: string;
+//     startDate: string;
+//     endDate: string;
+//     quantity: number;
+//     reason?: string;
+// }
 
 const UserAssetDetails: React.FC = () => {
     const { id } = useParams();
@@ -70,7 +72,7 @@ const UserAssetDetails: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-    const [currentRequest, setCurrentRequest] = useState<IRequest[] | null>([]);
+    const [currentRequest, setCurrentRequest] = useState<IAssetRequest[] | null>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
@@ -98,7 +100,7 @@ const UserAssetDetails: React.FC = () => {
                     setCurrentRequest(requestResponse.data.assetRequestDetails);
                 }
             } catch (error) {
-                if (error instanceof AxiosError) {
+                if (axios.isAxiosError(error)) {
                     setError(error.response?.data.message || 'Error fetching asset details');
                 } else {
                     setError('An unexpected error occurred');
@@ -214,7 +216,7 @@ const UserAssetDetails: React.FC = () => {
             }
         } catch (error) {
             setIsRequestModalOpen(false);
-            if (error instanceof AxiosError) {
+            if (axios.isAxiosError(error)) {
                 toast.error(error.response?.data?.message || 'Error requesting asset!');
             } else {
                 toast.error('Error requesting asset!');
@@ -505,11 +507,11 @@ const UserAssetDetails: React.FC = () => {
                                                     </p>
                                                     <p className="text-sm">
                                                         <span className="text-gray-500">Condition:</span>{' '}
-                                                        <span className="text-gray-700">{asset?.condition || 'Good'}</span>
+                                                        <span className="text-gray-700">{'Good'}</span>
                                                     </p>
                                                     <p className="text-sm">
                                                         <span className="text-gray-500">Location:</span>{' '}
-                                                        <span className="text-gray-700">{asset?.location || 'Main Storage'}</span>
+                                                        <span className="text-gray-700">{'Main Storage'}</span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -550,7 +552,7 @@ const UserAssetDetails: React.FC = () => {
                                         </div>
                                         <hr />
                                         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                            {currentRequest && currentRequest.map((request: IRequest) => (
+                                            {currentRequest && currentRequest.map((request: IAssetRequest) => (
                                                 <div>
                                                     <h3 className="text-lg font-semibold text-gray-800 mb-2">Current Request Status</h3>
                                                     <div className="space-y-2">

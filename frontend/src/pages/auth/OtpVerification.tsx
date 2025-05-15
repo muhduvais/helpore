@@ -1,9 +1,7 @@
-
-
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import bgDark_1_img from '../../assets/bg-darkGreen-1.jpeg';
 import logo from '../../assets/Logo.png';
 import { toast } from 'sonner';
@@ -76,7 +74,7 @@ const LoginPage: React.FC = () => {
         });
 
       } catch (error: unknown) {
-        if (error instanceof AxiosError) {
+        if (axios.isAxiosError(error)) {
           const errorMessage = error.response?.data?.message || 'An error occurred';
           setOtpMessage(errorMessage);
         } else {

@@ -60,21 +60,9 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useDebounce } from 'use-debounce';
 import asset_picture from '../../assets/asset_picture.png';
 import { adminService } from '@/services/admin.service';
-import { IAssistanceRequestResponse } from '@/interfaces/adminInterface';
-import { AxiosError } from 'axios';
-// import { IAssetRequest } from '@/interfaces/userInterface';
-
-// interface IPaginatedResponse {
-//   assetRequests: IAssetRequest[];
-//   totalPages: number;
-//   totalRequests: number;
-// }
-
-interface IAssistancePaginatedResponse {
-  assistanceRequests: IAssistanceRequestResponse[];
-  totalPages: number;
-  totalRequests: number;
-}
+import { IAssistanceRequest } from '@/interfaces/adminInterface';
+import axios from 'axios';
+import { IAssetRequest } from '@/interfaces/userInterface';
 
 const limit = 4;
 
@@ -83,7 +71,7 @@ const AdminRequests = () => {
   const [queryParams] = useSearchParams();
   const defaultTab = queryParams.get('tab') || 'assets';
 
-  const [requests, setRequests] = useState([]);
+  const [requests, setRequests] = useState<IAssetRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -92,10 +80,10 @@ const AdminRequests = () => {
   const [userFilter, setUserFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalRequests, setTotalRequests] = useState(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalRequests, setTotalRequests] = useState<number>(0);
   const [expandedCard, setExpandedCard] = useState(null);
-  const [totalDisplay, setTotalDisplay] = useState(totalRequests);
+  const [totalDisplay, setTotalDisplay] = useState<number>(totalRequests);
   const [actionDialog, setActionDialog] = useState<{
     open: boolean;
     type: 'approved' | 'rejected' | null;
@@ -114,7 +102,7 @@ const AdminRequests = () => {
   const [isLoadingUser, setIsLoadingUser] = useState(false);
 
   // Assistance request states
-  const [assistanceRequests, setAssistanceRequests] = useState<IAssistanceRequestResponse[]>([]);
+  const [assistanceRequests, setAssistanceRequests] = useState<IAssistanceRequest[]>([]);
   const [isAssistanceLoading, setIsAssistanceLoading] = useState(true);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const [assistanceFilter, setAssistanceFilter] = useState<string>('all');
@@ -159,11 +147,11 @@ const AdminRequests = () => {
         userFilter,
         sortBy
       );
-      const data = await response.data;
-      setRequests(data.assetRequests);
-      setTotalPages(data.totalPages);
-      setTotalRequests(data.totalRequests);
-      if (defaultTab !== 'assistance') setTotalDisplay(data.totalRequests);
+      
+      setRequests(response.data.assetRequests);
+      setTotalPages(response.data.totalPages || 0);
+      setTotalRequests(response.data.totalRequests || 0);
+      if (defaultTab !== 'assistance') setTotalDisplay(response.data.totalRequests || 0);
     } catch (error: any) {
       // setError(error.message);
     } finally {
@@ -184,14 +172,14 @@ const AdminRequests = () => {
       );
 
       if (response.status === 200) {
-        const data: IAssistancePaginatedResponse = response.data;
+        const data = response.data;
         setAssistanceRequests(data.assistanceRequests);
-        setAssistanceTotalPages(data.totalPages);
-        setAssistanceTotalRequests(data.totalRequests);
-        if (defaultTab === 'assistance') setTotalDisplay(data.totalRequests);
+        setAssistanceTotalPages(data.totalPages || 0);
+        setAssistanceTotalRequests(data.totalRequests || 0);
+        if (defaultTab === 'assistance') setTotalDisplay(data.totalRequests || 0);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         setAssistanceError(error.response?.data.message || 'Error fetching assistance requests. Please try again.');
       } else {
         setAssistanceError('An unexpected error occurred. Please try again.');
@@ -621,7 +609,7 @@ const AdminRequests = () => {
     );
   };
 
-  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequestResponse }> = ({ request }) => {
+  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequest }> = ({ request }) => {
     const navigate = useNavigate();
 
     return (
@@ -947,7 +935,7 @@ const AdminRequests = () => {
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {assistanceRequests.map((request: IAssistanceRequestResponse) => (
+                {assistanceRequests.map((request: IAssistanceRequest) => (
                   <AssistanceRequestCard key={request._id} request={request} />
                 ))}
               </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { IUser } from '../../interfaces/userInterface';
 import { userService } from '../../services/user.service';
 import { Activity, DollarSign, FileText, Bell } from 'lucide-react';
@@ -20,7 +20,7 @@ const UserDashboard: React.FC = () => {
         setUser(response.data.user);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         console.log('Error fetching user details:', error.response?.data?.message || error.message);
       }
     }

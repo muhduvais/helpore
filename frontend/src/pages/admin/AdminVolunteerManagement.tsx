@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Link } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { useDebounce } from 'use-debounce';
 import { FaUsers, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { CiSearch } from 'react-icons/ci';
@@ -17,11 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { IUser } from '@/interfaces/userInterface';
 import profile_pic from '../../assets/profile_pic.png'
+import { IVolunteer } from '@/components/AssignVolunteerModal';
 
 const AdminVolunteerManagement = () => {
-  const [volunteers, setVolunteers] = useState<IUser[]>([]);
+  const [volunteers, setVolunteers] = useState<IVolunteer[] | null>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -42,12 +42,12 @@ const AdminVolunteerManagement = () => {
       const response = await adminService.fetchVolunteers(currentPage, 5, searchTerm.trim());
 
       if (response.status === 200) {
-        setVolunteers(response.data.volunteers);
+        setVolunteers(response.data?.volunteers);
         setTotalPages(response.data.totalPages);
         setTotalVolunteers(response.data.totalVolunteers);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         if (error.response?.status === 400) {
           console.log('No users found!', error);
         }

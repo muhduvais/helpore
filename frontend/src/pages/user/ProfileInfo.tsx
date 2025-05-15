@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { validateChangePassword } from "../../utils/validation";
 import { userService } from '../../services/user.service';
 import { IUser } from '../../interfaces/userInterface';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { adminService } from '@/services/admin.service';
 import EditProfileModal from '@/components/EditUserProfile';
 
@@ -53,7 +53,7 @@ const Profile = () => {
                 setAddress(response.data.address);
             }
         } catch (error) {
-            if (error instanceof AxiosError) {
+            if (axios.isAxiosError(error)) {
                 console.log('Error fetching user details:', error.response?.data?.message || error.message);
             }
         } finally {
@@ -101,7 +101,7 @@ const Profile = () => {
             // Reset file input
             setCertificateFile(null);
         } catch (error) {
-            if (error instanceof AxiosError) {
+            if (axios.isAxiosError(error)) {
                 if (error.response?.data?.error === 'Unknown error') {
                     setCertificateErrorMessage('There was an error, please try again!');
                 } else {
@@ -147,7 +147,7 @@ const Profile = () => {
                     toast.success('Password reset successfully!');
                 }
             } catch (error) {
-                if (error instanceof AxiosError) {
+                if (axios.isAxiosError(error)) {
                     if (error.response?.status === 400) {
                         setMessage(error.response?.data?.message || 'Invalid current password!');
                     }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,40 +36,7 @@ import { format } from 'date-fns';
 import { toast } from "sonner";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { adminService } from '@/services/admin.service';
-
-interface IAssistanceRequest {
-    _id: string;
-    type: 'volunteer' | 'ambulance';
-    description: string;
-    status: 'pending' | 'approved' | 'rejected';
-    requestedDate: string;
-    requestedTime: string;
-    priority: 'urgent' | 'normal';
-    volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
-    user?: {
-        _id: string;
-        name: string;
-        phone: string;
-        email: string;
-        profilePicture: string;
-    };
-    volunteer?: {
-        _id: string;
-        name: string;
-        phone: string;
-        email: string;
-        profilePicture: string;
-    };
-    address: {
-        _id: string;
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
-    };
-    createdAt: string;
-    updatedAt: string;
-}
+import { IAssistanceRequest } from '@/interfaces/adminInterface';
 
 interface HistoryEntry {
     date: string;
@@ -103,17 +70,17 @@ const AssistanceRequestDetails: React.FC = () => {
                     {
                         date: new Date().toISOString(),
                         action: 'Status Update',
-                        details: `Request ${response.data.requestDetails.status}`
+                        details: `Request ${response.data.requestDetails?.status}`
                     },
                     {
-                        date: response.data.requestDetails.createdAt,
+                        date: response.data.requestDetails?.createdAt || '',
                         action: 'Request Created',
                         details: 'Assistance request submitted'
                     }
                 ]);
             }
         } catch (error) {
-            if (error instanceof AxiosError) {
+            if (axios.isAxiosError(error)) {
                 setError(error.response?.data.message || 'Error fetching request details');
             } else {
                 setError('An unexpected error occurred');

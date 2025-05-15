@@ -1,5 +1,70 @@
+import { UploadAssetImageResponse } from '@/components/AdminEditAsset';
 import { AddAssetFormData, SignUpFormData, SignupResponse } from '../interfaces/authInterface';
 import { customAxios } from '../utils/apiClient';
+import { IAsset, IAssistanceRequest } from '@/interfaces/adminInterface';
+import { IVolunteer } from '@/components/AssignVolunteerModal';
+import { IAddress, IAssetRequest, IUser } from '@/interfaces/userInterface';
+import { IDonation } from '@/interfaces/donation.interface';
+
+interface IAssetResponse {
+    asset: IAsset
+}
+
+interface IAssetsResponse {
+    assets: IAsset[];
+    totalPages: number;
+}
+
+interface IVolunteerResponse {
+    volunteers: IVolunteer[]
+}
+
+interface IAssistanceRequestDetailsResponse {
+    requestDetails: IAssistanceRequest | null;
+}
+
+interface IUserResponse {
+    user: IUser;
+    address?: IAddress;
+}
+
+interface IUsersResponse {
+    users: IUser[] | null;
+    totalPages: number;
+    totalUsers: number;
+}
+
+interface IVolunteersResponse {
+    volunteers: IVolunteer[] | null;
+    totalPages: number;
+    totalVolunteers: number;
+}
+
+interface IAssistanceRequestResponse {
+    pendingRequests: IAssistanceRequest[];
+}
+
+interface IAssistanceRequestsResponse {
+    assistanceRequests: IAssistanceRequest[];
+    totalPages?: number;
+    totalRequests?: number;
+}
+
+interface IAssetRequestsResponse {
+    assetRequests: IAssetRequest[];
+    totalPages?: number;
+    totalRequests?: number;
+}
+
+interface IDonationsResponse {
+    donations: IDonation[];
+    totalPages: number;
+    totalItems: number;
+}
+
+interface IVolunteerDetailsResponse {
+    volunteer: IVolunteer;
+}
 
 export const adminService = {
 
@@ -14,7 +79,7 @@ export const adminService = {
     },
     fetchUsers: async (page: number, limit: number, search: string) => {
         try {
-            const response = await customAxios.get('/api/users', {
+            const response = await customAxios.get<IUsersResponse>('/api/users', {
                 params: {
                     page,
                     limit,
@@ -28,7 +93,7 @@ export const adminService = {
     },
     fetchUserDetails: async (userId: string) => {
         try {
-            const response = await customAxios.get(`/api/users/${userId}`);
+            const response = await customAxios.get<IUserResponse>(`/api/users/${userId}`);
             return response;
         } catch (error) {
             throw error
@@ -54,7 +119,7 @@ export const adminService = {
     },
     fetchVolunteers: async (page: number, limit: number, search: string) => {
         try {
-            const response = await customAxios.get('/api/volunteers', {
+            const response = await customAxios.get<IVolunteersResponse>('/api/volunteers', {
                 params: {
                     page,
                     limit,
@@ -68,7 +133,7 @@ export const adminService = {
     },
     fetchVolunteersList: async (page: number, search: string, isActive: boolean) => {
         try {
-            const response = await customAxios.get('/api/volunteers', {
+            const response = await customAxios.get<IVolunteerResponse>('/api/volunteers', {
                 params: {
                     page,
                     search,
@@ -82,7 +147,7 @@ export const adminService = {
     },
     fetchVolunteerDetails: async (volunteerId: string) => {
         try {
-            const response = await customAxios.get(`/api/volunteers/${volunteerId}`);
+            const response = await customAxios.get<IVolunteerDetailsResponse>(`/api/volunteers/${volunteerId}`);
             return response;
         } catch (error) {
             throw error
@@ -108,7 +173,7 @@ export const adminService = {
     },
     uploadAssetImage: async (formData: any) => {
         try {
-            const response = await customAxios.post('/api/assets/image', formData, {
+            const response = await customAxios.post<UploadAssetImageResponse>('/api/assets/image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
@@ -120,7 +185,7 @@ export const adminService = {
     },
     fetchAssets: async (page: number, limit: number, search: string) => {
         try {
-            const response = await customAxios.get('/api/assets', {
+            const response = await customAxios.get<IAssetsResponse>('/api/assets', {
                 params: {
                     page,
                     limit,
@@ -134,7 +199,7 @@ export const adminService = {
     },
     fetchAssetDetails: async (assetId: string) => {
         try {
-            const response = await customAxios.get(`/api/assets/${assetId}`);
+            const response = await customAxios.get<IAssetResponse>(`/api/assets/${assetId}`);
             return response;
         } catch (error) {
             throw error
@@ -142,7 +207,7 @@ export const adminService = {
     },
     updateAsset: async (assetId: string, submitData: any) => {
         try {
-            const response = await customAxios.put(`/api/assets/${assetId}`, { submitData });
+            const response = await customAxios.put<IAssetResponse>(`/api/assets/${assetId}`, { submitData });
             return response;
         } catch (error) {
             throw error
@@ -152,7 +217,7 @@ export const adminService = {
     // Asset requests
     fetchAssetRequests: async (page: number, limit: number, search: string, status: string, priority: string, user: string, sort: string) => {
         try {
-            const response = await customAxios.get('/api/assetRequests', {
+            const response = await customAxios.get<IAssetRequestsResponse>('/api/assetRequests', {
                 params: {
                     page,
                     limit,
@@ -180,7 +245,7 @@ export const adminService = {
     // Assistance requests
     fetchAssistanceRequests: async (page: number, limit: number, search: string, filter: string, priority: string, sort: string,) => {
         try {
-            const response = await customAxios.get('/api/assistanceRequests', {
+            const response = await customAxios.get<IAssistanceRequestsResponse>('/api/assistanceRequests', {
                 params: {
                     page,
                     limit,
@@ -197,7 +262,7 @@ export const adminService = {
     },
     fetchPendingAssistanceRequests: async () => {
         try {
-            const response = await customAxios.get('/api/assistanceRequests/pending');
+            const response = await customAxios.get<IAssistanceRequestResponse>('/api/assistanceRequests/pending');
             return response;
         } catch (error) {
             throw error
@@ -205,7 +270,7 @@ export const adminService = {
     },
     fetchAssistanceRequestDetails: async (requestId: string) => {
         try {
-            const response = await customAxios.get(`/api/assistanceRequests/${requestId}`)
+            const response = await customAxios.get<IAssistanceRequestDetailsResponse>(`/api/assistanceRequests/${requestId}`)
             return response;
         } catch (error) {
             throw error
@@ -231,7 +296,7 @@ export const adminService = {
     // Donations
     fetchAllDonations: async (search: string, filter: string, page: number) => {
         try {
-            const response = await customAxios.get(`/api/donations`, {
+            const response = await customAxios.get<IDonationsResponse>(`/api/donations`, {
                 params: {
                     search,
                     filter,
@@ -246,7 +311,7 @@ export const adminService = {
 
     exportDonations: async (search: string, filter: string, page: number) => {
         try {
-            const response = await customAxios.get(`/api/donations`, {
+            const response = await customAxios.get<Blob>(`/api/donations`, {
                 responseType: 'blob',
                 params: {
                     search,

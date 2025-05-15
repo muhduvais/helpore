@@ -1,4 +1,5 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -58,8 +59,8 @@ export class GeocodingService {
                 latitude: result.geometry.lat,
                 longitude: result.geometry.lng
             };
-        } catch (error: any) {
-            if (axios.isAxiosError(error)) {
+        } catch (error: unknown) {
+            if (isAxiosError(error)) {
                 if (error.response?.status === 402) {
                     throw new Error('OpenCage API quota exceeded');
                 }
@@ -67,6 +68,7 @@ export class GeocodingService {
                     throw new Error('Invalid OpenCage API key');
                 }
             }
+
             console.error('Geocoding error:', error);
             throw error;
         }
@@ -84,7 +86,7 @@ export class GeocodingService {
             }
 
             return response.data.results[0];
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Reverse geocoding error:', error);
             throw error;
         }

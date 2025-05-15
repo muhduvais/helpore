@@ -5,7 +5,7 @@ import { FormField } from '@/components/FormField';
 import { FaUser, FaPhone, FaHome, FaCity, FaMap, FaFlag, FaMapMarkerAlt } from 'react-icons/fa';
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { IUser } from '@/interfaces/userInterface';
 
 interface IAddress {
@@ -15,16 +15,6 @@ interface IAddress {
   country: string;
   pincode: string;
 }
-
-// interface IUser {
-//   name: string;
-//   age: number;
-//   gender: string;
-//   phone: number;
-//   email: string;
-//   profilePicture?: string;
-//   createdAt?: string;
-// }
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -77,8 +67,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         onUpdate();
         onClose();
       }
-    } catch (error) {
-      if (error instanceof AxiosError) {
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
         setError(error.response?.data?.message || 'Failed to update profile');
         toast.error(error.response?.data?.message || 'Failed to update profile');
       }

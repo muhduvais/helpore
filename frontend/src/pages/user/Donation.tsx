@@ -20,14 +20,7 @@ import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
 import { donationService } from '@/services/donation.service';
 import DonationSuccessModal from '@/modals/DonationSuccessModal';
-
-interface DonationHistoryItem {
-    _id: string;
-    amount: number;
-    date: string;
-    status: 'completed' | 'pending' | 'failed';
-    campaign?: string;
-}
+import { IDonation } from '@/interfaces/donation.interface';
 
 const DonationPage = () => {
     const [amount, setAmount] = useState<number>(50);
@@ -36,7 +29,7 @@ const DonationPage = () => {
     const [message, setMessage] = useState<string>('');
     const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [donationHistory, setDonationHistory] = useState<DonationHistoryItem[]>([]);
+    const [donationHistory, setDonationHistory] = useState<IDonation[]>([]);
     const [isHistoryLoading, setIsHistoryLoading] = useState<boolean>(true);
     const [showHistory, setShowHistory] = useState<boolean>(false);
 

@@ -1,3 +1,4 @@
+import { IDonation } from '@/interfaces/donation.interface';
 import { customAxios } from '../utils/apiClient';
 
 interface CheckoutSessionParams {
@@ -7,17 +8,21 @@ interface CheckoutSessionParams {
   isAnonymous: boolean;
 }
 
+interface IDonationsResponse {
+  donations: IDonation[];
+}
+
 export const donationService = {
   fetchDonationHistory: async () => {
-    return await customAxios.get('/api/donations/history');
+    return await customAxios.get<IDonationsResponse>('/api/donations/history');
   },
 
   fetchRecentDonations: async () => {
-    return await customAxios.get('/api/donations/recent');
+    return await customAxios.get<IDonationsResponse>('/api/donations/recent');
   },
 
   createCheckoutSession: async (params: CheckoutSessionParams) => {
-    return await customAxios.post('/api/donations/create-checkout-session', params);
+    return await customAxios.post<{ checkoutUrl: string }>('/api/donations/create-checkout-session', params);
   },
 
   verifyCheckoutSession: async (sessionId: string) => {

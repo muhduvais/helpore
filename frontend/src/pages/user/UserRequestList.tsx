@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AxiosError } from 'axios';
+import axios from 'axios';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,15 +39,10 @@ import asset_picture from '../../assets/asset_picture.png';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from 'use-debounce';
 import { IAssetRequest, IAssistanceRequestResponse } from '@/interfaces/userInterface';
+import { IAssistanceRequest } from '@/interfaces/adminInterface';
 
 interface IPaginatedResponse {
   assetRequests: IAssetRequest[];
-  totalPages: number;
-  totalRequests: number;
-}
-
-interface IAssistancePaginatedResponse {
-  assistanceRequests: IAssistanceRequestResponse[];
   totalPages: number;
   totalRequests: number;
 }
@@ -71,7 +66,7 @@ const UserRequests: React.FC = () => {
   const [totalRequests, setTotalRequests] = useState(0);
 
   // Assistance request states
-  const [assistanceRequests, setAssistanceRequests] = useState<IAssistanceRequestResponse[]>([]);
+  const [assistanceRequests, setAssistanceRequests] = useState<IAssistanceRequest[]>([]);
   const [isAssistanceLoading, setIsAssistanceLoading] = useState(true);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const [assistanceFilter, setAssistanceFilter] = useState<string>('all');
@@ -106,7 +101,7 @@ const UserRequests: React.FC = () => {
         setTotalRequests(data.totalRequests);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         setError(error.response?.data.message || 'Error fetching requests');
       } else {
         setError('An unexpected error occurred');
@@ -127,13 +122,12 @@ const UserRequests: React.FC = () => {
       );
 
       if (response.status === 200) {
-        const data: IAssistancePaginatedResponse = response.data;
-        setAssistanceRequests(data.assistanceRequests);
-        setAssistanceTotalPages(data.totalPages);
-        setAssistanceTotalRequests(data.totalRequests);
+        setAssistanceRequests(response.data.assistanceRequests);
+        setAssistanceTotalPages(response.data.totalPages);
+        setAssistanceTotalRequests(response.data.totalRequests);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         setAssistanceError(error.response?.data.message || 'Error fetching assistance requests. Please try again.');
       } else {
         setAssistanceError('An unexpected error occurred. Please try again.');
@@ -273,7 +267,7 @@ const UserRequests: React.FC = () => {
     </motion.div>
   );
 
-  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequestResponse }> = ({ request }) => {
+  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequest }> = ({ request }) => {
     const navigate = useNavigate();
 
     return (
@@ -595,7 +589,7 @@ const UserRequests: React.FC = () => {
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {assistanceRequests.map((request: IAssistanceRequestResponse) => (
+                {assistanceRequests.map((request: IAssistanceRequest) => (
                   <AssistanceRequestCard key={request._id} request={request} />
                 ))}
               </div>
