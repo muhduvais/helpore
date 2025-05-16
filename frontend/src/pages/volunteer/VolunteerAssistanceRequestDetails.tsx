@@ -197,7 +197,7 @@ const AssistanceRequestDetails: React.FC = () => {
                     const response = await chatService.getConversationMessages(id);
 
                     if (response.status === 200) {
-                        setMessages(response.data.data);
+                        setMessages(response.data.messages);
                     }
                 } catch (error) {
                     console.error('Error fetching messages:', error);
