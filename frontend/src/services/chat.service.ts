@@ -23,6 +23,7 @@ export const chatService = {
   getConversationMessages: async (requestId: string) => {
     try {
       const response = await customAxios.get<{ messages: IMessageDocument[] }>(`/api/chats/conversations/${requestId}/messages`);
+      console.log('messages response: ', response);
       return response;
     } catch (error) {
       throw error;

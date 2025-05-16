@@ -38,7 +38,7 @@ import { userService } from '@/services/user.service';
 import asset_picture from '../../assets/asset_picture.png';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from 'use-debounce';
-import { IAssetRequest, IAssistanceRequestResponse } from '@/interfaces/userInterface';
+import { IAssetRequest } from '@/interfaces/userInterface';
 import { IAssistanceRequest } from '@/interfaces/adminInterface';
 
 interface IPaginatedResponse {
@@ -432,7 +432,7 @@ const UserRequests: React.FC = () => {
                 src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
                 loop
                 autoplay
-                style={{ width: '100px', height: '100px' }}
+                style={{ width: '50px', height: '50px' }}
               />
             </div>
           ) : requests.length === 0 ? (
@@ -568,7 +568,7 @@ const UserRequests: React.FC = () => {
                 src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
                 loop
                 autoplay
-                style={{ width: '100px', height: '100px' }}
+                style={{ width: '50px', height: '50px' }}
               />
             </div>
           ) : assistanceRequests.length === 0 ? (

@@ -11,10 +11,12 @@ services:
       - ./backend/.env
     depends_on:
       - redis
-    volumes:
-      - ./backend/node_modules:/app/node_modules  
+    # volumes:
+    #   - ./backend:/app  
     networks:
       - treatme-network
+    dns:
+      - 8.8.8.8
 
   redis:
     image: redis:alpine

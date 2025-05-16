@@ -25,7 +25,7 @@ const ProfileChangePassword = () => {
       const response = await userService.fetchUserDetails();
       
       if (response.status === 200) {
-        const { userDetails } = response.data;
+        const userDetails = response.data;
         setUser(userDetails.user);
       }
     } catch (error) {

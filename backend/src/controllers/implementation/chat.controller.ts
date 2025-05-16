@@ -43,7 +43,7 @@ export class ChatController implements IChatController {
         try {
             const { userId } = req.user as JwtPayload;
             const conversations = await this.chatService.getUserConversations(userId);
-            res.status(200).json({ success: true, data: conversations });
+            res.status(200).json({ success: true, messages: conversations });
         } catch (error) {
             console.error('Error fetching conversations:', error);
             res.status(500).json({ success: false, message: 'Error fetching conversations', error: error instanceof Error ? error.message : 'Unknown error' });
