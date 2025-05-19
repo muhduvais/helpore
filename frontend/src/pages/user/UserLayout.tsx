@@ -1,6 +1,6 @@
 import { useState, ReactNode, useEffect, useRef } from 'react';
 import { Menu, X, Home, Box, FileText, Heart, Newspaper, Users, LogOut, User, Bell } from 'lucide-react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, Navigate, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
 import logo from '../../assets/Logo-black.png';
@@ -31,6 +31,7 @@ const Layout: React.FC = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearAllNotifications, clearNotification } = useNotifications();
 
@@ -95,7 +96,7 @@ const Layout: React.FC = () => {
     { title: 'Requests', icon: <FileText className="w-5 h-5" />, path: '/user/requests' },
     { title: 'Donations', icon: <Heart className="w-5 h-5" />, path: '/user/donations' },
     { title: 'Meetings', icon: <Newspaper className="w-5 h-5" />, path: '/user/meetings' },
-    { title: 'About Us', icon: <Users className="w-5 h-5" />, path: '/user/about' },
+    // { title: 'About Us', icon: <Users className="w-5 h-5" />, path: '/user/about' },
   ];
 
   return (
@@ -103,7 +104,9 @@ const Layout: React.FC = () => {
       <nav className="bg-[#ffffff] text-[#435D2C] shadow-lg fixed w-full z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
-            <img src={logo} alt="Logo" />
+            <button onClick={() => navigate('/user/dashboard')}>
+              <img src={logo} alt="Logo" />
+            </button>
             {!logo && (
               <div className="flex items-center">
                 <div className="flex-shrink-0 flex items-center">
@@ -261,7 +264,7 @@ const Layout: React.FC = () => {
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-[#435D2C]/70"
+                className="inline-flex items-center justify-center p-2 rounded-md text-[#435D2C] hover:text-white border-[1px] border-[#435D2C]/20 hover:border-none hover:bg-[#435D2C]/70"
               >
                 {isMobileMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -285,7 +288,7 @@ const Layout: React.FC = () => {
                     `flex items-center w-full px-3 py-2 rounded-md text-base font-medium
                     ${isActive
                       ? 'bg-[#435D2C] text-white'
-                      : 'text-white/90 hover:bg-[#435D2C]/70'
+                      : 'text-[#435D2C] hover:text-white/90 hover:bg-[#435D2C]/90'
                     }`
                   }
                 >
@@ -298,7 +301,7 @@ const Layout: React.FC = () => {
                   setShowNotifications(!showNotifications);
                   setIsMobileMenuOpen(false);
                 }}
-                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-white hover:bg-[#435D2C]/70 relative"
+                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-[#435D2C] hover:text-white hover:bg-[#435D2C]/90 relative"
               >
                 <Bell className="w-5 h-5" />
                 <span className="ml-2">Notifications</span>
@@ -311,7 +314,7 @@ const Layout: React.FC = () => {
               <NavLink
                 to="/user/profile"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-white hover:bg-[#435D2C]/70"
+                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-[#435D2C] hover:text-white hover:bg-[#435D2C]/90"
               >
                 <User className="w-5 h-5" />
                 <span className="ml-2">Profile</span>
@@ -321,7 +324,7 @@ const Layout: React.FC = () => {
                   handleLogout();
                   setIsMobileMenuOpen(false);
                 }}
-                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-red-100 hover:bg-red-800/30"
+                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-red-700 hover:text-white hover:bg-red-800/90"
               >
                 <LogOut className="w-5 h-5" />
                 <span className="ml-2">Logout</span>
