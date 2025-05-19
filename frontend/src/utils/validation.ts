@@ -130,6 +130,8 @@ export const validateForm = (field: keyof Fields | string, value: string) => {
   }
 }
 
+
+
 export const validateForm1 = (formData: SignUpFormData) => {
   const errors: FormErrors = { name: '', email: '', password: '' };
   let isValid = true

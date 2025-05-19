@@ -1,6 +1,8 @@
 import { IAsset } from "./adminInterface";
 import { Types } from "mongoose";
 
+type statusType = 'approved' | 'rejected' | 'completed';
+
 export interface IUser {
     userId?: string;
     name: string;
@@ -76,7 +78,7 @@ export interface IAssetRequest {
     asset: IAsset;
     requestedDate: string;
     quantity: number;
-    status: 'pending' | 'approved' | 'rejected';
+    status: statusType;
     comment?: string;
     createdAt: string;
     updatedAt: string;

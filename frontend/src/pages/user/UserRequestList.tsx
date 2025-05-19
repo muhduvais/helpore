@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
@@ -40,27 +40,64 @@ import { Input } from '@/components/ui/input';
 import { useDebounce } from 'use-debounce';
 import { IAssetRequest } from '@/interfaces/userInterface';
 import { IAssistanceRequest } from '@/interfaces/adminInterface';
-
-interface IPaginatedResponse {
-  assetRequests: IAssetRequest[];
-  totalPages: number;
-  totalRequests: number;
-}
+import { RootState } from '@/redux/store';
 
 const limit = 4;
 
-const UserRequests: React.FC = () => {
+type statusType = 'approved' | 'rejected' | 'completed';
+type requestType = 'volunteer' | 'ambulance';
+type filterType = 'all' | 'pending' | 'approved' | 'rejected' | 'completed';
 
+const getStatusColor = (status: statusType) => {
+  switch (status.toLowerCase()) {
+    case 'approved':
+      return 'bg-green-100 text-green-800';
+    case 'rejected':
+      return 'bg-red-100 text-red-800';
+    case 'completed':
+      return 'bg-blue-100 text-blue-800';
+    default:
+      return 'bg-yellow-100 text-yellow-800';
+  }
+};
+
+const getStatusIcon = (status: statusType) => {
+  switch (status.toLowerCase()) {
+    case 'approved':
+      return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+    case 'rejected':
+      return <XCircle className="h-4 w-4 text-red-600" />;
+    case 'completed':
+      return <CheckCircle2 className="h-4 w-4 text-blue-600" />;
+    default:
+      return <Clock className="h-4 w-4 text-yellow-600" />;
+  }
+};
+
+const getTypeIcon = (type: requestType) => {
+  switch (type.toLowerCase()) {
+    case 'ambulance':
+      return <Ambulance className="h-6 w-6" />;
+    case 'volunteer':
+      return <HandHeart className="h-6 w-6" />;
+    default:
+      return <HandHeart className="h-6 w-6" />;
+  }
+};
+
+const UserRequests = () => {
   const [queryParams] = useSearchParams();
   const defaultTab = queryParams.get('tab') || 'assets';
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
 
   // Asset request states
   const [requests, setRequests] = useState<IAssetRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [view, setView] = useState<'card' | 'table'>('card');
+  const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [view, setView] = useState('card');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRequests, setTotalRequests] = useState(0);
@@ -69,8 +106,8 @@ const UserRequests: React.FC = () => {
   const [assistanceRequests, setAssistanceRequests] = useState<IAssistanceRequest[]>([]);
   const [isAssistanceLoading, setIsAssistanceLoading] = useState(true);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
-  const [assistanceFilter, setAssistanceFilter] = useState<string>('all');
-  const [assistanceSearchQuery, setAssistanceSearchQuery] = useState<string>('');
+  const [assistanceFilter, setAssistanceFilter] = useState('all');
+  const [assistanceSearchQuery, setAssistanceSearchQuery] = useState('');
   const [assistanceCurrentPage, setAssistanceCurrentPage] = useState(1);
   const [assistanceTotalPages, setAssistanceTotalPages] = useState(1);
   const [assistanceTotalRequests, setAssistanceTotalRequests] = useState(0);
@@ -78,13 +115,7 @@ const UserRequests: React.FC = () => {
   const [debouncedSearch] = useDebounce(searchQuery, 500);
   const [debouncedAssistanceSearch] = useDebounce(assistanceSearchQuery, 500);
 
-  const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
-
-  if (!isLoggedIn) {
-    return <Navigate to="/login" />;
-  }
-
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await userService.fetchMyAssetRequests(
@@ -95,7 +126,7 @@ const UserRequests: React.FC = () => {
       );
 
       if (response.status === 200) {
-        const data: IPaginatedResponse = response.data;
+        const data = response.data;
         setRequests(data.assetRequests);
         setTotalPages(data.totalPages);
         setTotalRequests(data.totalRequests);
@@ -109,9 +140,9 @@ const UserRequests: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, debouncedSearch, filter]);
 
-  const fetchAssistanceRequests = async () => {
+  const fetchAssistanceRequests = useCallback(async () => {
     try {
       setIsAssistanceLoading(true);
       const response = await userService.fetchMyAssistanceRequests(
@@ -135,74 +166,45 @@ const UserRequests: React.FC = () => {
     } finally {
       setIsAssistanceLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchRequests();
-  }, [currentPage, debouncedSearch, filter]);
-
-  useEffect(() => {
-    fetchAssistanceRequests();
   }, [assistanceCurrentPage, debouncedAssistanceSearch, assistanceFilter]);
 
-  const handleSearch = (value: string) => {
+  const handleSearch = useCallback((value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleAssistanceSearch = (value: string) => {
+  const handleAssistanceSearch = useCallback((value: string) => {
     setAssistanceSearchQuery(value);
     setAssistanceCurrentPage(1);
-  };
+  }, []);
 
-  const handleFilterChange = (value: string) => {
+  const handleFilterChange = useCallback((value: filterType) => {
     setFilter(value);
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleAssistanceFilterChange = (value: string) => {
+  const handleAssistanceFilterChange = useCallback((value: filterType) => {
     setAssistanceFilter(value);
     setAssistanceCurrentPage(1);
-  };
+  }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'completed':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchRequests();
     }
-  };
+  }, [isLoggedIn, fetchRequests]);
 
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case 'rejected':
-        return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-blue-600" />;
-      default:
-        return <Clock className="h-4 w-4 text-yellow-600" />;
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchAssistanceRequests();
     }
-  };
+  }, [isLoggedIn, fetchAssistanceRequests]);
 
-  const getTypeIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'ambulance':
-        return <Ambulance className="h-6 w-6" />;
-      case 'volunteer':
-        return <HandHeart className="h-6 w-6" />;
-      default:
-        return <HandHeart className="h-6 w-6" />;
-    }
-  };
+  if (!isLoggedIn) {
+    return <Navigate to="/login" />;
+  }
 
-  const RequestCard: React.FC<{ request: IAssetRequest }> = ({ request }) => (
+  const RequestCard:React.FC<{ request: IAssetRequest }> = ({ request }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -267,75 +269,71 @@ const UserRequests: React.FC = () => {
     </motion.div>
   );
 
-  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequest }> = ({ request }) => {
-    const navigate = useNavigate();
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <div className="p-4">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                  {getTypeIcon(request.type)}
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-800">
-                    {request.type.charAt(0).toUpperCase() + request.type.slice(1)} Assistance
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {request.description && request.description.length > 50
-                      ? `${request.description.substring(0, 50)}...`
-                      : request.description}
-                  </p>
-                </div>
+  const AssistanceRequestCard:React.FC<{ request: IAssistanceRequest }> = ({ request }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="hover:shadow-lg transition-shadow duration-300">
+        <div className="p-4">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                {getTypeIcon(request.type)}
               </div>
-              <Badge className={getStatusColor(request.status)}>
-                <span className="flex items-center gap-1">
-                  {getStatusIcon(request.status)}
-                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                </span>
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="h-4 w-4" />
-                <div>
-                  <p className="font-medium">Requested For</p>
-                  <p>{format(new Date(request.requestedDate), 'PPP')}</p>
-                </div>
+              <div>
+                <h3 className="font-medium text-gray-800">
+                  {request.type.charAt(0).toUpperCase() + request.type.slice(1)} Assistance
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {request.description && request.description.length > 50
+                    ? `${request.description.substring(0, 50)}...`
+                    : request.description}
+                </p>
               </div>
-              {request.volunteer && (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <User className="h-4 w-4" />
-                  <div>
-                    <p className="font-medium">Assigned Volunteer</p>
-                    <p>{request.volunteer.name || 'volunteer name'}</p>
-                  </div>
-                </div>
-              )}
             </div>
-
-            {/* View More */}
-            <div className="mt-4 flex justify-end">
-              <Button
-                variant="outline"
-                className="text-[#688D48] border-[#688d4855] hover:bg-[#688D48] opacity-80 hover:opacity-100 hover:text-white transition-colors"
-                onClick={() => navigate(`/user/assistanceRequests/${request._id}`)}
-              >
-                View More
-              </Button>
-            </div>
+            <Badge className={getStatusColor(request.status)}>
+              <span className="flex items-center gap-1">
+                {getStatusIcon(request.status)}
+                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+              </span>
+            </Badge>
           </div>
-        </Card>
-      </motion.div>
-    );
-  };
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Calendar className="h-4 w-4" />
+              <div>
+                <p className="font-medium">Requested For</p>
+                <p>{format(new Date(request.requestedDate), 'PPP')}</p>
+              </div>
+            </div>
+            {request.volunteer && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <User className="h-4 w-4" />
+                <div>
+                  <p className="font-medium">Assigned Volunteer</p>
+                  <p>{request.volunteer.name || 'volunteer name'}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* View More */}
+          <div className="mt-4 flex justify-end">
+            <Button
+              variant="outline"
+              className="text-[#688D48] border-[#688d4855] hover:bg-[#688D48] opacity-80 hover:opacity-100 hover:text-white transition-colors"
+              onClick={() => navigate(`/user/assistanceRequests/${request._id}`)}
+            >
+              View More
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
 
   return (
     <div className="p-4 sm:p-6 space-y-6 mt-16">
@@ -441,7 +439,7 @@ const UserRequests: React.FC = () => {
               <h3 className="text-xl font-semibold text-gray-600 mb-2">No Requests Found</h3>
               <p className="text-gray-500 mb-4">
                 {searchQuery || filter !== 'all'
-                  ? 'No requests match your search \"criteria\"'
+                  ? 'No requests match your search criteria'
                   : "You haven't made any asset requests yet."}
               </p>
               <Link to="/user/assets">
@@ -453,7 +451,7 @@ const UserRequests: React.FC = () => {
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {requests.map((request: IAssetRequest) => (
+                {requests.map((request) => (
                   <RequestCard key={request._id} request={request} />
                 ))}
               </div>
@@ -589,7 +587,7 @@ const UserRequests: React.FC = () => {
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {assistanceRequests.map((request: IAssistanceRequest) => (
+                {assistanceRequests.map((request) => (
                   <AssistanceRequestCard key={request._id} request={request} />
                 ))}
               </div>

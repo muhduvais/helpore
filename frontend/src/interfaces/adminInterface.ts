@@ -1,6 +1,9 @@
 import { Types } from "mongoose";
 import { IUser } from "./userInterface";
 
+type statusType = 'approved' | 'rejected' | 'completed';
+type requestType = 'volunteer' | 'ambulance';
+
 export interface AddAssetData {
     name: string,
     category: string,
@@ -22,9 +25,9 @@ export interface IAsset {
 
 export interface IAssistanceRequest {
     _id: string;
-    type: 'volunteer' | 'ambulance';
+    type: requestType;
     description: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: statusType;
     requestedDate: string;
     requestedTime: string;
     priority: 'urgent' | 'normal';

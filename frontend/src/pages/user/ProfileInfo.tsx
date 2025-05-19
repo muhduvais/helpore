@@ -6,10 +6,10 @@ import loading_Profile from '../../assets/loadingProfile.webp';
 import { toast } from 'sonner';
 import { validateChangePassword } from "../../utils/validation";
 import { userService } from '../../services/user.service';
-import { IUser } from '../../interfaces/userInterface';
+import { IAddress, IUser } from '../../interfaces/userInterface';
 import axios from 'axios';
 import { adminService } from '@/services/admin.service';
-import EditProfileModal from '@/components/EditUserProfile';
+import EditProfileModal, { IAddressData, IUserData } from '@/components/EditUserProfile';
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('info');
@@ -245,6 +245,18 @@ const Profile = () => {
         }
     };
 
+    const handleProfileUpdate = (userData: IUserData, addressData: IAddressData) => {
+        setUser((prevUser: IUser) => ({
+            ...prevUser,
+            ...userData
+        }));
+
+        setAddress((prevAddr: IAddress) => ({
+            ...prevAddr,
+            ...addressData
+        }));
+    }
+
     const tabs = [
         { id: 'info', label: 'Profile Info', icon: <User className="w-5 h-5" /> },
         { id: 'uploads', label: 'Uploads', icon: <Upload className="w-5 h-5" /> },
@@ -267,7 +279,7 @@ const Profile = () => {
                 onClose={() => setIsEditModalOpen(false)}
                 user={user}
                 address={address}
-                onUpdate={fetchUserDetails}
+                onUpdate={(userData: IUserData, addressData: IAddressData) => handleProfileUpdate(userData, addressData)}
             />
             <div className="bg-white shadow-lg rounded-lg max-w-6xl w-full overflow-hidden">
 

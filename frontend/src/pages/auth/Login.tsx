@@ -202,12 +202,10 @@ const LoginPage: React.FC = () => {
     <>
       {/* Modal */}
       {showForgotModal && (
-        <div className={`fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 ${showForgotModal ? 'opacity-100' : 'opacity-0'
-          }`}>
-          <div className={`bg-white bg-opacity-90 transition-all duration-300 rounded-xl p-3 px-5 ${showForgotModal ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'
-            }`}>
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+          <div className="bg-white bg-opacity-90 transition-all duration-300 rounded-xl p-3 px-5 w-full max-w-md">
             <div className="header flex items-center justify-start gap-x-5">
-              <h2 className="text-2xl font-bold mb-1">Forgot <span className='font-normal'>Password</span></h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-1">Forgot <span className='font-normal'>Password</span></h2>
             </div>
             {forgotError && <p className='opacity-90 font-semibold text-red-500 text-sm py-2 pb-3'>{forgotError}</p>}
             <form onSubmit={handleForgotPassword}>
@@ -216,9 +214,9 @@ const LoginPage: React.FC = () => {
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
                 placeholder="Enter your email"
-                className={`transition-all duration-300 bg-transparent px-3 py-2 my-2 text-xl font-semibold border-b-[3px] bg-white ${forgotError || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}
+                className={`transition-all duration-300 bg-transparent px-3 py-2 my-2 text-lg md:text-xl font-semibold border-b-[3px] bg-white w-full ${forgotError || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}
               />
-              <div className="btns flex gap-x-1">
+              <div className="btns flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={handleForgotPassword}
                   className={`w-full p-2 bg-[#688D48] text-white mt-2 ${isLoading ? 'opacity-80' : ''}`}
@@ -244,21 +242,23 @@ const LoginPage: React.FC = () => {
       )}
 
       {/* Main container */}
-      <div className={`main-container relative w-[100vw] h-[100vh] flex items-center justify-between text-[#222222] bg-cover bg-center px-20 ${showForgotModal ? 'blur-[3px]' : ''}`}
+      <div className={`main-container relative w-full min-h-screen flex flex-col md:flex-row items-center justify-center text-[#222222] bg-cover bg-center p-4 md:p-6 lg:px-12 xl:px-20 ${showForgotModal ? 'blur-[3px]' : ''}`}
         style={{ backgroundImage: `url(${bgDark_1_img})` }}
       >
-        <div className="logo absolute top-16 left-28">
-          <img src={logo} alt="logo" />
+        <div className="top-part flex flex-col items-center sm:items-start justify-center sm:gap-y-4">
+          <div className="logo">
+            <img src={logo} alt="logo" className="h-10 sm:h-12 md:h-auto" />
+          </div>
+
+          {/* text */}
+          <div className="textContainer w-full md:max-w-[65%] mx-4 md:mx-8 md:mt-0 mb-8 md:mb-0">
+            <h2 className='text-gray-300 text-center sm:text-start text-lg sm:text-3xl md:text-4xl lg:text-5xl font-normal italic'>"You can always, always give something, even if it is only kindness!"</h2>
+          </div>
         </div>
 
-        {/* Left text */}
-        <div className="textContainer max-w-[45%] mx-20">
-          <h2 className='text-white text-5xl font-bold'>“You can always, always give something, even if it is only kindness!”</h2>
-        </div>
-
-        <div className={`login-form bg-white bg-opacity-80 transition-all duration-300 rounded-xl max-w-sm w-[400px] p-3 px-5 mr-24`}>
-          <div className='login-title flex items-center justify-start gap-x-4 p-4 pb-8 text-4xl font-bold'>
-            <h2 className={`text-[#414141]`}>Login <span className='font-light'>here</span></h2>
+        <div className="login-form bg-white bg-opacity-80 transition-all duration-300 rounded-xl w-full max-w-sm mx-auto md:mr-8 lg:mr-16 xl:mr-24 p-3 px-5">
+          <div className='login-title flex items-center justify-start gap-x-4 p-2 sm:p-4 pb-4 sm:pb-8 text-2xl sm:text-3xl md:text-4xl font-bold'>
+            <h2 className="text-[#414141]">Login <span className='font-light'>here</span></h2>
             {isLoading &&
               <DotLottieReact
                 src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
@@ -269,62 +269,64 @@ const LoginPage: React.FC = () => {
           </div>
 
           {/* Are you a volunteer? */}
-          <div className='login-title flex items-center justify-center mx-4 mb-1'>
-            <button className={`${!isVolunteer ? 'bg-[#688D48]' : ''} w-[50%] flex gap-x-2 items-center justify-center`}
+          <div className='login-title flex items-center justify-center mx-2 sm:mx-4 mb-1'>
+            <button className={`${!isVolunteer ? 'bg-[#688D48]' : ''} w-[50%] flex gap-x-2 items-center justify-center py-1`}
               onClick={() => toggleRole(false)}
             >
               {!isVolunteer && <SiTicktick className='text-white' />}
-              <h2 className={`text-black ${!isVolunteer ? 'text-white' : 'font-semibold'}`}>Not a volunteer</h2>
+              <h2 className={`text-black text-sm sm:text-base ${!isVolunteer ? 'text-white' : 'font-semibold'}`}>Not a volunteer</h2>
             </button>
-            <button className={`${isVolunteer ? 'bg-[#688D48]' : ''} w-[50%] flex gap-x-2 items-center justify-center`}
+            <button className={`${isVolunteer ? 'bg-[#688D48]' : ''} w-[50%] flex gap-x-2 items-center justify-center py-1`}
               onClick={() => toggleRole(true)}
             >
               {isVolunteer && <SiTicktick className='text-white' />}
-              <h2 className={`text-black ${isVolunteer ? 'text-white' : 'font-semibold'}`}>I am a volunteer</h2>
+              <h2 className={`text-black text-sm sm:text-base ${isVolunteer ? 'text-white' : 'font-semibold'}`}>I am a volunteer</h2>
             </button>
           </div>
 
-          {errorMessage && <span className='p-3 opacity-90 font-semibold text-red-500'>{errorMessage}</span>}
+          {errorMessage && <span className='p-2 sm:p-3 opacity-90 font-semibold text-red-500 text-sm'>{errorMessage}</span>}
           <hr className='opacity-100' />
 
-          <form onSubmit={handleLogin} className='py-3'>
+          <form onSubmit={handleLogin} className='py-2 sm:py-3'>
 
-            <div className="input-field flex flex-col p-3 pt-0 gap-y-1">
-              {formErrors.email ? <label htmlFor="email" className='opacity-90 font-semibold text-red-500'>{formErrors.email}</label>
-                : <label htmlFor="email" className='opacity-75 font-semibold'>Email</label>}
+            <div className="input-field flex flex-col p-2 sm:p-3 pt-0 gap-y-1">
+              {formErrors.email ? <label htmlFor="email" className='opacity-90 font-semibold text-red-500 text-sm'>{formErrors.email}</label>
+                : <label htmlFor="email" className='opacity-75 font-semibold text-sm'>Email</label>}
               <input
                 type="text"
                 name="email"
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`transition-all duration-300 bg-transparent px-3 py-2 text-xl font-semibold border-b-[3px] bg-white ${formErrors.email || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
+                className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white ${formErrors.email || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
 
             </div>
 
-            <div className="relative input-field flex flex-col p-3 pt-0 gap-y-2">
-              {formErrors.password ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500'>{formErrors.password}</label>
-                : <label htmlFor="password" className='opacity-75 font-semibold'>Password</label>}
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                id="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={`transition-all duration-300 bg-transparent px-3 py-2  text-xl font-semibold border-b-[3px] bg-white ${formErrors.password || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
+            <div className="relative input-field flex flex-col p-2 sm:p-3 pt-0 gap-y-1 sm:gap-y-2">
+              {formErrors.password ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500 text-sm'>{formErrors.password}</label>
+                : <label htmlFor="password" className='opacity-75 font-semibold text-sm'>Password</label>}
+              <div className="relative w-full">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  id="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white ${formErrors.password || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none w-full`} />
 
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-7 top-11 text-xl text-gray-600"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute inset-y-0 right-3 text-lg sm:text-xl text-gray-600"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
 
             {/* Forgot password */}
-            <div className="btns flex items-center justify-between mx-3 mb-2 mt-3">
-              <div className='new-user text-[14px]'><button
+            <div className="btns flex items-center justify-between mx-2 sm:mx-3 mb-2 mt-2 sm:mt-3">
+              <div className='new-user text-xs sm:text-sm'><button
                 type='button'
                 className={`text-[#767676] font-semibold pr-1 hover:underline`}
                 onClick={() => setShowForgotModal(true)}
@@ -332,28 +334,28 @@ const LoginPage: React.FC = () => {
             </div>
 
             {/* Submit button */}
-            <div className="input-field flex flex-col px-3 py-1">
+            <div className="input-field flex flex-col px-2 sm:px-3 py-1">
               <button
                 type='submit'
-                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-xl outline-none font-semibold`}>
+                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-lg sm:text-xl outline-none font-semibold`}>
                 Submit
               </button>
             </div>
 
             {/* Register now button */}
             {!isVolunteer &&
-              <div className="btns flex items-center justify-between mx-3 mb-2 mt-2">
-                <div className='new-user text-[14px]'><span className='opacity-60 pr-2'>Not Registered?</span><Link to="/user/register"
+              <div className="btns flex items-center justify-between mx-2 sm:mx-3 mb-2 mt-2">
+                <div className='new-user text-xs sm:text-sm'><span className='opacity-60 pr-2'>Not Registered?</span><Link to="/user/register"
                   className={`text-[#414141] font-semibold pr-1 hover:underline`}>Register Now</Link></div>
               </div>}
 
             {/* Google login button */}
-            {!isVolunteer && <div className="input-field flex flex-col px-3 py-1">
+            {!isVolunteer && <div className="input-field flex flex-col px-2 sm:px-3 py-1">
               <button
                 onClick={handleGoogleLogin}
                 type='button'
-                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-xl outline-none`}>
-                <span className='opacity-50 pr-5 text-sm'>OR</span><span>Login with</span> <span className='font-semibold'>Google</span>
+                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-base sm:text-lg md:text-xl outline-none`}>
+                <span className='opacity-50 pr-3 sm:pr-5 text-xs sm:text-sm'>OR</span><span>Login with</span> <span className='font-semibold'>Google</span>
               </button>
             </div>}
 

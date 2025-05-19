@@ -8,7 +8,14 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { IUser } from '@/interfaces/userInterface';
 
-interface IAddress {
+export interface IUserData {
+  name: string;
+  age: number;
+  gender: string;
+  phone: number;
+}
+
+export interface IAddressData {
   street: string;
   city: string;
   state: string;
@@ -20,18 +27,18 @@ interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: IUser | null;
-  address: IAddress | null;
-  onUpdate: () => void;
+  address: IAddressData | null;
+  onUpdate: (userData: IUserData, addressData: IAddressData) => void;
 }
 
-interface FormData extends Omit<IUser, 'profilePicture' | 'email' | 'createdAt' | 'password' | 'isActive' | 'isBlocked' | 'isVerified' | 'role' | 'googleId' | 'resetToken' | 'resetTokenExpiry'>, IAddress {}
+interface FormData extends Omit<IUser, 'profilePicture' | 'email' | 'createdAt' | 'password' | 'isActive' | 'isBlocked' | 'isVerified' | 'role' | 'googleId' | 'resetToken' | 'resetTokenExpiry'>, IAddressData { }
 
-const EditProfileModal: React.FC<EditProfileModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  user, 
-  address, 
-  onUpdate 
+const EditProfileModal: React.FC<EditProfileModalProps> = ({
+  isOpen,
+  onClose,
+  user,
+  address,
+  onUpdate
 }) => {
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || '',
@@ -55,6 +62,21 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }));
   };
 
+  // const validateAllFields = () => {
+  //   const newFormErrors = { ...initialData };
+  //   let hasError = false;
+
+  //   Object.keys(formData).forEach((field: any) => {
+  //     const validationResult = validateForm(field, formData[field as keyof EditUserFormData]);
+  //     if (validationResult?.error) {
+  //       newFormErrors[field as keyof EditUserFormData] = validationResult.error;
+  //       hasError = true;
+  //     }
+  //   });
+
+  //   return { newFormErrors, hasError };
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -64,7 +86,23 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       const response = await userService.updateUser(formData);
       if (response.status === 200) {
         toast.success('Profile updated successfully!');
-        onUpdate();
+
+        const userData = {
+          name: formData.name,
+          age: formData.age,
+          gender: formData.gender,
+          phone: formData.phone,
+        }
+
+        const addressData = {
+          street: formData.street,
+          city: formData.city,
+          state: formData.state,
+          country: formData.country,
+          pincode: formData.pincode,
+        }
+
+        onUpdate(userData, addressData);
         onClose();
       }
     } catch (error: unknown) {
@@ -83,13 +121,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-[#688D48]">Edit Profile</DialogTitle>
         </DialogHeader>
-        
+
         {error && (
           <div className="p-3 mb-4 text-sm text-red-500 bg-red-50 rounded">
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">

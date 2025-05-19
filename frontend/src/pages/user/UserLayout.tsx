@@ -3,7 +3,7 @@ import { Menu, X, Home, Box, FileText, Heart, Newspaper, Users, LogOut, User, Be
 import { Outlet, NavLink } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
-import logo from '../../assets/Logo.png';
+import logo from '../../assets/Logo-black.png';
 import 'react-toastify/dist/ReactToastify.css';
 import * as TimeAgoModule from 'react-timeago';
 import { useNotifications } from '@/context/notificationContext';
@@ -100,7 +100,7 @@ const Layout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-[#688D48] text-white shadow-lg fixed w-full z-50">
+      <nav className="bg-[#ffffff] text-[#435D2C] shadow-lg fixed w-full z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
             <img src={logo} alt="Logo" />
@@ -124,7 +124,7 @@ const Layout: React.FC = () => {
                     `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors
                     ${isActive
                       ? 'bg-[#435D2C] text-white'
-                      : 'text-white/90 hover:bg-[#435D2C]/70'
+                      : 'text-[#435D2C] hover:text-white hover:bg-[#435D2C]/80'
                     }`
                   }
                 >
@@ -138,7 +138,7 @@ const Layout: React.FC = () => {
                 <button
                   ref={notificationRef}
                   onClick={toggleNotifications}
-                  className="flex items-center px-3 py-2 rounded-md text-sm font-medium hover:bg-[#435D2C]/70 relative"
+                  className="flex items-center px-3 py-2 rounded-md text-sm font-medium hover:text-white hover:bg-[#435D2C]/80 relative"
                 >
                   <Bell className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -225,7 +225,7 @@ const Layout: React.FC = () => {
                     setIsProfileDropdownOpen(!isProfileDropdownOpen);
                     setShowNotifications(false);
                   }}
-                  className="flex items-center px-3 py-2 rounded-md text-sm font-medium hover:bg-[#435D2C]/70"
+                  className="flex items-center px-3 py-2 rounded-md text-sm hover:text-white font-medium hover:bg-[#435D2C]/80"
                 >
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <User className="w-5 h-5" />

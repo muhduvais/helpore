@@ -118,21 +118,23 @@ const SignupPage: React.FC = () => {
 
   return (
     <>
-      <div className={`main-container relative w-[100vw] h-[100vh] flex items-center justify-between text-[#222222] bg-cover bg-center px-20`}
+      <div className="main-container relative w-full min-h-screen flex flex-col md:flex-row items-center justify-center text-[#222222] bg-cover bg-center p-4 md:p-6 lg:px-12 xl:px-20"
         style={{ backgroundImage: `url(${bgDark_1_img})` }}
       >
-        <div className="logo absolute top-16 left-28">
-          <img src={logo} alt="logo" />
+        <div className="top-part flex flex-col items-center sm:items-start justify-center sm:gap-y-4">
+          <div className="logo">
+            <img src={logo} alt="logo" className="h-10 sm:h-12 md:h-auto" />
+          </div>
+
+          {/* text */}
+          <div className="textContainer w-full md:max-w-[65%] mx-4 md:mx-8 md:mt-0 mb-8 md:mb-0">
+            <h2 className='text-gray-300 text-center sm:text-start text-lg sm:text-3xl md:text-4xl lg:text-5xl font-normal italic'>"You can always, always give something, even if it is only kindness!"</h2>
+          </div>
         </div>
 
-        {/* Left text */}
-        <div className="textContainer max-w-[45%] mx-20">
-          <h2 className='text-white text-5xl font-bold'>“You can always, always give something, even if it is only kindness!”</h2>
-        </div>
-
-        <div className={`login-form bg-white bg-opacity-80 transition-all duration-300 rounded-xl max-w-sm w-[400px] p-3 px-5 mr-24`}>
-          <div className='login-title flex items-center justify-start gap-x-2 p-4 pb-8 text-4xl font-bold'>
-            <h2 className={`text-[#414141] pr-2`}>Register <span className='font-light'>here</span></h2>
+        <div className="login-form bg-white bg-opacity-80 transition-all duration-300 rounded-xl w-full max-w-sm mx-auto md:mr-8 lg:mr-16 xl:mr-24 p-3 px-5">
+          <div className='login-title flex items-center justify-start gap-x-2 p-2 sm:p-4 pb-4 sm:pb-8 text-2xl sm:text-3xl md:text-4xl font-bold'>
+            <h2 className="text-[#414141] pr-2">Register <span className='font-light'>here</span></h2>
             {isLoading &&
               <DotLottieReact
                 src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
@@ -141,76 +143,79 @@ const SignupPage: React.FC = () => {
                 style={{ width: "30px", height: "50px", paddingTop: "15px" }}
               />}
           </div>
-          {errorMessage && <span className='p-3 opacity-90 font-semibold text-red-500'>{errorMessage}</span>}
+
+          {errorMessage && <span className='p-2 sm:p-3 opacity-90 font-semibold text-red-500 text-sm'>{errorMessage}</span>}
           <hr className='opacity-100' />
 
-          <form onSubmit={handleSignup} className='py-3'>
+          <form onSubmit={handleSignup} className='py-2 sm:py-3'>
 
-            <div className="input-field flex flex-col p-3 pt-0 gap-y-1">
-              {formErrors.name ? <label htmlFor="name" className='opacity-90 font-semibold text-red-500'>{formErrors.name}</label>
-                : <label htmlFor="name" className='opacity-75 font-semibold'>Name</label>}
+            <div className="input-field flex flex-col px-2 sm:px-3 pt-0 gap-y-1">
+              {formErrors.name ? <label htmlFor="name" className='opacity-90 font-semibold text-red-500 text-sm'>{formErrors.name}</label>
+                : <label htmlFor="name" className='opacity-75 font-semibold text-sm'>Name</label>}
               <input
                 type="text"
                 name="name"
                 id="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className={`transition-all duration-300 bg-transparent px-3 py-2 text-xl font-semibold border-b-[3px] bg-white ${formErrors.name || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
+                className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white ${formErrors.name || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none w-full`} />
             </div>
 
-            <div className="input-field flex flex-col p-3 pt-0 gap-y-1">
-              {formErrors.email ? <label htmlFor="email" className='opacity-90 font-semibold text-red-500'>{formErrors.email}</label>
-                : <label htmlFor="email" className='opacity-75 font-semibold'>Email</label>}
+            <div className="input-field flex flex-col p-2 pb-0 sm:p-3 sm:pb-0 pt-0 gap-y-1">
+              {formErrors.email ? <label htmlFor="email" className='opacity-90 font-semibold text-red-500 text-sm'>{formErrors.email}</label>
+                : <label htmlFor="email" className='opacity-75 font-semibold text-sm'>Email</label>}
               <input
                 type="text"
                 name="email"
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`transition-all duration-300 bg-transparent px-3 py-2 text-xl font-semibold border-b-[3px] bg-white ${formErrors.email || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
+                className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white ${formErrors.email || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none w-full`} />
             </div>
 
-            <div className="relative input-field flex flex-col p-3 pt-0 gap-y-2">
-              {formErrors.password ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500'>{formErrors.password}</label>
-                : <label htmlFor="password" className='opacity-75 font-semibold'>Password</label>}
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                id="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={`transition-all duration-300 bg-transparent px-3 py-2  text-xl font-semibold border-b-[3px] bg-white ${formErrors.password || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-7 top-11 text-xl text-gray-600"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
+            <div className="input-field flex flex-col p-2 sm:p-3 pt-0 gap-y-1 sm:gap-y-2">
+              {formErrors.password ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500 text-sm'>{formErrors.password}</label>
+                : <label htmlFor="password" className='opacity-75 font-semibold text-sm'>Password</label>}
+              <div className="relative w-full">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  id="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white ${formErrors.password || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none w-full`} />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-lg sm:text-xl text-gray-600"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
 
             {/* Submit button */}
-            <div className="input-field flex flex-col px-3 py-1">
+            <div className="input-field flex flex-col px-2 sm:px-3 py-1">
               <button
                 type='submit'
-                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-xl outline-none font-semibold`}>
+                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-lg sm:text-xl outline-none font-semibold`}>
                 Submit
               </button>
             </div>
 
-            {/* Register now button */}
-            <div className="btns flex items-center justify-between mx-3 mb-2 mt-2">
-              <div className='new-user text-[14px]'><span className='opacity-60 pr-2'>Already Registered?</span><Link to="/user/login"
+            {/* Already registered button */}
+            <div className="btns flex items-center justify-between mx-2 sm:mx-3 mb-2 mt-2">
+              <div className='new-user text-xs sm:text-sm'><span className='opacity-60 pr-2'>Already Registered?</span><Link to="/user/login"
                 className={`text-[#414141] font-semibold pr-1 hover:underline`}>Login Now</Link></div>
             </div>
 
             {/* Google login button */}
-            <div className="input-field flex flex-col px-3 py-1">
+            <div className="input-field flex flex-col px-2 sm:px-3 py-1">
               <button
                 onClick={handleGoogleLogin}
                 type='button'
-                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-xl outline-none`}>
-                <span className='opacity-50 pr-5 text-sm'>OR</span><span>Login with</span> <span className='font-semibold'>Google</span>
+                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-base sm:text-lg md:text-xl outline-none`}>
+                <span className='opacity-50 pr-3 sm:pr-5 text-xs sm:text-sm'>OR</span><span>Login with</span> <span className='font-semibold'>Google</span>
               </button>
             </div>
 
