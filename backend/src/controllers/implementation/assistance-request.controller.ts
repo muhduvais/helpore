@@ -3,6 +3,8 @@ import { inject, injectable } from "tsyringe";
 import { IAssistanceRequestController } from '../interfaces/IAssistanceRequestController';
 import { IAssistanceRequestService } from '../../services/interfaces/ServiceInterface';
 import { JwtPayload } from 'jsonwebtoken';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class AssistanceRequestController implements IAssistanceRequestController {
@@ -30,11 +32,11 @@ export class AssistanceRequestController implements IAssistanceRequestController
         try {
             const createAssistanceRequest = await this.assistanceRequestService.createAssistanceRequest(formData);
             if (createAssistanceRequest) {
-                res.status(200).json({ success: true, message: 'Request created successfully!' });
+                res.status(HttpStatusCode.CREATED).json({ success: true, message: ErrorMessages.ASSISTANCE_REQUEST_CREATE_SUCCESS });
             }
         } catch (error) {
-            console.error('Error creating the request: ', error);
-            res.status(500).json({ message: 'Error creating the request: ', error });
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_CREATE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.ASSISTANCE_REQUEST_CREATE_FAILED, error });
         }
     }
 
@@ -55,15 +57,15 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const total = metadata.total;
             const totalPages = Math.ceil(total / 4);
 
-            res.status(200).json({
+            res.status(HttpStatusCode.OK).json({
                 success: true,
                 nearbyRequests: requests,
                 totalPages,
                 documentsCount: total
             });
         } catch (error) {
-            console.error('Error fetching nearby requests:', error);
-            res.status(500).json({ success: false, message: 'Error fetching nearby requests' });
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_NEARBY_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: ErrorMessages.ASSISTANCE_REQUEST_FETCH_NEARBY_FAILED, error });
         }
     }
 
@@ -79,29 +81,28 @@ export class AssistanceRequestController implements IAssistanceRequestController
                 action,
             );
 
-            console.log('updatedRequest: ', updatedRequest)
-
             let message = '';
 
             if (updatedRequest === 'Request approved') {
-                message = 'Request approved';
+                message = ErrorMessages.ASSISTANCE_REQUEST_APPROVED;
             } else if (updatedRequest === 'reject') {
-                message = 'Request rejected';
+                message = ErrorMessages.ASSISTANCE_REQUEST_REJECTED;
             } else if (updatedRequest === 'complete') {
-                message = 'Request completed';
+                message = ErrorMessages.ASSISTANCE_REQUEST_COMPLETED;
             }
 
-            res.status(200).json({
+            res.status(HttpStatusCode.OK).json({
                 success: true,
                 message,
                 data: updatedRequest
             });
         } catch (error: any) {
-            res.status(400).json({
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_UPDATE_STATUS_FAILED, error);
+            res.status(HttpStatusCode.BAD_REQUEST).json({
                 success: false,
-                message: error.message
+                message: ErrorMessages.ASSISTANCE_REQUEST_UPDATE_STATUS_FAILED,
+                error: error.message
             });
-            console.log('Error updating the request status: ', error)
         }
     }
 
@@ -119,10 +120,10 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const documentsCount = await this.assistanceRequestService.countAssistanceRequests(search, filter, priority);
             const totalPages = Math.ceil(documentsCount / limit);
 
-            res.status(200).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });
+            res.status(HttpStatusCode.OK).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });
         } catch (error) {
-            console.error('Error fetching assistance requests:', error);
-            res.status(500).json({ message: 'Error fetching assistance requests', error });
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error });
         }
     }
 
@@ -141,10 +142,10 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const documentsCount = await this.assistanceRequestService.countMyAssistanceRequests(userId, search, filter, priority);
             const totalPages = Math.ceil(documentsCount / limit);
 
-            res.status(200).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });
+            res.status(HttpStatusCode.OK).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });
         } catch (error) {
-            console.error('Error fetching assistance requests:', error);
-            res.status(500).json({ message: 'Error fetching assistance requests', error });
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error });
         }
     }
 
@@ -152,10 +153,10 @@ export class AssistanceRequestController implements IAssistanceRequestController
         try {
             const pendingRequests = await this.assistanceRequestService.fetchPendingRequests();
 
-            res.status(200).json({ success: true, pendingRequests });
+            res.status(HttpStatusCode.OK).json({ success: true, pendingRequests });
         } catch (error) {
-            console.error('Error fetching pending requests:', error);
-            res.status(500).json({ message: 'Error fetching pending requests', error });
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_PENDING_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.ASSISTANCE_REQUEST_FETCH_PENDING_FAILED, error });
         }
     }
 
@@ -173,10 +174,10 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const documentsCount = await this.assistanceRequestService.countProcessingRequests(search, filter, volunteerId);
             const totalPages = Math.ceil(documentsCount / limit);
 
-            res.status(200).json({ success: true, processingRequests, totalPages, totalRequests: documentsCount });
+            res.status(HttpStatusCode.OK).json({ success: true, processingRequests, totalPages, totalRequests: documentsCount });
         } catch (error) {
-            console.error('Error fetching processing requests:', error);
-            res.status(500).json({ message: 'Error fetching processing requests', error });
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_PROCESSING_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.ASSISTANCE_REQUEST_FETCH_PROCESSING_FAILED, error });
         }
     }
 
@@ -185,13 +186,13 @@ export class AssistanceRequestController implements IAssistanceRequestController
         try {
             const requestDetails = await this.assistanceRequestService.fetchAssistanceRequestDetails(requestId);
             if (requestDetails) {
-                res.status(200).json({ success: true, requestDetails });
+                res.status(HttpStatusCode.OK).json({ success: true, requestDetails });
             } else {
-                res.status(404).json({ success: false, message: 'Assistance request not found!' });
+                res.status(HttpStatusCode.NOT_FOUND).json({ success: false, message: ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND });
             }
         } catch (error) {
-            console.error('Error fetching assistance request details:', error);
-            res.status(500).json({ message: 'Error fetching assistance request details', error });
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_DETAILS_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.ASSISTANCE_REQUEST_DETAILS_FETCH_FAILED, error });
         }
     }
 
@@ -202,19 +203,19 @@ export class AssistanceRequestController implements IAssistanceRequestController
         try {
             const isTasksLimit = await this.assistanceRequestService.checkTasksLimit(volunteerId);
             if (isTasksLimit) {
-                res.status(400).json({ success: false, message: 'Volunteer can process only 5 tasks at a time!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_TASK_LIMIT });
                 return;
             }
 
             const assignSuccess = await this.assistanceRequestService.assignVolunteer(requestId, volunteerId);
             if (assignSuccess) {
-                res.status(200).json({ success: true, message: 'Assigned volunteer successfully!' });
+                res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_ASSIGNED });
             } else {
-                res.status(400).json({ success: false, message: 'Failed to assign volunteer!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_ASSIGN_FAILED });
             }
         } catch (error) {
-            console.error('Error assigning volunteer:', error);
-            res.status(500).json({ message: 'Error assigning volunteer', error });
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_ASSIGN_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_ASSIGN_FAILED, error });
         }
     }
 }

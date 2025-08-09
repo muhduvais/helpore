@@ -11,6 +11,7 @@ import { IDonationRepository } from '../../repositories/interfaces/IDonationRepo
 import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { IAddress, IUser } from '../../interfaces/user.interface';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 dotenv.config();
 
@@ -25,85 +26,104 @@ export class DonationService extends BaseService<IDonation> implements IDonation
   }
 
   async createCheckoutSession(donationData: any): Promise<any> {
-    const { amount, campaign, message, isAnonymous, userId } = donationData;
+    try {
+      const { amount, campaign, message, isAnonymous, userId } = donationData;
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'inr',
-            product_data: {
-              name: campaign === 'general' ? 'General Donation' : `${campaign} Campaign Donation`,
-              description: 'Thank you for your generosity',
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'inr',
+              product_data: {
+                name: campaign === 'general' ? 'General Donation' : `${campaign} Campaign Donation`,
+                description: ErrorMessages.DONATION_THANK_YOU,
+              },
+              unit_amount: Math.round(amount * 100),
             },
-            unit_amount: Math.round(amount * 100),
+            quantity: 1,
           },
-          quantity: 1,
+        ],
+        mode: 'payment',
+        success_url: `${process.env.CLIENT_URL}/user/donations?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.CLIENT_URL}/user/donations?success=false`,
+        metadata: {
+          campaign,
+          message: message || '',
+          isAnonymous: isAnonymous.toString(),
+          userId: userId,
         },
-      ],
-      mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/user/donations?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/user/donations?success=false`,
-      metadata: {
-        campaign,
-        message: message || '',
-        isAnonymous: isAnonymous.toString(),
-        userId: userId,
-      },
-    });
+      });
 
-    return {
-      sessionId: session.id,
-      checkoutUrl: session.url
-    };
+      return {
+        sessionId: session.id,
+        checkoutUrl: session.url
+      };
+    } catch (error) {
+      console.error(ErrorMessages.DONATION_CHECKOUT_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_CHECKOUT_FAILED);
+    }
   }
 
   async verifySession(sessionId: string): Promise<any> {
     if (!sessionId) {
-      throw new Error('Session ID is required');
+      throw new Error(ErrorMessages.DONATION_SESSION_ID_REQUIRED);
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    try {
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    return {
-      verified: true,
-      status: session.payment_status
-    };
+      return {
+        verified: true,
+        status: session.payment_status
+      };
+    } catch (error) {
+      console.error(ErrorMessages.DONATION_SESSION_VERIFY_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_SESSION_VERIFY_FAILED);
+    }
   }
 
   async handleWebhookEvent(event: any): Promise<any> {
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
+    try {
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
 
-      if (!session) {
-        return { error: 'Session object is missing' };
+        if (!session) {
+          return { error: ErrorMessages.DONATION_SESSION_OBJECT_MISSING };
+        }
+
+        await this.donationRepository.createData({
+          stripeSessionId: session.id,
+          stripePaymentId: session.payment_intent,
+          amount: session.amount_total / 100,
+          campaign: session.metadata?.campaign,
+          message: session.metadata?.message,
+          isAnonymous: session.metadata?.isAnonymous === 'true',
+          userId: session.metadata?.userId,
+          status: 'completed',
+          date: new Date()
+        });
       }
 
-      await this.donationRepository.createData({
-        stripeSessionId: session.id,
-        stripePaymentId: session.payment_intent,
-        amount: session.amount_total / 100,
-        campaign: session.metadata?.campaign,
-        message: session.metadata?.message,
-        isAnonymous: session.metadata?.isAnonymous === 'true',
-        userId: session.metadata?.userId,
-        status: 'completed',
-        date: new Date()
-      });
+      return { received: true };
+    } catch (error) {
+      console.error(ErrorMessages.DONATION_WEBHOOK_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_WEBHOOK_FAILED);
     }
-
-    return { received: true };
   }
-
 
   async getUserDonationHistory(userId: string): Promise<any> {
     if (!userId) {
-      throw new Error('User ID is required');
+      throw new Error(ErrorMessages.INVALID_USER_ID);
     }
 
-    const donations = await this.donationRepository.findByUserId(userId);
-    return { donations };
+    try {
+      const donations = await this.donationRepository.findByUserId(userId);
+      return { donations };
+    } catch (error) {
+      console.error(ErrorMessages.DONATION_HISTORY_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_HISTORY_FAILED);
+    }
   }
 
   async getAllDonations(page: number, limit: number, search: string, campaign: string): Promise<IDonation[] | null> {
@@ -122,8 +142,8 @@ export class DonationService extends BaseService<IDonation> implements IDonation
       const donations = await this.donationRepository.findAll(query, skip, limit);
       return donations;
     } catch (error) {
-      console.error('Error fetcing donations:', error);
-      throw new Error('Error fetcing donations');
+      console.error(ErrorMessages.DONATION_FETCH_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_FETCH_FAILED);
     }
   }
 
@@ -132,8 +152,8 @@ export class DonationService extends BaseService<IDonation> implements IDonation
       const donations = await this.donationRepository.findRecentDonations();
       return donations;
     } catch (error) {
-      console.error('Error fetcing recent donations:', error);
-      throw new Error('Error fetcing recent donations');
+      console.error(ErrorMessages.DONATION_FETCH_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_FETCH_FAILED);
     }
   }
 
@@ -148,41 +168,54 @@ export class DonationService extends BaseService<IDonation> implements IDonation
       }
       return await this.donationRepository.countDonations(query);
     } catch (error) {
-      console.error('Error counting donations:', error);
-      throw new Error('Error counting donations');
+      console.error(ErrorMessages.DONATION_COUNT_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_COUNT_FAILED);
     }
   }
 
   async constructEvent(payload: any, signature: any, secret: any): Promise<any> {
-    return stripe.webhooks.constructEvent(payload, signature, secret);
+    try {
+      return stripe.webhooks.constructEvent(payload, signature, secret);
+    } catch (error) {
+      console.error(ErrorMessages.DONATION_WEBHOOK_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_WEBHOOK_FAILED);
+    }
   }
 
   async generateAndSendReceipt(donationId: string, userId: string): Promise<Buffer> {
-    const donation = await this.donationRepository.findById(donationId);
-    const userDetails = await this.userRepository.findById(userId);
-    const addressDetailsResponse = await this.addressRepository.findAddressesByEntityId(userId);
-    const addressDetails = addressDetailsResponse[0];
-    return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({
-        size: 'A4',
-        margin: 50,
-        info: {
-          Title: `Donation Receipt ${donation?._id}`,
-          Author: 'HelpOre',
-          Subject: 'Donation Receipt',
-          Keywords: 'donation, receipt, charity'
-        }
+    try {
+      const donation = await this.donationRepository.findById(donationId);
+      const userDetails = await this.userRepository.findById(userId);
+      const addressDetailsResponse = await this.addressRepository.findAddressesByEntityId(userId);
+      const addressDetails = addressDetailsResponse[0];
+      return new Promise((resolve, reject) => {
+        const doc = new PDFDocument({
+          size: 'A4',
+          margin: 50,
+          info: {
+            Title: `Donation Receipt ${donation?._id}`,
+            Author: 'HelpOre',
+            Subject: 'Donation Receipt',
+            Keywords: 'donation, receipt, charity'
+          }
+        });
+        const buffers: Buffer[] = [];
+
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
+        doc.on('error', (err) => {
+          console.error(ErrorMessages.DONATION_RECEIPT_FAILED, err);
+          reject(new Error(ErrorMessages.DONATION_RECEIPT_FAILED));
+        });
+
+        this.addReceiptContent(doc, donation, userDetails, addressDetails);
+
+        doc.end();
       });
-      const buffers: Buffer[] = [];
-
-      doc.on('data', buffers.push.bind(buffers));
-      doc.on('end', () => resolve(Buffer.concat(buffers)));
-      doc.on('error', (err) => reject(err));
-
-      this.addReceiptContent(doc, donation, userDetails, addressDetails);
-
-      doc.end();
-    });
+    } catch (error) {
+      console.error(ErrorMessages.DONATION_RECEIPT_FAILED, error);
+      throw new Error(ErrorMessages.DONATION_RECEIPT_FAILED);
+    }
   }
 
   private addReceiptContent(doc: PDFKit.PDFDocument, donation: any, userDetails: any, addressDetails: IAddress) {

@@ -12,6 +12,7 @@ import { IAuthService } from '../interfaces/ServiceInterface';
 import { IUserCreationData } from '../../repositories/implementation/auth.repository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { Types } from 'mongoose';
+import { ErrorMessages } from '../../constants/errorMessages'; // <-- Add this import
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -47,7 +48,7 @@ export class AuthService implements IAuthService {
 
             return email;
         } catch (error) {
-            console.error('Error registering the user', error);
+            console.error(ErrorMessages.REGISTER_USER_FAILED, error);
             return null;
         }
     }
@@ -56,7 +57,7 @@ export class AuthService implements IAuthService {
         try {
             const redisData = await redisClient.get(`temp_registration:${email}`);
             if (!redisData) {
-                console.log('Registration data not found in Redis');
+                console.log(ErrorMessages.EMAIL_NOT_FOUND_TEMP_REGISTRATION);
                 return null;
             }
 
@@ -79,7 +80,7 @@ export class AuthService implements IAuthService {
 
             return newOtp;
         } catch (error) {
-            console.error('Error generating and resending OTP:', error);
+            console.error(ErrorMessages.OTP_GENERATE_FAILED, error);
             return null;
         }
     }
@@ -90,7 +91,7 @@ export class AuthService implements IAuthService {
             await this.otpRepository.storeOtp(email, otp);
             return otp;
         } catch (error) {
-            console.error('Error generating OTP:', error);
+            console.error(ErrorMessages.OTP_GENERATE_FAILED, error);
             return null;
         }
     }
@@ -99,14 +100,14 @@ export class AuthService implements IAuthService {
         try {
             const redisData = await redisClient.get(`temp_registration:${email}`);
             if (!redisData) {
-                console.log('Registration data not found or expired in Redis');
+                console.log(ErrorMessages.EMAIL_NOT_FOUND_TEMP_REGISTRATION);
                 return false;
             }
 
             const registrationData = JSON.parse(redisData);
 
             if (otp !== registrationData.otp) {
-                console.log('Invalid OTP');
+                console.log(ErrorMessages.WRONG_OTP);
                 return false;
             }
 
@@ -135,7 +136,7 @@ export class AuthService implements IAuthService {
 
             return true;
         } catch (error) {
-            console.error('Error verifying OTP:', error);
+            console.error(ErrorMessages.OTP_VERIFICATION_FAILED, error);
             return false;
         }
     }
@@ -148,8 +149,8 @@ export class AuthService implements IAuthService {
             }
             return null;
         } catch (error) {
-            console.error('Error verifying login:', error);
-            throw new Error('Login failed');
+            console.error(ErrorMessages.LOGIN_FAILED, error);
+            throw new Error(ErrorMessages.LOGIN_FAILED);
         }
     }
 
@@ -157,8 +158,8 @@ export class AuthService implements IAuthService {
         try {
             return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '5m' });
         } catch (error) {
-            console.error('Error generating access token:', error);
-            throw new Error('Failed to generate access token');
+            console.error(ErrorMessages.ACCESS_TOKEN_FAILED, error);
+            throw new Error(ErrorMessages.ACCESS_TOKEN_FAILED);
         }
     }
 
@@ -166,8 +167,8 @@ export class AuthService implements IAuthService {
         try {
             return jwt.sign({ userId, role }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '3h' });
         } catch (error) {
-            console.error('Error generating refresh token:', error);
-            throw new Error('Failed to generate refresh token');
+            console.error(ErrorMessages.REFRESH_TOKEN_FAILED, error);
+            throw new Error(ErrorMessages.REFRESH_TOKEN_FAILED);
         }
     }
 
@@ -176,7 +177,7 @@ export class AuthService implements IAuthService {
             const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
             return decoded as any;
         } catch (error) {
-            console.error('Error verifying refresh token:', error);
+            console.error(ErrorMessages.REFRESH_TOKEN_FAILED, error);
             return null;
         }
     }
@@ -185,7 +186,7 @@ export class AuthService implements IAuthService {
         try {
             return await this.authRepository.findIsBlocked(userId);
         } catch (error) {
-            console.error('Error authenticating user:', error);
+            console.error(ErrorMessages.AUTHENTICATE_USER_FAILED, error);
             return null;
         }
     }
@@ -211,7 +212,7 @@ export class AuthService implements IAuthService {
 
             return await this.authRepository.createUser(newUser);
         } catch (error) {
-            console.error('Error finding/creating the user:', error);
+            console.error(ErrorMessages.GOOGLE_LOGIN_FAILED, error);
             return null;
         }
     }
@@ -220,7 +221,7 @@ export class AuthService implements IAuthService {
         try {
             return await this.authRepository.findUserById(userId);
         } catch (error) {
-            console.error('Error finding the user:', error);
+            console.error(ErrorMessages.USER_NOT_FOUND, error);
             return null;
         }
     }
@@ -232,7 +233,7 @@ export class AuthService implements IAuthService {
                 return false;
             }
             if (!process.env.RESET_LINK_SECRET) {
-                throw new Error('RESET_LINK_SECRET environment variable is not defined!');
+                throw new Error(ErrorMessages.RESET_LINK_SECRET_MISSING);
             }
             const payload = { userId: existingUser._id, email };
             const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: '3h' });
@@ -243,10 +244,10 @@ export class AuthService implements IAuthService {
             const resetLink = `${CLIENT_URL}/user/resetPassword?token=${resetToken}`;
             await sendResetEmail(email, "Password Reset", `Click here to reset your password: ${resetLink}`);
 
-            console.log("Reset link sent:", resetLink);
+            console.log(ErrorMessages.RESET_LINK_SENT, resetLink);
             return true;
         } catch (error) {
-            console.error('Error sending reset link to the mail:', error);
+            console.error(ErrorMessages.FORGOT_PASSWORD_FAILED, error);
             return null;
         }
     }
@@ -256,8 +257,8 @@ export class AuthService implements IAuthService {
             const hashedPassword = await bcrypt.hash(password, 10);
             await this.authRepository.resetPassword(email, hashedPassword);
         } catch (error) {
-            console.error('Error reseting the password:', error);
-            throw new Error('Error reseting the password');
+            console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
+            throw new Error(ErrorMessages.PASSWORD_UPDATE_FAILED);
         }
     }
 }

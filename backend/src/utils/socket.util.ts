@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import http from 'http';
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
+import Message from '../models/message.model';
 dotenv.config();
 
 let io: Server;
@@ -35,7 +36,7 @@ export const setupSocketIO = (server: http.Server) => {
         // Emit to the conversation room
         socket.to(`request-${messageData.requestId}`).emit('new-message', messageData);
 
-        // Also emit a notification to the receiver
+        // Emit a notification to the receiver
         socket.to(`notification-${messageData.receiverId}`).emit('new-notification', {
           type: 'message',
           content: messageData.content,
@@ -54,6 +55,24 @@ export const setupSocketIO = (server: http.Server) => {
         userId: socket.id,
         isTyping: data.isTyping,
       });
+    });
+
+    socket.on('messagesRead', async (conversationId: string) => {
+      try {
+        await Message.updateMany(
+          {
+            requestId: conversationId,
+            read: false,
+          },
+          { $set: { read: true } }
+        );  
+
+        socket.to(`request-${conversationId}`).emit('messagesReadUpdate', {
+          userId: socket.id,
+        });
+      } catch (err) {
+        console.error('Failed to mark messages as read:', err);
+      }
     });
 
     socket.on('disconnect', () => {

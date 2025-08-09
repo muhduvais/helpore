@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IAssetService } from '../../services/interfaces/ServiceInterface';
 import { IAssetController } from '../interfaces/IAssetController';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class AssetController implements IAssetController {
@@ -19,13 +21,16 @@ export class AssetController implements IAssetController {
         try {
             const data = req.body.formData;
             await this.assetService.addAsset(data);
-            res.status(201).json({
+            res.status(HttpStatusCode.CREATED).json({
                 success: true,
-                message: 'Asset added successfully',
+                message: ErrorMessages.ASSET_CREATE_SUCCESS,
             });
         } catch (error) {
-            console.error('Error creating the asset:', error);
-            res.status(500).json({ message: 'Error creating the asset', error });
+            console.error(ErrorMessages.ASSET_CREATE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                message: ErrorMessages.ASSET_CREATE_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 
@@ -34,7 +39,7 @@ export class AssetController implements IAssetController {
             const file = req.file;
 
             if (!file) {
-                res.status(400).json({ message: 'No image uploaded' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.NO_IMAGE_UPLOADED });
                 return;
             }
 
@@ -46,11 +51,11 @@ export class AssetController implements IAssetController {
 
             const imageUrl = await this.assetService.uploadAssetImage(file);
 
-            res.status(200).json({ imageUrl });
+            res.status(HttpStatusCode.OK).json({ imageUrl });
         } catch (error) {
-            console.error('Error uploading the asset image: ', error);
-            res.status(500).json({
-                message: 'Error uploading the asset image',
+            console.error(ErrorMessages.ASSET_UPLOAD_IMAGE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                message: ErrorMessages.ASSET_UPLOAD_IMAGE_FAILED,
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
         }
@@ -72,13 +77,16 @@ export class AssetController implements IAssetController {
             const totalPages = Math.ceil(documentsCount / limit);
 
             if (assets) {
-                res.status(200).json({ success: true, assets, totalPages });
+                res.status(HttpStatusCode.OK).json({ success: true, assets, totalPages });
             } else {
-                res.status(400).json({ success: false, message: 'Assets not found!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.ASSET_NOT_FOUND });
             }
         } catch (error) {
-            console.error('Error fetching the assets:', error);
-            res.status(500).json({ message: 'Error fetching the assets', error });
+            console.error(ErrorMessages.ASSET_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                message: ErrorMessages.ASSET_FETCH_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 
@@ -87,13 +95,16 @@ export class AssetController implements IAssetController {
         try {
             const asset = await this.assetService.fetchAssetDetails(assetId);
             if (asset) {
-                res.status(200).json({ success: true, asset });
+                res.status(HttpStatusCode.OK).json({ success: true, asset });
             } else {
-                res.status(400).json({ success: false, message: 'Asset not found!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.ASSET_NOT_FOUND });
             }
         } catch (error) {
-            console.error('Error fetching the asset details:', error);
-            res.status(500).json({ message: 'Error fetching the asset details', error });
+            console.error(ErrorMessages.ASSET_DETAILS_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                message: ErrorMessages.ASSET_DETAILS_FETCH_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 
@@ -103,13 +114,16 @@ export class AssetController implements IAssetController {
         try {
             const asset = await this.assetService.updateAsset(assetId, submitData);
             if (asset) {
-                res.status(200).json({ success: true, asset });
+                res.status(HttpStatusCode.OK).json({ success: true, asset });
             } else {
-                res.status(400).json({ success: false, message: 'Asset not found!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.ASSET_NOT_FOUND });
             }
         } catch (error) {
-            console.error('Error updating the asset details:', error);
-            res.status(500).json({ message: 'Error updating the asset details', error });
+            console.error(ErrorMessages.ASSET_UPDATE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                message: ErrorMessages.ASSET_UPDATE_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 }

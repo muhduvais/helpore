@@ -1,12 +1,17 @@
 import { useState, ReactNode, useEffect, useRef } from 'react';
-import { Menu, X, Home, Box, FileText, Heart, Newspaper, Users, LogOut, User, Bell } from 'lucide-react';
-import { Outlet, NavLink, Navigate, useNavigate } from 'react-router-dom';
+import { Menu, X, Home, Box, FileText, Heart, Newspaper, LogOut, User, Bell, Upload, UserIcon } from 'lucide-react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
 import logo from '../../assets/Logo-black.png';
 import 'react-toastify/dist/ReactToastify.css';
 import * as TimeAgoModule from 'react-timeago';
 import { useNotifications } from '@/context/notificationContext';
+import { IUser } from '@/interfaces/userInterface';
+import { userService } from '@/services/user.service';
+import { AxiosError } from 'axios';
+import profile_pic from '../../assets/profile_pic.png';
+import { MdPassword } from 'react-icons/md';
 const TimeAgo = (TimeAgoModule as any).default;
 
 interface MenuItem {
@@ -30,6 +35,7 @@ const Layout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [user, setUser] = useState<IUser>();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -37,6 +43,11 @@ const Layout: React.FC = () => {
 
   const notificationRef = useRef<HTMLButtonElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,6 +64,35 @@ const Layout: React.FC = () => {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const fetchUserDetails = async () => {
+    try {
+      const response = await userService.fetchUserDetails();
+      if (response.status === 200) {
+        setUser(response.data.user);
+      }
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.error('Error fetching user details:', error.response?.data || error.message);
+      } else {
+        console.error('Unexpected error:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -236,23 +276,74 @@ const Layout: React.FC = () => {
                 </button>
 
                 {isProfileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                  <div className="absolute right-0 mt-2 w-56 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 z-10"
+                    ref={profileDropdownRef}>
                     <div className="py-1">
                       <NavLink
                         to="/user/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="group block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsProfileDropdownOpen(false)}
                       >
-                        Profile Settings
+                        <div className='flex items-center justify-between'>
+                          <div className='flex flex-col gap-1'>
+                            <span className='font-bold hover:underline'>{user?.name}</span>
+                            <span className='text-xs text-gray-500'>{user?.email}</span>
+                          </div>
+                          <div className="w-[50px] h-[50px] rounded-full overflow-hidden border-[0.5px] border-[#d2d2d2] relative">
+                            {user ? (
+                              <img
+                                src={user.profilePicture ? user.profilePicture : profile_pic}
+                                alt="Profile"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
+                              />) :
+                              (
+                                <div className={`bg-gray-200 animate-pulse ${'w-full h-full object-cover'}`}>
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <svg
+                                      className="w-1/3 h-1/3 text-gray-300"
+                                      fill="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                    </svg>
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        </div>
                       </NavLink>
+                      <hr />
+                      <NavLink
+                        to="/user/profile"
+                        className="group flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsProfileDropdownOpen(false)}>
+                        <UserIcon className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:scale-125 group-hover:text-gray-900" />
+                        <span>Profile Settings</span>
+                      </NavLink>
+                      <NavLink
+                        to="/user/profile/info?tab=uploads"
+                        className="group flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        <Upload className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:scale-125 group-hover:text-gray-900" />
+                        <span>Manage Uploads</span>
+                      </NavLink>
+                      <NavLink
+                        to="/user/profile/info?tab=password"
+                        className="group flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsProfileDropdownOpen(false)}>
+                        <MdPassword className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:scale-125 group-hover:text-gray-900" />
+                        <span>Change Password</span>
+                      </NavLink>
+                      <hr />
                       <button
                         onClick={() => {
                           handleLogout();
                           setIsProfileDropdownOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium flex items-center"
+                        className="group w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium flex items-center"
                       >
-                        <LogOut className="w-4 h-4 mr-2" />
+                        <LogOut className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:scale-125" />
                         Logout
                       </button>
                     </div>

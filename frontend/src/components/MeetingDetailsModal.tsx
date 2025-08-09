@@ -151,9 +151,9 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
                             <div className="text-sm">
                                 <div>Participants:</div>
                                 {(participantInfo.length > 0 && role === 'admin') ? (
-                                    (<ul className="list-disc list-inside mt-1 pl-2">
+                                    (<ul className={`list-disc list-inside mt-1 pl-2 w-72 ${participantInfo.length > 5 ? 'max-h-72 overflow-y-auto' : ''}`}>
                                         {participantInfo.map((info, index) => (
-                                            <li key={index}>{info}</li>
+                                            <li key={index} className='text-gray-700'>{info}</li>
                                         ))}
                                     </ul>)
                                 ) : (

@@ -25,9 +25,11 @@ export const ChatMessage: React.FC<{
                             }`}
                     >
                         <p>{message.content}</p>
-                        <div className={`text-xs mt-1 ${isOwnMessage ? 'text-gray-200' : 'text-gray-500'
-                            }`}>
-                            {formatTime(message.createdAt.toString())}
+                        <div className="flex justify-between items-center mt-2">
+                            <div className={`text-xs mt-1 ${isOwnMessage ? 'text-gray-200' : 'text-gray-500'
+                                }`}>
+                                {formatTime(message.createdAt.toString())}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -83,7 +83,8 @@ export const chatService = {
   setupListeners: (
     socket: Socket,
     messageCallback: (message: IMessageDocument) => void,
-    typingCallback: (data: { userId: string, isTyping: boolean }) => void
+    typingCallback: (data: { userId: string, isTyping: boolean }) => void,
+    messagesReadCallback: (data: { userId: string }) => void
   ) => {
     socket.on('new-message', (message: IMessageDocument) => {
       console.log('Received new message:', message);
@@ -94,6 +95,12 @@ export const chatService = {
       typingCallback({
         userId: data.userId,
         isTyping: data.isTyping,
+      });
+    });
+
+    socket.on('messagesReadUpdate', (data: any) => {
+      messagesReadCallback({
+        userId: data.userId,
       });
     });
   },

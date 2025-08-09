@@ -3,6 +3,8 @@ import { injectable, inject } from 'tsyringe';
 import { IMeetingService } from '../../services/interfaces/ServiceInterface';
 import { IMeetingController } from '../interfaces/IMeetingController';
 import { JwtPayload } from 'jsonwebtoken';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class MeetingController implements IMeetingController {
@@ -30,10 +32,10 @@ export class MeetingController implements IMeetingController {
                 scheduledTime
             );
 
-            res.status(201).json({ meeting });
+            res.status(HttpStatusCode.CREATED).json({ meeting });
         } catch (error) {
-            console.error('Error creating meeting:', error);
-            res.status(500).json({ error: 'Could not create meeting' });
+            console.error(ErrorMessages.MEETING_CREATE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: ErrorMessages.MEETING_CREATE_FAILED });
         }
     }
 
@@ -52,24 +54,24 @@ export class MeetingController implements IMeetingController {
 
             const documentsCount = await this.meetingService.totalMeetingsCount(search, filter) || 0;
 
-            res.json({
+            res.status(HttpStatusCode.OK).json({
                 meetings,
                 totalPages: Math.ceil(documentsCount / 5),
                 totalItems: documentsCount,
             });
         } catch (error) {
-            console.error('Error fetching meetings:', error);
-            res.status(500).json({ error: 'Could not fetch meetings' });
+            console.error(ErrorMessages.MEETING_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: ErrorMessages.MEETING_FETCH_FAILED });
         }
     }
 
     async getUpcomingMeetings(req: Request, res: Response): Promise<void> {
         try {
             const upcomingMeetings = await this.meetingService.getUpcomingMeetings();
-            res.status(200).json({ upcomingMeetings });
+            res.status(HttpStatusCode.OK).json({ upcomingMeetings });
         } catch (error) {
-            console.error('Error fetching upcoming meetings:', error);
-            res.status(500).json({ error: 'Could not fetch upcoming meetings' });
+            console.error(ErrorMessages.MEETING_FETCH_UPCOMING_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: ErrorMessages.MEETING_FETCH_UPCOMING_FAILED });
         }
     }
 
@@ -79,14 +81,14 @@ export class MeetingController implements IMeetingController {
             const meeting = await this.meetingService.getMeetingById(meetingId);
 
             if (!meeting) {
-                res.status(404).json({ error: 'Meeting not found' });
+                res.status(HttpStatusCode.NOT_FOUND).json({ error: ErrorMessages.MEETING_NOT_FOUND });
                 return;
             }
 
-            res.json(meeting);
+            res.status(HttpStatusCode.OK).json(meeting);
         } catch (error) {
-            console.error('Error fetching meeting details:', error);
-            res.status(500).json({ error: 'Could not fetch meeting details' });
+            console.error(ErrorMessages.MEETING_DETAILS_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: ErrorMessages.MEETING_DETAILS_FETCH_FAILED });
         }
     }
 
@@ -98,7 +100,7 @@ export class MeetingController implements IMeetingController {
             const filter = req.query.filter as string;
 
             if (!userId) {
-                res.status(401).json({ message: 'User not authenticated!' });
+                res.status(HttpStatusCode.UNAUTHORIZED).json({ message: ErrorMessages.UNAUTHORIZED_MEETING_ACCESS });
                 return;
             }
 
@@ -112,14 +114,14 @@ export class MeetingController implements IMeetingController {
 
             const userMeetingsCount = await this.meetingService.totalUserMeetingsCount(userId, search, filter) || 0;
 
-            res.json({
+            res.status(HttpStatusCode.OK).json({
                 meetings,
                 totalPages: Math.ceil(userMeetingsCount / 5),
                 totalItems: userMeetingsCount,
             });
         } catch (error) {
-            console.error('Error fetching user meetings:', error);
-            res.status(500).json({ message: 'Failed to fetch user meetings' });
+            console.error(ErrorMessages.MEETING_USER_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.MEETING_USER_FETCH_FAILED });
         }
     };
 
@@ -134,14 +136,14 @@ export class MeetingController implements IMeetingController {
             );
 
             if (!updatedMeeting) {
-                res.status(404).json({ error: 'Meeting not found' });
+                res.status(HttpStatusCode.NOT_FOUND).json({ error: ErrorMessages.MEETING_NOT_FOUND });
                 return;
             }
 
-            res.json(updatedMeeting);
+            res.status(HttpStatusCode.OK).json(updatedMeeting);
         } catch (error) {
-            console.error('Error updating meeting status:', error);
-            res.status(500).json({ error: 'Could not update meeting status' });
+            console.error(ErrorMessages.MEETING_UPDATE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: ErrorMessages.MEETING_UPDATE_FAILED });
         }
     }
 
@@ -155,9 +157,9 @@ export class MeetingController implements IMeetingController {
                 userName
             );
 
-            res.status(200).json({ token });
+            res.status(HttpStatusCode.OK).json({ token });
         } catch (error) {
-            res.status(500).json({ error: 'Token generation failed' });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: ErrorMessages.MEETING_TOKEN_FAILED });
         }
     }
 
@@ -167,9 +169,9 @@ export class MeetingController implements IMeetingController {
 
             await this.meetingService.deleteMeeting(meetingId);
 
-            res.status(200).json({ message: 'Meeting deleted successfully!' });
+            res.status(HttpStatusCode.OK).json({ message: ErrorMessages.MEETING_DELETE_SUCCESS });
         } catch (error) {
-            res.status(500).json({ error: 'Error deletig meeting!' });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: ErrorMessages.MEETING_DELETE_FAILED });
         }
     }
 }

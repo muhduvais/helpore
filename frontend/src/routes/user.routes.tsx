@@ -26,7 +26,7 @@ const UserRoutes = () => {
           <Route path="/" element={<Navigate to="/user/dashboard" />} />
 
           <Route path="/" element={<UserLayout />}>
-            <Route index path="dashboard" element={<UserDashboard />} />
+            <Route path="dashboard" element={<UserDashboard />} />
             <Route path="assets" element={<UserAssetListing />} />
             <Route path="assets/:id" element={<UserAssetDetails />} />
 

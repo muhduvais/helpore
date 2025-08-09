@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { uploadToCloudinary } from '../../utils';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class UserService extends BaseService<IUserDocument> implements IUserService {
@@ -23,8 +24,8 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             const query = search ? { name: { $regex: search, $options: 'i' }, role: 'user' } : { role: 'user' };
             return await this.userRepository.findUsers(query, skip, limit);
         } catch (error) {
-            console.error('Error finding users:', error);
-            throw error;
+            console.error(ErrorMessages.USER_FETCH_FAILED, error);
+            throw new Error(ErrorMessages.USER_FETCH_FAILED);
         }
     }
 
@@ -32,8 +33,8 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         try {
             return await this.userRepository.findUserDetails(userId);
         } catch (error) {
-            console.error('Error fetching user details:', error);
-            throw error;
+            console.error(ErrorMessages.USER_FETCH_FAILED, error);
+            throw new Error(ErrorMessages.USER_FETCH_FAILED);
         }
     }
 
@@ -42,8 +43,8 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             const query = search ? { name: { $regex: search, $options: 'i' }, role: 'user' } : { role: 'user' };
             return await this.userRepository.countUsers(query);
         } catch (error) {
-            console.error('Error counting users:', error);
-            throw error;
+            console.error(ErrorMessages.USER_FETCH_FAILED, error);
+            throw new Error(ErrorMessages.USER_FETCH_FAILED);
         }
     }
 
@@ -75,7 +76,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
             return registeredMail;
         } catch (error) {
-            console.error('Error registering the user', error);
+            console.error(ErrorMessages.USER_UPDATE_FAILED, error);
             return null;
         }
     }
@@ -85,8 +86,8 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             await this.userRepository.findByIdAndUpdate(userId, { isBlocked: action });
             return true;
         } catch (error) {
-            console.error('Error updating block status:', error);
-            throw error;
+            console.error(ErrorMessages.BLOCK_STATUS_UPDATE_FAILED, error);
+            throw new Error(ErrorMessages.BLOCK_STATUS_UPDATE_FAILED);
         }
     }
 
@@ -95,7 +96,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             await this.userRepository.updateProfilePicture(userId, profilePicture);
             return true;
         } catch (error) {
-            console.error('Error updating the profile picture: ', error);
+            console.error(ErrorMessages.PROFILE_UPDATE_FAILED, error);
             return false;
         }
     }
@@ -106,7 +107,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             if (!password) return;
             return bcrypt.compare(currentPassword, password);
         } catch (error) {
-            console.error('Error updating the password: ', error);
+            console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
             return null;
         }
     }
@@ -117,7 +118,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             await this.userRepository.updatePassword(userId, hashedPassword);
             return true;
         } catch (error) {
-            console.error('Error updating the password: ', error);
+            console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
             return false;
         }
     }
@@ -127,7 +128,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             const newAddress = await this.addressRepository.addAddress(addressData);
             return String(newAddress._id);
         } catch (error) {
-            console.error('Error creating the address: ', error);
+            console.error(ErrorMessages.ADDRESS_CREATE_FAILED, error);
             return null;
         }
     }
@@ -136,7 +137,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         try {
             return await this.addressRepository.findAddressesByEntityId(userId);
         } catch (error) {
-            console.error('Error fetching the addresses: ', error);
+            console.error(ErrorMessages.ADDRESS_FETCH_FAILED, error);
             return null;
         }
     }
@@ -145,7 +146,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         try {
             return await this.addressRepository.findAddressByEntityId(userId);
         } catch (error) {
-            console.error('Error fetching the addresses: ', error);
+            console.error(ErrorMessages.ADDRESS_FETCH_FAILED, error);
             return null;
         }
     }
@@ -153,7 +154,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
     async uploadCertificateImage(userId: string, file: Express.Multer.File): Promise<string> {
         try {
             if (!file) {
-                throw new Error('No file path provided');
+                throw new Error(ErrorMessages.NO_IMAGE_UPLOADED);
             }
 
             const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 10);
@@ -164,8 +165,8 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
             return result.secure_url;
         } catch (error) {
-            console.error('Error uploading certificate:', error);
-            throw error;
+            console.error(ErrorMessages.CERTIFICATE_UPLOAD_FAILED, error);
+            throw new Error(ErrorMessages.CERTIFICATE_UPLOAD_FAILED);
         }
     }
 
@@ -175,7 +176,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
             console.log('publicId: ', publicId)
 
             if (!publicId) {
-                throw new Error('Invalid certificate URL');
+                throw new Error(ErrorMessages.CERTIFICATE_URL_REQUIRED);
             }
 
             await this.userRepository.deleteFile(publicId);
@@ -184,20 +185,20 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
             return updatedUser;
         } catch (error) {
-            console.error('Service - Error deleting certificate:', error);
-            throw error;
+            console.error(ErrorMessages.CERTIFICATE_DELETE_FAILED, error);
+            throw new Error(ErrorMessages.CERTIFICATE_DELETE_FAILED);
         }
     };
 
     extractPublicIdFromUrl(url: string) {
         try {
             if (!url.includes('cloudinary.com')) {
-                throw new Error('Not a Cloudinary URL');
+                throw new Error(ErrorMessages.NOT_CLOUDINARY_URL);
             }
 
             const uploadIndex = url.indexOf('/upload/');
             if (uploadIndex === -1) {
-                throw new Error('Invalid Cloudinary URL format');
+                throw new Error(ErrorMessages.INVALID_CLOUDINARY_URL_FORMAT);
             }
 
             let fullPath = url.substring(uploadIndex + 8);
@@ -213,7 +214,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
             return fullPath;
         } catch (error) {
-            console.error('Error extracting public ID from URL:', error);
+            console.error(ErrorMessages.EXTRACT_PUBLIC_ID_FAILED, error);
             return null;
         }
     }
@@ -222,8 +223,8 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         try {
             return await this.userRepository.checkCertificate(userId);
         } catch (error) {
-            console.error('Error checking the certificate:', error);
-            throw error;
+            console.error(ErrorMessages.CERTIFICATE_CHECK_FAILED, error);
+            throw new Error(ErrorMessages.CERTIFICATE_CHECK_FAILED);
         }
     };
 }

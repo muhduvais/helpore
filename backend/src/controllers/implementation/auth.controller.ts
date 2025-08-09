@@ -5,6 +5,8 @@ import { IAuthController } from '../interfaces/IAuthController';
 import { firebaseAdmin } from '../../config';
 import { JwtPayload } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -28,13 +30,13 @@ export class AuthController implements IAuthController {
             const registeredMail = await this.authService.registerUser(name, email, password);
 
             if (registeredMail) {
-                res.status(201).json({ success: true, registeredMail });
+                res.status(HttpStatusCode.CREATED).json({ success: true, registeredMail });
             } else {
-                res.status(400).json({ success: false, message: 'Email is already registered!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.EMAIL_ALREADY_REGISTERED });
             }
         } catch (error) {
-            console.error('Error registering the user:', error);
-            res.status(500).json({ message: 'Error registering user', error });
+            console.error(ErrorMessages.REGISTER_USER_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.REGISTER_USER_FAILED, error });
         }
     }
 
@@ -46,13 +48,13 @@ export class AuthController implements IAuthController {
 
             if (otp) {
                 console.log('New OTP:', otp);
-                res.status(200).json({ success: true, message: 'OTP generated successfully!' });
+                res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.OTP_GENERATED_SUCCESS });
             } else {
-                res.status(404).json({ success: false, message: 'Email not found in temporary registration!' });
+                res.status(HttpStatusCode.NOT_FOUND).json({ success: false, message: ErrorMessages.EMAIL_NOT_FOUND_TEMP_REGISTRATION });
             }
         } catch (error) {
-            console.error('Error generating the OTP:', error);
-            res.status(500).json({ message: 'Error generating the OTP', error });
+            console.error(ErrorMessages.OTP_GENERATE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.OTP_GENERATE_FAILED, error });
         }
     }
 
@@ -61,13 +63,13 @@ export class AuthController implements IAuthController {
             const { email, otp } = req.body;
             const verified = await this.authService.verifyOtp(email, otp);
             if (!verified) {
-                res.status(400).json({ message: 'Wrong OTP!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.WRONG_OTP });
                 return;
             }
-            res.status(200).json({ message: 'OTP verification successful!' });
+            res.status(HttpStatusCode.OK).json({ message: ErrorMessages.OTP_VERIFICATION_SUCCESS });
         } catch (error) {
-            console.error('Error verifying the OTP:', error);
-            res.status(500).json({ message: 'Error verifying the OTP', error });
+            console.error(ErrorMessages.OTP_VERIFICATION_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.OTP_VERIFICATION_FAILED, error });
         }
     }
 
@@ -78,8 +80,13 @@ export class AuthController implements IAuthController {
 
             const user = await this.authService.verifyLogin(email, password);
 
+            if (user.isBlocked) {
+                res.status(HttpStatusCode.UNAUTHORIZED).json({ message: ErrorMessages.UNAUTHORIZED_USER });
+                return;
+            }
+
             if (!user || user.role !== selectedRole) {
-                res.status(400).json({ message: 'Invalid email or password!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.INVALID_EMAIL_OR_PASSWORD });
                 return;
             }
 
@@ -93,8 +100,8 @@ export class AuthController implements IAuthController {
                 maxAge: 3 * 60 * 60 * 1000
             });
 
-            res.status(200).json({
-                message: 'Login successful!',
+            res.status(HttpStatusCode.OK).json({
+                message: ErrorMessages.LOGIN_SUCCESS,
                 accessToken,
                 user: {
                     id: user._id,
@@ -102,8 +109,8 @@ export class AuthController implements IAuthController {
                 },
             });
         } catch (error) {
-            console.error('Error logging in:', error);
-            res.status(500).json({ message: 'Error logging in', error });
+            console.error(ErrorMessages.LOGIN_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.LOGIN_FAILED, error });
         }
     }
 
@@ -112,8 +119,8 @@ export class AuthController implements IAuthController {
             const refreshToken = req.cookies.refreshToken;
 
             if (!refreshToken) {
-                console.log(' Refresh token is missing!');
-                res.status(403).json({ message: 'Refresh token is missing!' });
+                console.log(ErrorMessages.REFRESH_TOKEN_MISSING);
+                res.status(HttpStatusCode.FORBIDDEN).json({ message: ErrorMessages.REFRESH_TOKEN_MISSING });
                 return
             }
 
@@ -121,16 +128,16 @@ export class AuthController implements IAuthController {
             const userId = payload.userId;
             const role = payload.role;
             if (!userId) {
-                res.status(403).json({ message: 'Invalid refresh token!' });
+                res.status(HttpStatusCode.FORBIDDEN).json({ message: ErrorMessages.INVALID_REFRESH_TOKEN });
                 return
             }
 
             const newAccessToken = await this.authService.generateAccessToken(userId, role);
 
-            res.status(200).json({ accessToken: newAccessToken });
+            res.status(HttpStatusCode.OK).json({ accessToken: newAccessToken });
         } catch (error) {
-            console.error('Error refreshing token:', error);
-            res.status(500).json({ message: 'Error refreshing token', error });
+            console.error(ErrorMessages.REFRESH_TOKEN_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.REFRESH_TOKEN_FAILED, error });
         }
     }
 
@@ -142,9 +149,9 @@ export class AuthController implements IAuthController {
             const user = await this.authService.findOrCreateUser(decodedToken);
 
             if (!user) {
-                res.status(401).json({
+                res.status(HttpStatusCode.UNAUTHORIZED).json({
                     success: false,
-                    message: "You are not registered as a volunteer!"
+                    message: ErrorMessages.NOT_REGISTERED_VOLUNTEER
                 });
                 return;
             }
@@ -152,18 +159,10 @@ export class AuthController implements IAuthController {
             const userId = user._id as string;
             const role = user.role as string;
 
-            if (!user) {
-                res.status(401).json({
-                    success: false,
-                    message: "You are not registered as a volunteer!"
-                });
-                return;
-            }
-
             if (user.isBlocked) {
-                res.status(403).json({
+                res.status(HttpStatusCode.FORBIDDEN).json({
                     success: false,
-                    message: "Invalid email or password!"
+                    message: ErrorMessages.INVALID_EMAIL_OR_PASSWORD
                 });
                 return;
             }
@@ -171,7 +170,7 @@ export class AuthController implements IAuthController {
             const accessToken = await this.authService.generateAccessToken(userId, role);
             const refreshToken = await this.authService.generateRefreshToken(userId, role);
 
-            res.status(200).json({
+            res.status(HttpStatusCode.OK).json({
                 success: true,
                 accessToken,
                 refreshToken,
@@ -182,11 +181,11 @@ export class AuthController implements IAuthController {
             });
         } catch (error: any) {
             if (error.code === 'auth/invalid-id-token') {
-                res.status(400).json({ message: 'Invalid Google ID Token' });
-                console.error('Invalid Google ID Token', error);
+                res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.INVALID_GOOGLE_ID_TOKEN });
+                console.error(ErrorMessages.INVALID_GOOGLE_ID_TOKEN, error);
             } else {
-                res.status(500).json({ message: 'Something went wrong during login', error: error.message });
-                console.error('Something went wrong during login', error);
+                res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.GOOGLE_LOGIN_FAILED, error: error.message });
+                console.error(ErrorMessages.GOOGLE_LOGIN_FAILED, error);
             }
         }
     }
@@ -196,13 +195,13 @@ export class AuthController implements IAuthController {
             const { email } = req.body;
             const sendResetLink = await this.authService.sendResetLink(email);
             if (!sendResetLink) {
-                res.status(400).json({ message: 'The email is not registered!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.EMAIL_NOT_REGISTERED });
             } else {
-                res.status(200).json({ message: 'Reset link has been sent to your email!' });
+                res.status(HttpStatusCode.OK).json({ message: ErrorMessages.RESET_LINK_SENT });
             }
         } catch (error: any) {
-            res.status(500).json({ message: 'Something went wrong!', error: error.message });
-            console.error('Something went wrong during sending the reset link', error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.FORGOT_PASSWORD_FAILED, error: error.message });
+            console.error(ErrorMessages.FORGOT_PASSWORD_FAILED, error);
         }
     }
 
@@ -213,16 +212,16 @@ export class AuthController implements IAuthController {
             const { userId } = decoded;
             const user = await this.authService.findUserById(userId);
             if (!user) {
-                res.status(400).json({ message: 'User not found!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.USER_NOT_FOUND });
                 return;
             }
             const email = user.email;
 
             await this.authService.resetPassword(email, newPassword);
-            res.status(200).json({ message: 'Password reset successful' });
+            res.status(HttpStatusCode.OK).json({ message: ErrorMessages.PASSWORD_RESET_SUCCESS });
         } catch (error) {
             console.log('error: ', error)
-            res.status(400).json({ message: 'Invalid or expired token' });
+            res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.INVALID_OR_EXPIRED_TOKEN });
         }
     }
 
@@ -230,10 +229,10 @@ export class AuthController implements IAuthController {
         const userId = req.params.id;
         try {
             const isBlocked = await this.authService.findIsBlocked(userId);
-            res.status(200).json({ isBlocked, message: 'Authenticated user successfully!' });
+            res.status(HttpStatusCode.OK).json({ isBlocked, message: ErrorMessages.AUTHENTICATED_USER_SUCCESS });
         } catch (error) {
-            console.log('Error authenticating the user!');
-            res.status(500).json({ isBlocked: false, message: 'Error authenticating the user!' });
+            console.log(ErrorMessages.AUTHENTICATE_USER_FAILED);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ isBlocked: false, message: ErrorMessages.AUTHENTICATE_USER_FAILED });
         }
     }
 }

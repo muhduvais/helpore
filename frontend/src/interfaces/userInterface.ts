@@ -1,7 +1,7 @@
 import { IAsset } from "./adminInterface";
 import { Types } from "mongoose";
 
-type statusType = 'approved' | 'rejected' | 'completed';
+type statusType = 'pending' | 'approved' | 'rejected' | 'completed';
 
 export interface IUser {
     userId?: string;

@@ -3,6 +3,8 @@ import { injectable, inject } from 'tsyringe';
 import { IChatController } from '../interfaces/IChatController';
 import { IChatService } from '../../services/interfaces/ServiceInterface';
 import { JwtPayload } from 'jsonwebtoken';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class ChatController implements IChatController {
@@ -21,10 +23,14 @@ export class ChatController implements IChatController {
             const { userId: senderId } = req.user as JwtPayload;
 
             const message = await this.chatService.sendMessage(senderId, receiverId, content, requestId, senderType, receiverType);
-            res.status(201).json({ success: true, data: message });
+            res.status(HttpStatusCode.CREATED).json({ success: true, data: message });
         } catch (error) {
-            console.error('Error sending message:', error);
-            res.status(500).json({ success: false, message: 'Error sending message', error: error instanceof Error ? error.message : 'Unknown error' });
+            console.error(ErrorMessages.CHAT_SEND_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: ErrorMessages.CHAT_SEND_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 
@@ -32,10 +38,14 @@ export class ChatController implements IChatController {
         try {
             const { requestId } = req.params;
             const messages = await this.chatService.getConversationMessages(requestId);
-            res.status(200).json({ success: true, messages });
+            res.status(HttpStatusCode.OK).json({ success: true, messages });
         } catch (error) {
-            console.error('Error fetching messages:', error);
-            res.status(500).json({ success: false, message: 'Error fetching messages', error: error instanceof Error ? error.message : 'Unknown error' });
+            console.error(ErrorMessages.CHAT_FETCH_MESSAGES_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: ErrorMessages.CHAT_FETCH_MESSAGES_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 
@@ -43,10 +53,14 @@ export class ChatController implements IChatController {
         try {
             const { userId } = req.user as JwtPayload;
             const conversations = await this.chatService.getUserConversations(userId);
-            res.status(200).json({ success: true, messages: conversations });
+            res.status(HttpStatusCode.OK).json({ success: true, messages: conversations });
         } catch (error) {
-            console.error('Error fetching conversations:', error);
-            res.status(500).json({ success: false, message: 'Error fetching conversations', error: error instanceof Error ? error.message : 'Unknown error' });
+            console.error(ErrorMessages.CHAT_FETCH_CONVERSATIONS_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: ErrorMessages.CHAT_FETCH_CONVERSATIONS_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 
@@ -56,10 +70,14 @@ export class ChatController implements IChatController {
             const { userId } = req.user as JwtPayload;
 
             await this.chatService.markConversationAsRead(conversationId, userId);
-            res.status(200).json({ success: true, message: 'Messages marked as read' });
+            res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.CHAT_MARK_READ_SUCCESS });
         } catch (error) {
-            console.error('Error marking messages as read:', error);
-            res.status(500).json({ success: false, message: 'Error marking messages as read', error: error instanceof Error ? error.message : 'Unknown error' });
+            console.error(ErrorMessages.CHAT_MARK_READ_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: ErrorMessages.CHAT_MARK_READ_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 }

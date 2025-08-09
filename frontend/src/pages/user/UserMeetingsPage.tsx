@@ -20,11 +20,11 @@ import {
     Video
 } from 'lucide-react';
 
+import loading_logo from "../../assets/Logo-black-short.png"
 import { meetingService } from '@/services/meeting.service';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
 import { IMeeting } from '@/interfaces/meeting.interface';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { MeetingDetailsModal } from '@/components/MeetingDetailsModal';
 import { useDebounce } from 'use-debounce';
 import { Input } from '@/components/ui/input';
@@ -139,13 +139,8 @@ const UserMeetingsPage: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[400px]">
-                <DotLottieReact
-                    src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
-                    loop
-                    autoplay
-                    style={{ width: '60px', height: '60px' }}
-                />
+            <div className="flex justify-center items-center h-72">
+                <img src={loading_logo} alt="Loading..." className='flip-animation' />
             </div>
         )
     }

@@ -8,6 +8,7 @@ import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { Types } from 'mongoose';
 import { IAssistanceRequestRepository } from '../../repositories/interfaces/IAssistanceRequestRepository';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class VolunteerService extends BaseService<IUserDocument> implements IVolunteerService {
@@ -55,7 +56,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
 
             return registeredMail;
         } catch (error) {
-            console.error('Error registering the volunteer', error);
+            console.error(ErrorMessages.VOLUNTEER_REGISTER_FAILED, error);
             return null;
         }
     }
@@ -88,7 +89,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
 
             return registeredMail;
         } catch (error) {
-            console.error('Error updating the volunteer details', error);
+            console.error(ErrorMessages.VOLUNTEER_UPDATE_FAILED, error);
             return null;
         }
     }
@@ -103,7 +104,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
             }
             return await this.userRepository.findUsers(query, skip, limit);
         } catch (error) {
-            console.error('Error finding volunteers:', error);
+            console.error(ErrorMessages.VOLUNTEER_FETCH_FAILED, error);
             throw error;
         }
     }
@@ -112,7 +113,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
         try {
             return await this.userRepository.findUserDetails(volunteerId);
         } catch (error) {
-            console.error('Error fetching volunteer details:', error);
+            console.error(ErrorMessages.VOLUNTEER_DETAILS_FETCH_FAILED, error);
             throw error;
         }
     }
@@ -121,7 +122,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
         try {
             return await this.addressRepository.findAddressByEntityId(volunteerId);
         } catch (error) {
-            console.error('Error fetching the address: ', error);
+            console.error(ErrorMessages.ADDRESS_FETCH_FAILED, error);
             return null;
         }
     }
@@ -131,7 +132,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
             const query = search ? { name: { $regex: search, $options: 'i' }, role: 'volunteer' } : { role: 'volunteer' };
             return await this.userRepository.countUsers(query);
         } catch (error) {
-            console.error('Error counting volunteers:', error);
+            console.error(ErrorMessages.VOLUNTEER_COUNT_FAILED, error);
             throw error;
         }
     }
@@ -141,7 +142,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
             await this.userRepository.updateProfilePicture(volunteerId, profilePicture);
             return true;
         } catch (error) {
-            console.error('Error updating the profile picture: ', error);
+            console.error(ErrorMessages.PROFILE_UPDATE_FAILED, error);
             return false;
         }
     }
@@ -152,7 +153,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
             if (!password) return;
             return bcrypt.compare(currentPassword, password);
         } catch (error) {
-            console.error('Error updating the password: ', error);
+            console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
             return null;
         }
     }
@@ -163,7 +164,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
             await this.userRepository.updatePassword(volunteerId, hashedPassword);
             return true;
         } catch (error) {
-            console.error('Error updating the password: ', error);
+            console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
             return false;
         }
     }
@@ -173,7 +174,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
             await this.userRepository.findByIdAndUpdate(userId, { isBlocked: action });
             return true;
         } catch (error) {
-            console.error('Error updating block status:', error);
+            console.error(ErrorMessages.BLOCK_STATUS_UPDATE_FAILED, error);
             throw error;
         }
     }
@@ -183,7 +184,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
             const checkTasksLimit = await this.assistanceRepository.checkTasksLimit(volunteerId);
             return checkTasksLimit;
         } catch (error) {
-            console.error('Error assigning volunteer: ', error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_TASK_LIMIT, error);
             return null;
         }
     }

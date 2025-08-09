@@ -5,6 +5,7 @@ import { Types } from "mongoose";
 import { IAddressRepository } from "../../repositories/interfaces/IAddressRepository";
 import { calculateDistance, MAX_DISTANCE, MIN_DISTANCE } from '../../utils';
 import { IAssistanceRequestRepository } from "../../repositories/interfaces/IAssistanceRequestRepository";
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class AssistanceRequestService implements IAssistanceRequestService {
@@ -18,13 +19,12 @@ export class AssistanceRequestService implements IAssistanceRequestService {
             await this.assistanceRepository.createAssistanceRequest(formData);
             return true;
         } catch (error) {
-            console.error('Error creating the request: ', error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_CREATE_FAILED, error);
             return false;
         }
     }
 
     async calculateEstimatedTravelTime(distanceInKm: number): Promise<string> {
-
         const timeInHours = distanceInKm / 30;
         const timeInMinutes = Math.round(timeInHours * 60);
 
@@ -48,11 +48,11 @@ export class AssistanceRequestService implements IAssistanceRequestService {
             const volunteerAddress = await this.addressRepository.findAddressesByQuery(query);
 
             if (!volunteerAddress) {
-                throw new Error('Volunteer address not found');
+                throw new Error(ErrorMessages.ADDRESS_NOT_FOUND);
             }
 
             if (!volunteerAddress.latitude || !volunteerAddress.longitude) {
-                throw new Error('Volunteer address missing coordinates');
+                throw new Error(ErrorMessages.ADDRESS_NOT_FOUND);
             }
 
             let requestQuery: any = {
@@ -76,12 +76,12 @@ export class AssistanceRequestService implements IAssistanceRequestService {
             const requestsWithPromises = pendingRequests
                 .map((request: any) => {
                     if (!request.address || !request.address.latitude || !request.address.longitude) {
-                        console.warn(`Request ${request._id} has invalid address`);
+                        console.warn(`${ErrorMessages.ASSISTANCE_REQUEST_DETAILS_FETCH_FAILED}: Request ${request._id} has invalid address`);
                         return null;
                     }
 
                     if (!volunteerAddress || !volunteerAddress.latitude || !volunteerAddress.longitude) {
-                        console.warn(`Request ${request._id} has invalid volunteerAddress`);
+                        console.warn(`${ErrorMessages.ADDRESS_NOT_FOUND}: Request ${request._id} has invalid volunteerAddress`);
                         return null;
                     }
 
@@ -130,7 +130,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 }
             };
         } catch (error) {
-            console.error('Error finding nearby requests:', error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_NEARBY_FAILED, error);
             throw error;
         }
     }
@@ -139,11 +139,11 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         const request = await this.assistanceRepository.findRequestById(requestId);
 
         if (!request) {
-            throw new Error('Request not found');
+            throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
         }
 
         if (action === 'approve' && request.status !== 'pending') {
-            throw new Error('Request is no longer available');
+            throw new Error(ErrorMessages.ASSISTANCE_REQUEST_UPDATE_STATUS_FAILED);
         }
 
         if (action === 'approve') {
@@ -166,11 +166,11 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         await this.assistanceRepository.updateRequest(request);
 
         if (action === 'approve') {
-            return 'Request approved';
+            return ErrorMessages.ASSISTANCE_REQUEST_APPROVED;
         } else if (action === 'reject') {
-            return 'Request rejected';
+            return ErrorMessages.ASSISTANCE_REQUEST_REJECTED;
         } else if (action === 'complete') {
-            return 'Request completed';
+            return ErrorMessages.ASSISTANCE_REQUEST_COMPLETED;
         }
         return '';
     }
@@ -189,7 +189,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 address: request.address instanceof Types.ObjectId ? undefined : request.address,
             }));
         } catch (error) {
-            console.error("Error finding assistance requests:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
             return null;
         }
     }
@@ -208,7 +208,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 address: request.address instanceof Types.ObjectId ? undefined : request.address,
             }));
         } catch (error) {
-            console.error("Error finding assistance requests:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
             return null;
         }
     }
@@ -225,7 +225,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 address: request.address instanceof Types.ObjectId ? undefined : request.address,
             }));
         } catch (error) {
-            console.error("Error finding assistance requests:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_PENDING_FAILED, error);
             return null;
         }
     }
@@ -243,7 +243,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 address: request.address instanceof Types.ObjectId ? undefined : request.address,
             }));
         } catch (error) {
-            console.error("Error finding assistance requests:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_PROCESSING_FAILED, error);
             return null;
         }
     }
@@ -252,7 +252,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         try {
             return await this.assistanceRepository.countAssistanceRequests(search, filter, priority);
         } catch (error) {
-            console.error("Error counting assistance requests:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
             return 0;
         }
     }
@@ -261,7 +261,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         try {
             return await this.assistanceRepository.countAssistanceRequests(search, filter, priority, userId);
         } catch (error) {
-            console.error("Error counting assistance requests:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
             return 0;
         }
     }
@@ -270,7 +270,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         try {
             return await this.assistanceRepository.countProcessingRequests(search, filter, volunteerId);
         } catch (error) {
-            console.error("Error counting assistance requests:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_PROCESSING_FAILED, error);
             return 0;
         }
     }
@@ -279,7 +279,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         try {
             return await this.assistanceRepository.findAssistanceRequestDetails(requestId);
         } catch (error) {
-            console.error("Error fetching assistance request details:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_DETAILS_FETCH_FAILED, error);
             return null;
         }
     }
@@ -288,7 +288,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         try {
             return await this.assistanceRepository.checkTasksLimit(volunteerId);
         } catch (error) {
-            console.error("Error checking volunteer task limit:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_TASK_LIMIT, error);
             return null;
         }
     }
@@ -297,7 +297,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         try {
             return await this.assistanceRepository.assignVolunteer(requestId, volunteerId);
         } catch (error) {
-            console.error("Error assigning volunteer:", error);
+            console.error(ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_ASSIGN_FAILED, error);
             return null;
         }
     }

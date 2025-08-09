@@ -21,6 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { donationService } from '@/services/donation.service';
 import DonationSuccessModal from '@/modals/DonationSuccessModal';
 import { IDonation } from '@/interfaces/donation.interface';
+import loading_logo from "../../assets/Logo-black-short.png"
 
 const DonationPage = () => {
     const [amount, setAmount] = useState<number>(50);
@@ -295,13 +296,8 @@ const DonationPage = () => {
                                 {showHistory && (
                                     <div className='h-96 overflow-y-auto'>
                                         {isHistoryLoading ? (
-                                            <div className="flex justify-center items-center py-8">
-                                                <DotLottieReact
-                                                    src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
-                                                    loop
-                                                    autoplay
-                                                    style={{ width: '40px', height: '40px' }}
-                                                />
+                                            <div className="flex justify-center items-center h-72">
+                                                <img src={loading_logo} alt="Loading..." className='flip-animation' />
                                             </div>
                                         ) : donationHistory.length > 0 ? (
                                             <div className="space-y-4">

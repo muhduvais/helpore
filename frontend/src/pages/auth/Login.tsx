@@ -117,6 +117,8 @@ const LoginPage: React.FC = () => {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 400) {
           setErrorMessage(error.response?.data?.message || 'Invalid email or password!');
+        } else if (error.response?.status === 401) {
+          setErrorMessage('Your access is blocked!');
         }
       } else {
         setErrorMessage('An unexpected error occured!');

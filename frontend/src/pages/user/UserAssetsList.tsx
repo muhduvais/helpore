@@ -26,13 +26,14 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from '@/components/ui/label';
 import { FaAngleLeft, FaAngleRight, FaBox } from 'react-icons/fa';
 import { CiSearch } from 'react-icons/ci';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/user.service';
 import { IAsset } from '@/interfaces/adminInterface';
 import asset_picture from '../../assets/asset_picture.png';
 import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
 import { CalendarIcon, MinusCircle, PlusCircle } from 'lucide-react';
+
+import loading_logo from '../../assets/Logo-black-short.png';
 
 const AssetListing = () => {
 
@@ -294,13 +295,8 @@ const AssetListing = () => {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="flex justify-center items-center h-64">
-          <DotLottieReact
-            src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
-            loop
-            autoplay
-            style={{ width: '50px', height: '50px' }}
-          />
+        <div className="flex justify-center items-center h-72">
+          <img src={loading_logo} alt="Loading..." className='flip-animation' />
         </div>
       )}
 

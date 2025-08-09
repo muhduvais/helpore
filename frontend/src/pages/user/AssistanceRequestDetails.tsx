@@ -27,7 +27,9 @@ import {
     Ambulance,
     HeartHandshake,
     Send,
-    MessageSquare
+    MessageSquare,
+    CheckCheck,
+    Check
 } from 'lucide-react';
 import {
     Alert,
@@ -141,9 +143,22 @@ const AssistanceRequestDetails: React.FC = () => {
                 (message) => {
                     console.log('Message received in state update:', message);
                     setMessages((prevMessages) => [...prevMessages, message]);
+
+                    if (activeTab === 'chat' && socketRef.current && message.sender !== userId) {
+                        socketRef.current.emit('messagesRead', request._id);
+                    }
                 },
                 (data) => {
                     setIsTyping(data.isTyping && data.userId !== userId);
+                },
+                (data) => {
+                    if (data.userId !== userId) {
+                        setMessages((prevMessages: IMessageDocument[]) =>
+                            prevMessages.map((msg: any) =>
+                                !msg.read ? { ...msg, read: true } : msg
+                            )
+                        )
+                    }
                 }
             );
 
@@ -171,6 +186,10 @@ const AssistanceRequestDetails: React.FC = () => {
 
                     if (response.status === 200) {
                         setMessages(response.data.messages);
+                    }
+
+                    if (socketRef.current) {
+                        socketRef.current.emit('messagesRead', request._id);
                     }
                 } catch (error) {
                     console.error('Error fetching messages:', error);
@@ -656,9 +675,12 @@ const AssistanceRequestDetails: React.FC = () => {
                                                                     }`}
                                                             >
                                                                 <p>{message.content}</p>
-                                                                <div className={`text-xs mt-1 ${message.sender === userId ? 'text-gray-200' : 'text-gray-500'
-                                                                    }`}>
-                                                                    {formatMessageTime(message.createdAt.toString())}
+                                                                <div className={`flex ${message.sender === userId ? 'justify-between' : 'justify-start'} items-center`}>
+                                                                    <div className={`text-xs mt-1 ${message.sender === userId ? 'text-gray-200' : 'text-gray-500'
+                                                                        }`}>
+                                                                        {formatMessageTime(message.createdAt.toString())}
+                                                                    </div>
+                                                                    {message.sender === userId && <span className='pl-2 text-xs mt-1 text-gray-200'>{message.read ? <CheckCheck size={15} /> : <Check size={15} />}</span>}
                                                                 </div>
                                                             </div>
                                                         </div>

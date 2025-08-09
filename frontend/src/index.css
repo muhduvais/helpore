@@ -90,3 +90,18 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes flipX {
+  0%, 100% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(180deg);
+  }
+}
+
+.flip-animation {
+  animation: flipX 2s infinite ease-in-out;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}

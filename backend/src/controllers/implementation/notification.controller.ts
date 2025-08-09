@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { INotificationService } from '../../services/interfaces/ServiceInterface';
 import { JwtPayload } from 'jsonwebtoken';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class NotificationController {
@@ -19,12 +21,12 @@ export class NotificationController {
         try {
             const { userId } = req.user as JwtPayload;
             const notifications = await this.notificationService.getUserNotifications(userId);
-            res.status(200).json({ success: true, data: notifications });
+            res.status(HttpStatusCode.OK).json({ success: true, data: notifications });
         } catch (error) {
-            console.error('Error fetching notifications:', error);
-            res.status(500).json({ 
+            console.error(ErrorMessages.NOTIFICATION_FETCH_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ 
                 success: false, 
-                message: 'Error fetching notifications',
+                message: ErrorMessages.NOTIFICATION_FETCH_FAILED,
                 error: error instanceof Error ? error.message : 'Unknown error' 
             });
         }
@@ -35,12 +37,12 @@ export class NotificationController {
             const { notificationId } = req.params;
             const { userId } = req.user as JwtPayload;
             await this.notificationService.markAsRead(notificationId, userId);
-            res.status(200).json({ success: true, message: 'Notification marked as read' });
+            res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.NOTIFICATION_MARK_READ_SUCCESS });
         } catch (error) {
-            console.error('Error marking notification as read:', error);
-            res.status(500).json({ 
+            console.error(ErrorMessages.NOTIFICATION_MARK_READ_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ 
                 success: false, 
-                message: 'Error marking notification as read', 
+                message: ErrorMessages.NOTIFICATION_MARK_READ_FAILED, 
                 error: error instanceof Error ? error.message : 'Unknown error' 
             });
         }
@@ -50,12 +52,12 @@ export class NotificationController {
         try {
             const { userId } = req.user as JwtPayload;
             await this.notificationService.markAllAsRead(userId);
-            res.status(200).json({ success: true, message: 'All notifications marked as read' });
+            res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.NOTIFICATION_MARK_ALL_READ_SUCCESS });
         } catch (error) {
-            console.error('Error marking all notifications as read:', error);
-            res.status(500).json({ 
+            console.error(ErrorMessages.NOTIFICATION_MARK_ALL_READ_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ 
                 success: false, 
-                message: 'Error marking all notifications as read', 
+                message: ErrorMessages.NOTIFICATION_MARK_ALL_READ_FAILED, 
                 error: error instanceof Error ? error.message : 'Unknown error' 
             });
         }
@@ -66,12 +68,12 @@ export class NotificationController {
             const { notificationId } = req.params;
             const { userId } = req.user as JwtPayload;
             await this.notificationService.deleteNotification(notificationId, userId);
-            res.status(200).json({ success: true, message: 'Notification deleted' });
+            res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.NOTIFICATION_DELETE_SUCCESS });
         } catch (error) {
-            console.error('Error deleting notification:', error);
-            res.status(500).json({ 
+            console.error(ErrorMessages.NOTIFICATION_DELETE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ 
                 success: false, 
-                message: 'Error deleting notification', 
+                message: ErrorMessages.NOTIFICATION_DELETE_FAILED, 
                 error: error instanceof Error ? error.message : 'Unknown error' 
             });
         }
@@ -81,12 +83,12 @@ export class NotificationController {
         try {
             const { userId } = req.user as JwtPayload;
             await this.notificationService.deleteAllNotifications(userId);
-            res.status(200).json({ success: true, message: 'All notifications deleted' });
+            res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.NOTIFICATION_DELETE_ALL_SUCCESS });
         } catch (error) {
-            console.error('Error deleting all notifications:', error);
-            res.status(500).json({ 
+            console.error(ErrorMessages.NOTIFICATION_DELETE_ALL_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ 
                 success: false, 
-                message: 'Error deleting all notifications', 
+                message: ErrorMessages.NOTIFICATION_DELETE_ALL_FAILED, 
                 error: error instanceof Error ? error.message : 'Unknown error' 
             });
         }

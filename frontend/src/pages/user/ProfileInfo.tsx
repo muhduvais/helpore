@@ -10,6 +10,8 @@ import { IAddress, IUser } from '../../interfaces/userInterface';
 import axios from 'axios';
 import { adminService } from '@/services/admin.service';
 import EditProfileModal, { IAddressData, IUserData } from '@/components/EditUserProfile';
+import { useSearchParams } from 'react-router-dom';
+import loading_logo from "../../assets/Logo-black-short.png"
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('info');
@@ -31,6 +33,9 @@ const Profile = () => {
     const [certificateToDelete, setCertificateToDelete] = useState<{ index: number, url: string } | null>(null);
     const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
 
+    const [searchParams] = useSearchParams();
+    const currentTab = searchParams.get('tab');
+
     // Password change state
     const initialFormState = {
         currentPassword: '',
@@ -42,6 +47,12 @@ const Profile = () => {
     const [message, setMessage] = useState<string | null>(null);
 
     const [isDeleting, setIsDeleting] = useState(false);
+
+    useEffect(() => {
+        if (currentTab) {
+            setActiveTab(currentTab);
+        }
+    }, [currentTab]);
 
     const fetchUserDetails = async () => {
         try {
@@ -266,8 +277,8 @@ const Profile = () => {
 
     if (isLoading) {
         return (
-            <div className="w-full h-full flex items-center justify-center">
-                <span>Loading...</span>
+            <div className="flex justify-center items-center h-72">
+                <img src={loading_logo} alt="Loading..." className='flip-animation' />
             </div>
         );
     }
@@ -322,7 +333,6 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* Enhanced Tabs */}
                 <div className="border-b bg-white sticky top-0 z-10">
                     <div className="flex overflow-x-auto">
                         {tabs.map((tab) => (
@@ -342,7 +352,6 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* Enhanced Tab Content */}
                 <div className="p-8">
                     {activeTab === 'info' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

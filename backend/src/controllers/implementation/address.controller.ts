@@ -3,6 +3,8 @@ import { injectable, inject } from 'tsyringe';
 import { IUserService } from '../../services/interfaces/ServiceInterface';
 import { IAddressController } from '../interfaces/IAddressController';
 import { JwtPayload } from 'jsonwebtoken';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class AddressController implements IAddressController {
@@ -24,13 +26,13 @@ export class AddressController implements IAddressController {
         try {
             const addressId = await this.userService.addAddress(addressData);
             if (addressId) {
-                res.status(200).json({ success: true, addressId });
+                res.status(HttpStatusCode.OK).json({ success: true, addressId });
             } else {
-                res.status(400).json({ success: false, message: 'Error creating the address!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.CREATE_FAILED });
             }
         } catch (error) {
-            console.error('Error creating the address:', error);
-            res.status(500).json({ message: 'Error creating the address', error });
+            console.error(ErrorMessages.CREATE_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.CREATE_FAILED, error });
         }
     }
 
@@ -39,13 +41,13 @@ export class AddressController implements IAddressController {
         try {
             const addresses = await this.userService.fetchAddresses(userId);
             if (addresses) {
-                res.status(200).json({ success: true, addresses });
+                res.status(HttpStatusCode.OK).json({ success: true, addresses });
             } else {
-                res.status(400).json({ success: false, message: 'Addresses not found!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.ADDRESS_NOT_FOUND });
             }
         } catch (error) {
-            console.error('Error fetching the addresses:', error);
-            res.status(500).json({ message: 'Error fetching the addresses', error });
+            console.error(ErrorMessages.SERVER_ERROR, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.SERVER_ERROR, error });
         }
     }
 }

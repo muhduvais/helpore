@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { Types } from 'mongoose';
 import { IAssistanceRequestRepository } from '../../repositories/interfaces/IAssistanceRequestRepository';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class AdminService implements IAdminService {
@@ -55,7 +56,7 @@ export class AdminService implements IAdminService {
 
       return registeredMail;
     } catch (error) {
-      console.error('Error registering the user', error);
+      console.error(ErrorMessages.REGISTER_USER_FAILED, error);
       return null;
     }
   }
@@ -88,7 +89,7 @@ export class AdminService implements IAdminService {
 
       return registeredMail;
     } catch (error) {
-      console.error('Error registering the user', error);
+      console.error(ErrorMessages.USER_UPDATE_FAILED, error);
       return null;
     }
   }
@@ -100,6 +101,7 @@ export class AdminService implements IAdminService {
         : { role: 'user' };
       return await this.userRepository.findUsers(query, skip, limit);
     } catch (error) {
+      console.error(ErrorMessages.USER_FETCH_FAILED, error);
       throw error;
     }
   }
@@ -108,7 +110,7 @@ export class AdminService implements IAdminService {
     try {
       return await this.userRepository.findUserDetails(userId);
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      console.error(ErrorMessages.USER_FETCH_FAILED, error);
       throw error;
     }
   }
@@ -120,6 +122,7 @@ export class AdminService implements IAdminService {
         : { role: 'user' };
       return await this.userRepository.countUsers(query);
     } catch (error) {
+      console.error(ErrorMessages.USER_FETCH_FAILED, error);
       throw error;
     }
   }
@@ -129,7 +132,7 @@ export class AdminService implements IAdminService {
       await this.userRepository.findByIdAndUpdate(userId, { isBlocked: action });
       return true;
     } catch (error) {
-      console.error('Error updating block status:', error);
+      console.error(ErrorMessages.BLOCK_STATUS_UPDATE_FAILED, error);
       throw error;
     }
   }
@@ -172,7 +175,7 @@ export class AdminService implements IAdminService {
 
       return registeredMail;
     } catch (error) {
-      console.error('Error registering the volunteer', error);
+      console.error(ErrorMessages.REGISTER_USER_FAILED, error);
       return null;
     }
   }
@@ -188,7 +191,7 @@ export class AdminService implements IAdminService {
 
       return await this.userRepository.findUsers(query, skip, limit);
     } catch (error) {
-      console.error('Error finding the users:', error);
+      console.error(ErrorMessages.USER_FETCH_FAILED, error);
       return null;
     }
   }
@@ -197,7 +200,7 @@ export class AdminService implements IAdminService {
     try {
       return await this.userRepository.findUserDetails(volunteerId);
     } catch (error) {
-      console.error('Error fetching the volunteer details: ', error);
+      console.error(ErrorMessages.USER_FETCH_FAILED, error);
       return null;
     }
   }
@@ -209,6 +212,7 @@ export class AdminService implements IAdminService {
         : { role: 'volunteer' };
       return await this.userRepository.countUsers(query);
     } catch (error) {
+      console.error(ErrorMessages.USER_FETCH_FAILED, error);
       throw error;
     }
   }
@@ -217,7 +221,7 @@ export class AdminService implements IAdminService {
     try {
       return await this.addressRepository.findAddressesByEntityId(userId);
     } catch (error) {
-      console.error('Error fetching the addresses: ', error);
+      console.error(ErrorMessages.ADDRESS_NOT_FOUND, error);
       return null;
     }
   }
@@ -227,7 +231,7 @@ export class AdminService implements IAdminService {
       const checkTasksLimit = await this.assistanceRepository.checkTasksLimit(volunteerId);
       return checkTasksLimit;
     } catch (error) {
-      console.error('Error assigning volunteer: ', error);
+      console.error(ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_ASSIGN_FAILED, error);
       return null;
     }
   }

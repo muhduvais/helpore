@@ -39,7 +39,6 @@ export class NotificationService implements INotificationService {
     }
 
     async markAsRead(notificationId: string, userId: string): Promise<void> {
-        // You can add additional check to ensure user owns the notification
         await this.notificationRepository.markAsRead(notificationId);
     }
 
@@ -48,7 +47,6 @@ export class NotificationService implements INotificationService {
     }
 
     async deleteNotification(notificationId: string, userId: string): Promise<void> {
-        // You can add additional check to ensure user owns the notification
         await this.notificationRepository.deleteNotification(notificationId);
     }
 

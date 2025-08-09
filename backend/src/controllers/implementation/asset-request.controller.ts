@@ -3,6 +3,7 @@ import { injectable, inject } from 'tsyringe';
 import { IAssetRequestController } from '../interfaces/IAssetRequestController';
 import { IAssetService, IUserService } from '../../services/interfaces/ServiceInterface';
 import { JwtPayload } from 'jsonwebtoken';
+import { HttpStatusCode } from '../../constants/httpStatus';
 
 @injectable()
 export class AssetRequestController implements IAssetRequestController {
@@ -26,14 +27,14 @@ export class AssetRequestController implements IAssetRequestController {
             const isCertificateAdded = await this.userService.checkCertificate(userId);
 
             if (!isCertificateAdded) {
-                res.status(400).json({ success: false, noCertificate: true, message: 'You cannot request without adding your medical certificates. Pease go to \'Profile > Uploads\' and upload the documents.' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, noCertificate: true, message: 'You cannot request without adding your medical certificates. Pease go to \'Profile > Uploads\' and upload the documents.' });
                 return;
             }
 
             const isLimit = await this.assetService.checkIsRequestLimit(userId, quantity);
 
             if (isLimit) {
-                res.status(400).json({ success: false, isRequestLimit: true, message: 'You cannot have more than 3 requests at a time! Try requesting lesser quantity.' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, isRequestLimit: true, message: 'You cannot have more than 3 requests at a time! Try requesting lesser quantity.' });
                 return;
             }
 
@@ -41,11 +42,11 @@ export class AssetRequestController implements IAssetRequestController {
                 assetId, userId, requestedDate, quantity
             );
             if (createAssetRequest) {
-                res.status(200).json({ success: true, message: 'Request created successfully!' });
+                res.status(HttpStatusCode.OK).json({ success: true, message: 'Request created successfully!' });
             }
         } catch (error) {
             console.error('Error creating the request: ', error);
-            res.status(500).json({ message: 'Error creating the request: ', error });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Error creating the request: ', error });
         }
     }
 
@@ -71,14 +72,14 @@ export class AssetRequestController implements IAssetRequestController {
             );
 
             if (!assetRequests) {
-                res.status(404).json({ message: "No asset requests found" });
+                res.status(HttpStatusCode.NOT_FOUND).json({ message: "No asset requests found" });
                 return;
             }
 
-            res.status(200).json({ assetRequests, totalPages, totalRequests: documentsCount });
+            res.status(HttpStatusCode.OK).json({ assetRequests, totalPages, totalRequests: documentsCount });
         } catch (error) {
             console.error("Error getting asset requests:", error);
-            res.status(500).json({ message: "Server error" });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
         }
     }
 
@@ -98,13 +99,13 @@ export class AssetRequestController implements IAssetRequestController {
             const totalPages = Math.ceil(documentsCount / limit);
 
             if (assetRequests) {
-                res.status(200).json({ success: true, assetRequests, totalPages, totalRequests: documentsCount });
+                res.status(HttpStatusCode.OK).json({ success: true, assetRequests, totalPages, totalRequests: documentsCount });
             } else {
-                res.status(400).json({ success: false, message: 'Asset requests not found!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: 'Asset requests not found!' });
             }
         } catch (error) {
             console.error('Error fetching the asset requests:', error);
-            res.status(500).json({ message: 'Error fetching the asset requests', error });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching the asset requests', error });
         }
     }
 
@@ -117,13 +118,13 @@ export class AssetRequestController implements IAssetRequestController {
                 userId, assetId
             );
             if (assetRequestDetails) {
-                res.status(200).json({ success: true, assetRequestDetails });
+                res.status(HttpStatusCode.OK).json({ success: true, assetRequestDetails });
             } else {
-                res.status(400).json({ success: false, message: 'Request not found!' });
+                res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: 'Request not found!' });
             }
         } catch (error) {
             console.error('Error fetching the asset request details:', error);
-            res.status(500).json({ message: 'Error fetching the asset request details', error });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching the asset request details', error });
         }
     }
 
@@ -134,13 +135,13 @@ export class AssetRequestController implements IAssetRequestController {
         try {
             const updatedRequest = await this.assetService.updateStatus(requestId, status, comment);
             if (!updatedRequest) {
-                res.status(404).json({ message: 'Asset request not found' });
+                res.status(HttpStatusCode.NOT_FOUND).json({ message: 'Asset request not found' });
                 return;
             }
-            res.status(200).json(updatedRequest);
+            res.status(HttpStatusCode.OK).json(updatedRequest);
         } catch (error) {
             console.error('Error updating asset request status:', error);
-            res.status(500).json({ message: 'An error occurred while updating the asset request' });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'An error occurred while updating the asset request' });
         }
     }
 }

@@ -3,6 +3,8 @@ import { injectable, inject } from 'tsyringe';
 import { IDonationController } from '../interfaces/IDonationController';
 import { IDonationService } from '../../services/interfaces/ServiceInterface';
 import { createObjectCsvStringifier } from 'csv-writer';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class DonationController implements IDonationController {
@@ -32,10 +34,10 @@ export class DonationController implements IDonationController {
         userId
       });
 
-      res.status(200).json(result);
+      res.status(HttpStatusCode.OK).json(result);
     } catch (error: any) {
-      console.error('Checkout session error:', error);
-      res.status(500).json({ error: error.message });
+      console.error(ErrorMessages.DONATION_CHECKOUT_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.DONATION_CHECKOUT_FAILED, error: error.message });
     }
   }
 
@@ -50,9 +52,9 @@ export class DonationController implements IDonationController {
       );
 
       const result = await this.donationService.handleWebhookEvent(event);
-      res.status(200).json(result);
+      res.status(HttpStatusCode.OK).json(result);
     } catch (err: any) {
-      res.status(400).send(`Webhook Error: ${err.message}`);
+      res.status(HttpStatusCode.BAD_REQUEST).send(`${ErrorMessages.DONATION_WEBHOOK_FAILED}: ${err.message}`);
     }
   };
 
@@ -61,14 +63,14 @@ export class DonationController implements IDonationController {
       const userId = req.user?.userId;
 
       if (!userId) {
-        res.status(401).json({ message: 'Unauthorized' });
+        res.status(HttpStatusCode.UNAUTHORIZED).json({ message: ErrorMessages.UNAUTHORIZED });
         return;
       }
 
       const result = await this.donationService.getUserDonationHistory(userId);
-      res.status(200).json(result);
+      res.status(HttpStatusCode.OK).json(result);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.DONATION_HISTORY_FAILED, error: error.message });
     }
   };
 
@@ -77,7 +79,7 @@ export class DonationController implements IDonationController {
     const userId = !req.query.userId && req.user?.role !== 'admin' ? req.user?.userId : req.query.userId as string;
     try {
       if (!userId) {
-        res.status(400).json({ message: 'Invalid userId!' });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.INVALID_USER_ID });
         return;
       }
       const pdfBuffer = await this.donationService.generateAndSendReceipt(donationId, userId);
@@ -86,9 +88,9 @@ export class DonationController implements IDonationController {
       res.setHeader('Content-Disposition', `inline; filename=donation_receipt_${donationId}.pdf`);
       res.end(pdfBuffer);
     } catch (error) {
-      console.error('Receipt generation error:', error);
-      res.status(500).json({
-        message: 'Error generating receipt',
+      console.error(ErrorMessages.DONATION_RECEIPT_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: ErrorMessages.DONATION_RECEIPT_FAILED,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -109,14 +111,14 @@ export class DonationController implements IDonationController {
 
       const documentsCount = await this.donationService.totalDonationsCount(search, filter) || 0;
 
-      res.status(200).json({
+      res.status(HttpStatusCode.OK).json({
         donations: donations,
         totalPages: Math.ceil(documentsCount / 10),
         totalItems: documentsCount,
       });
     } catch (error) {
-      console.error('Error in getDonations controller:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error(ErrorMessages.DONATION_FETCH_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.DONATION_FETCH_FAILED });
     }
   };
 
@@ -124,12 +126,12 @@ export class DonationController implements IDonationController {
     try {
       const donations = await this.donationService.getRecentDonations();
 
-      res.status(200).json({
+      res.status(HttpStatusCode.OK).json({
         donations: donations,
       });
     } catch (error) {
-      console.error('Error in getRecentDonations controller:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error(ErrorMessages.DONATION_FETCH_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.DONATION_FETCH_FAILED });
     }
   };
   
@@ -175,10 +177,10 @@ export class DonationController implements IDonationController {
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename=donations_${new Date().toISOString().split('T')[0]}.csv`);
       
-      res.status(200).send(csvContent);
+      res.status(HttpStatusCode.OK).send(csvContent);
     } catch (error) {
-      console.error('Error in exportDonations controller:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error(ErrorMessages.DONATION_EXPORT_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.DONATION_EXPORT_FAILED });
     }
   };
 }

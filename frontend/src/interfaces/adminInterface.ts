@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { IUser } from "./userInterface";
 
-type statusType = 'approved' | 'rejected' | 'completed';
+type statusType = 'pending' | 'approved' | 'rejected' | 'completed';
 type requestType = 'volunteer' | 'ambulance';
 
 export interface AddAssetData {

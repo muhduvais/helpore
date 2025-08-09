@@ -5,6 +5,7 @@ import { IAsset, IAssetRequestResponse } from '../../interfaces/user.interface';
 import { IAssetRepository } from '../../repositories/interfaces/IAssetRepository';
 import { IAssetRequestRepository } from '../../repositories/interfaces/IAssetRequestRepository';
 import { uploadToCloudinary } from '../../utils';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class AssetService extends BaseService<IAsset> implements IAssetService {
@@ -19,15 +20,15 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         try {
             return await this.assetRepository.addAsset(data);
         } catch (error: any) {
-            console.error("Database error while adding asset:", error);
-            throw new Error(`Error adding asset: ${error.message}`);
+            console.error(ErrorMessages.ASSET_CREATE_FAILED, error);
+            throw new Error(`${ErrorMessages.ASSET_CREATE_FAILED}: ${error.message}`);
         }
     }
 
     async uploadAssetImage(file: Express.Multer.File): Promise<string> {
         try {
             if (!file) {
-                throw new Error('No file provided');
+                throw new Error(ErrorMessages.NO_IMAGE_UPLOADED);
             }
 
             const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 10);
@@ -38,14 +39,13 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
 
             return result.secure_url;
         } catch (error) {
-            console.error('Error in uploadAssetImage service:', error);
-            throw error;
+            console.error(ErrorMessages.ASSET_UPLOAD_IMAGE_FAILED, error);
+            throw new Error(`${ErrorMessages.ASSET_UPLOAD_IMAGE_FAILED}: ${error instanceof Error ? error.message : error}`);
         }
     }
 
     async fetchAssets(search: string, skip: number, limit: number, sortBy: string, filterByAvailability: string): Promise<IAsset[] | null> {
         try {
-
             const query = search ? { name: { $regex: search, $options: 'i' } } : {};
 
             if (filterByAvailability && filterByAvailability !== 'all') {

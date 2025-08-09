@@ -41,10 +41,11 @@ import { useDebounce } from 'use-debounce';
 import { IAssetRequest } from '@/interfaces/userInterface';
 import { IAssistanceRequest } from '@/interfaces/adminInterface';
 import { RootState } from '@/redux/store';
+import loading_logo from "../../assets/Logo-black-short.png"
 
 const limit = 4;
 
-type statusType = 'approved' | 'rejected' | 'completed';
+type statusType = 'pending' | 'approved' | 'rejected' | 'completed';
 type requestType = 'volunteer' | 'ambulance';
 type filterType = 'all' | 'pending' | 'approved' | 'rejected' | 'completed';
 
@@ -204,7 +205,7 @@ const UserRequests = () => {
     return <Navigate to="/login" />;
   }
 
-  const RequestCard:React.FC<{ request: IAssetRequest }> = ({ request }) => (
+  const RequestCard: React.FC<{ request: IAssetRequest }> = ({ request }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -269,7 +270,7 @@ const UserRequests = () => {
     </motion.div>
   );
 
-  const AssistanceRequestCard:React.FC<{ request: IAssistanceRequest }> = ({ request }) => (
+  const AssistanceRequestCard: React.FC<{ request: IAssistanceRequest }> = ({ request }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -425,13 +426,8 @@ const UserRequests = () => {
 
           {/* Requests List */}
           {isLoading ? (
-            <div className="flex justify-center items-center min-h-[400px]">
-              <DotLottieReact
-                src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
-                loop
-                autoplay
-                style={{ width: '50px', height: '50px' }}
-              />
+            <div className="flex justify-center items-center h-72">
+              <img src={loading_logo} alt="Loading..." className='flip-animation' />
             </div>
           ) : requests.length === 0 ? (
             <Card className="p-8 text-center">

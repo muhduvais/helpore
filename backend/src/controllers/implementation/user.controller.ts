@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import { IUserController } from '../interfaces/IUserController';
 import { IAdminService, IUserService } from '../../services/interfaces/ServiceInterface';
 import { JwtPayload } from 'jsonwebtoken';
+import { HttpStatusCode } from '../../constants/httpStatus';
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class UserController implements IUserController {
@@ -27,21 +29,21 @@ export class UserController implements IUserController {
       const registeredMail = await this.adminService.addUser(formData);
 
       if (registeredMail) {
-        res.status(201).json({
+        res.status(HttpStatusCode.CREATED).json({
           success: true,
           registeredMail
         });
       } else {
-        res.status(400).json({
+        res.status(HttpStatusCode.BAD_REQUEST).json({
           success: false,
           existingMail: true,
-          message: 'This email is already registered!'
+          message: ErrorMessages.EMAIL_ALREADY_REGISTERED
         });
       }
     } catch (error) {
-      res.status(500).json({
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: 'Error registering user',
+        message: ErrorMessages.REGISTER_USER_FAILED,
         error
       });
     }
@@ -64,22 +66,22 @@ export class UserController implements IUserController {
       const totalPages = Math.ceil(documentsCount / limit);
 
       if (users) {
-        res.status(200).json({
+        res.status(HttpStatusCode.OK).json({
           success: true,
           users,
           totalPages,
           totalUsers: documentsCount
         });
       } else {
-        res.status(400).json({
+        res.status(HttpStatusCode.BAD_REQUEST).json({
           success: false,
-          message: 'Users not found!'
+          message: ErrorMessages.USER_NOT_FOUND
         });
       }
     } catch (error) {
-      res.status(500).json({
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: 'Error fetching the users',
+        message: ErrorMessages.SERVER_ERROR,
         error
       });
     }
@@ -95,17 +97,17 @@ export class UserController implements IUserController {
       ]);
 
       if (user) {
-        res.status(200).json({ success: true, user, address });
+        res.status(HttpStatusCode.OK).json({ success: true, user, address });
       } else {
-        res.status(400).json({
+        res.status(HttpStatusCode.BAD_REQUEST).json({
           success: false,
-          message: 'User not found!'
+          message: ErrorMessages.USER_NOT_FOUND
         });
       }
     } catch (error) {
-      res.status(500).json({
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: 'Error fetching the user details',
+        message: ErrorMessages.SERVER_ERROR,
         error
       });
     }
@@ -118,58 +120,53 @@ export class UserController implements IUserController {
       const registeredMail = await this.userService.editUser(userId, formData);
 
       if (registeredMail) {
-        res.status(200).json({ success: true, registeredMail });
+        res.status(HttpStatusCode.OK).json({ success: true, registeredMail });
       }
     } catch (error) {
-      console.error('Error updating the user:', error);
-      res.status(500).json({ message: 'Error updating user', error });
+      console.error(ErrorMessages.USER_UPDATE_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.USER_UPDATE_FAILED, error });
     }
   }
 
   async updateProfilePicture(req: Request, res: Response): Promise<void> {
-
     const { userId } = req.user as JwtPayload;
-
     const { profilePicture } = req.body;
 
     try {
       const changeProfilePicture = await this.userService.changeProfilePicture(userId, profilePicture);
 
       if (!changeProfilePicture) {
-        res.status(400).json({ success: false, message: 'Error changing the profile!' });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.PROFILE_UPDATE_FAILED });
         return;
       }
 
-      res.status(200).json({ success: true, message: 'profile updated successfully!' });
+      res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.PROFILE_UPDATE_SUCCESS });
     } catch (error) {
-      console.error('Error updating the profile picture: ', error);
-      res.status(500).json({ message: 'Error updating the profile picture: ', error });
+      console.error(ErrorMessages.PROFILE_UPDATE_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.PROFILE_UPDATE_FAILED, error });
     }
   }
 
   async changePassword(req: Request, res: Response): Promise<void> {
-
     const { userId } = req.user as JwtPayload;
-
     const data = req.body;
-
     const { currentPassword, newPassword } = data;
 
     try {
       const verifyCurrentPassword = await this.userService.verifyCurrentPassword(userId, currentPassword);
 
       if (!verifyCurrentPassword) {
-        res.status(400).json({ success: false, message: 'Invalid current password!' });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.INVALID_CURRENT_PASSWORD });
         return;
       }
       const changePassword = await this.userService.changePassword(userId, newPassword);
 
       if (changePassword) {
-        res.status(200).json({ success: true, message: 'Password updated successfully!' });
+        res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.PASSWORD_RESET_SUCCESS });
       }
     } catch (error) {
-      console.error('Error updating the password: ', error);
-      res.status(500).json({ message: 'Error updating the password: ', error });
+      console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.PASSWORD_UPDATE_FAILED, error });
     }
   }
 
@@ -180,15 +177,15 @@ export class UserController implements IUserController {
       const toggleResponse = await this.userService.toggleIsBlocked(action, userId);
 
       if (toggleResponse) {
-        res.status(200).json({
+        res.status(HttpStatusCode.OK).json({
           success: true,
-          message: 'Updated the block status successfully!'
+          message: ErrorMessages.BLOCK_STATUS_UPDATE_SUCCESS
         });
       }
     } catch (error) {
-      res.status(500).json({
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: 'Error updating the block status',
+        message: ErrorMessages.BLOCK_STATUS_UPDATE_FAILED,
         error
       });
     }
@@ -200,22 +197,22 @@ export class UserController implements IUserController {
       const file = req.file;
 
       if (!file) {
-        res.status(400).json({ message: 'No image uploaded' });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.NO_IMAGE_UPLOADED });
         return;
       }
 
       const uploadResponse = await this.userService.uploadCertificateImage(userId, file);
 
       if (!uploadResponse) {
-        res.status(500).json({ message: 'Failed to upload image to Cloudinary' });
+        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.CERTIFICATE_UPLOAD_FAILED });
         return;
       }
 
-      res.status(200).json({ certificateUrl: uploadResponse });
+      res.status(HttpStatusCode.OK).json({ certificateUrl: uploadResponse });
     } catch (error) {
-      console.error('Error uploading the certificate image: ', error);
-      res.status(500).json({
-        message: 'Error uploading the certificate image',
+      console.error(ErrorMessages.CERTIFICATE_UPLOAD_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: ErrorMessages.CERTIFICATE_UPLOAD_FAILED,
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -226,35 +223,34 @@ export class UserController implements IUserController {
       const { certificateUrl } = req.body;
       const { userId } = req.user as JwtPayload;
 
-      console.log('certificateUrl: ', certificateUrl)
-
       if (!certificateUrl) {
-        res.status(400).json({ success: false, message: "Certificate URL is required" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.CERTIFICATE_URL_REQUIRED });
         return;
       }
 
       if (!userId) {
-        res.status(401).json({ success: false, message: "Unauthorized: User ID not found" });
+        res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: ErrorMessages.UNAUTHORIZED });
         return;
       }
 
       const result = await this.userService.deleteCertificate(userId, certificateUrl);
 
       if (!result) {
-        res.status(404).json({ success: false, message: "Certificate not found or could not be deleted" });
+        res.status(HttpStatusCode.NOT_FOUND).json({ success: false, message: ErrorMessages.CERTIFICATE_NOT_FOUND });
         return;
       }
 
-      res.status(200).json({
+      res.status(HttpStatusCode.OK).json({
         success: true,
-        message: "Certificate deleted successfully",
+        message: ErrorMessages.CERTIFICATE_DELETE_SUCCESS,
         data: result,
       });
     } catch (error: any) {
-      console.error("Error deleting certificate:", error);
-      res.status(500).json({
+      console.error(ErrorMessages.CERTIFICATE_DELETE_FAILED, error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: error.message || "Failed to delete certificate",
+        message: ErrorMessages.CERTIFICATE_DELETE_FAILED,
+        error: error.message || ErrorMessages.CERTIFICATE_DELETE_FAILED,
       });
     }
   };

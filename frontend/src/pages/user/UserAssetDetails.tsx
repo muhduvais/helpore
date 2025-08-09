@@ -11,6 +11,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
+import loading_logo from "../../assets/Logo-black-short.png"
 import {
     ArrowLeft,
     PackageOpen,
@@ -33,7 +34,6 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from 'framer-motion';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { userService } from '@/services/user.service';
 import asset_picture from '../../assets/asset_picture.png';
 import { FaTimes } from 'react-icons/fa';
@@ -41,29 +41,6 @@ import { toast } from "sonner";
 import 'react-toastify/dist/ReactToastify.css';
 import { IAsset } from '@/interfaces/adminInterface';
 import { IAssetRequest } from '@/interfaces/userInterface';
-
-// interface IAsset {
-//     _id: string;
-//     name: string;
-//     description: string;
-//     image: string;
-//     category: string;
-//     stocks: number;
-//     createdAt: string;
-//     updatedAt: string;
-//     condition?: string;
-//     location?: string;
-// }
-
-// interface IRequest {
-//     _id: string;
-//     status: 'pending' | 'approved' | 'rejected';
-//     requestedDate: string;
-//     startDate: string;
-//     endDate: string;
-//     quantity: number;
-//     reason?: string;
-// }
 
 const UserAssetDetails: React.FC = () => {
     const { id } = useParams();
@@ -155,19 +132,9 @@ const UserAssetDetails: React.FC = () => {
 
     if (isLoading) {
         return (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="flex justify-center items-center min-h-[60vh]"
-            >
-                <DotLottieReact
-                    src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
-                    loop
-                    autoplay
-                    style={{ width: '100px', height: '100px' }}
-                />
-            </motion.div>
+            <div className="flex justify-center items-center h-72">
+                <img src={loading_logo} alt="Loading..." className='flip-animation' />
+            </div>
         );
     }
 
