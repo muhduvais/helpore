@@ -1,5 +1,5 @@
 import { useState, ReactNode, useEffect, useRef } from 'react';
-import { Menu, X, Home, Box, FileText, Heart, Newspaper, LogOut, User, Bell, Upload, UserIcon } from 'lucide-react';
+import { Menu, X, Home, Box, FileText, Heart, Newspaper, LogOut, User, Bell, Upload, UserIcon, User2 } from 'lucide-react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
@@ -365,10 +365,18 @@ const Layout: React.FC = () => {
                     setIsProfileDropdownOpen(!isProfileDropdownOpen);
                     setShowNotifications(false);
                   }}
-                  className="flex items-center px-3 py-2 rounded-md text-sm hover:text-white font-medium hover:bg-[#435D2C]/80"
+                  className="flex items-center px-3 py-2 rounded-md text-sm hover:text-white font-medium"
                 >
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5" />
+                    {user?.profilePicture ? (
+                      <img
+                        src={user.profilePicture}
+                        alt="Profile"
+                        className="w-full h-full object-cover rounded-full border-[1px] border-transparent hover:border-[#435D2C]/80"
+                      />
+                    ) : (
+                      <User2 className="w-5 h-5" />
+                    )}
                   </div>
                 </button>
 

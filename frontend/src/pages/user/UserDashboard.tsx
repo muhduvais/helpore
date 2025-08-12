@@ -33,7 +33,7 @@ const UserDashboard: React.FC = () => {
     },
     {
       title: 'Published Blogs',
-      value: '0',
+      value: 'Feature Coming Soon',
       icon: <FileText className="w-8 h-8 text-white/80" />,
       gradient: 'from-[#2A76B5] to-[#6FADE3]'
     },

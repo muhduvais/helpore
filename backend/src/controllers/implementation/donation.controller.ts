@@ -18,7 +18,6 @@ export class DonationController implements IDonationController {
     this.getDonations = this.getDonations.bind(this);
     this.exportDonations = this.exportDonations.bind(this);
     this.getRecentDonations = this.getRecentDonations.bind(this);
-    // this.fechAllDonations = this.fechAllDonations.bind(this);
   }
 
   async createCheckoutSession(req: Request, res: Response): Promise<void> {

@@ -94,7 +94,6 @@ const DonationPage = () => {
                 isAnonymous
             });
 
-            // Redirect to Stripe Checkout
             if (response.data?.checkoutUrl) {
                 window.location.href = response.data.checkoutUrl;
             } else {
