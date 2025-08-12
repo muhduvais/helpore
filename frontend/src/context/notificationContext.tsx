@@ -14,6 +14,7 @@ interface Notification {
     content: string;
     read: boolean;
     timestamp: Date;
+    media: string[];
     requestId?: string;
     senderId?: string;
 }

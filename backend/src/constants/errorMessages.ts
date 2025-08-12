@@ -75,6 +75,7 @@ export const ErrorMessages = {
   CHAT_FETCH_CONVERSATIONS_FAILED: 'Error fetching conversations',
   CHAT_MARK_READ_SUCCESS: 'Messages marked as read',
   CHAT_MARK_READ_FAILED: 'Error marking messages as read',
+  CHAT_UPLOAD_MEDIA_FAILED: 'Error uploading media files',
 
   ACCESS_TOKEN_FAILED: 'Access token is missing or invalid. Please log in to continue.',
   RESET_LINK_SECRET_MISSING: 'Reset link secret is missing. Please contact support.',

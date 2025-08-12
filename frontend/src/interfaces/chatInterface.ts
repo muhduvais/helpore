@@ -6,9 +6,11 @@ export interface IMessage {
   content: string;
   read: boolean;
   requestId: mongoose.Schema.Types.ObjectId;
+  media: string[];
 }
 
 export interface IMessageDocument extends IMessage, mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

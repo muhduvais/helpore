@@ -33,7 +33,9 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
 
             const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 10);
 
-            const result = await uploadToCloudinary(file, 'asset-images', uniqueId);
+            const results = await uploadToCloudinary(file, 'asset-images', uniqueId);
+
+            const result = results[0];
 
             console.log('Cloudinary upload successful:', result.secure_url);
 
@@ -198,7 +200,7 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         try {
             let query: any = {};
 
-        if (search) {
+            if (search) {
                 query["asset.name"] = { $regex: search, $options: "i" };
             }
 

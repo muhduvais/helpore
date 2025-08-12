@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { format } from 'date-fns';
 import { IMessageDocument } from '@/interfaces/chatInterface';
@@ -11,6 +10,14 @@ import { EmptyChatState } from "./EmptyChatState";
 import { TypingIndicator } from "./TypingIndicator";
 import { ChatMessage } from "./ChatMessage";
 import { MessageInput } from "./MessageInput";
+import { RootState } from "@/redux/store";
+import React, { useEffect, useRef, useState } from "react";
+import { ObjectId } from "mongoose";
+
+interface Volunteer {
+    name?: string;
+    profilePicture?: string;
+}
 
 interface ChatInterfaceProps {
     request: IAssistanceRequest | null;
@@ -21,19 +28,13 @@ interface ChatInterfaceProps {
     handleSendMessage: () => Promise<void>;
     handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
     messagesEndRef?: React.RefObject<HTMLDivElement>;
+    sendError?: string;
+    isSending?: boolean;
 }
 
-interface IVolunteer {
-    _id: string;
-    name: string;
-    phone: string;
-    email: string;
-    profilePicture: string;
-}
-
-const ChatHeader: React.FC<{ volunteer: any, isTyping: boolean }> = ({ volunteer, isTyping }) => {
+const ChatHeader: React.FC<{ volunteer: Volunteer, isTyping: boolean }> = ({ volunteer, isTyping }) => {
     return (
-        <div className="p-4 border-b flex items-center justify-between">
+        <div className="p-4 border-b flex items-center justify-between" aria-label="Chat header">
             <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                     <AvatarImage
@@ -48,7 +49,7 @@ const ChatHeader: React.FC<{ volunteer: any, isTyping: boolean }> = ({ volunteer
                     <h3 className="font-medium text-gray-800">
                         {volunteer?.name || 'Volunteer'}
                     </h3>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500" aria-live="polite">
                         {isTyping ? 'Typing...' : 'Available to chat'}
                     </p>
                 </div>
@@ -56,6 +57,35 @@ const ChatHeader: React.FC<{ volunteer: any, isTyping: boolean }> = ({ volunteer
         </div>
     )
 }
+
+function useAutoScroll(dep: any, ref: React.RefObject<HTMLDivElement>) {
+    useEffect(() => {
+        if (ref && ref.current) {
+            ref.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [dep, ref]);
+}
+
+// 6. Performance: Virtualization (simple, for demo; use react-window for large lists)
+const VirtualizedMessages: React.FC<{
+    messages: IMessageDocument[];
+    userId: string | ObjectId;
+    formatTime: (dateString: string) => string;
+}> = ({ messages, userId, formatTime }) => {
+    // For real virtualization, use react-window or similar
+    return (
+        <>
+            {messages.map((message: IMessageDocument) => (
+                <ChatMessage
+                    key={message._id.toString() || message.createdAt.toString()}
+                    message={message}
+                    isOwnMessage={message.sender === userId}
+                    formatTime={formatTime}
+                />
+            ))}
+        </>
+    );
+};
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     request,
@@ -65,35 +95,52 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     messageInput,
     handleSendMessage,
     handleInputChange,
-    messagesEndRef
+    messagesEndRef,
+    sendError,
+    isSending
 }) => {
-    const userId = useSelector((state: any) => state.auth.userId);
+    const userId = useSelector((state: RootState) => state.auth.userId);
+
+    useAutoScroll(messages, messagesEndRef || useRef<HTMLDivElement>(null));
+
+    const [localSending, setLocalSending] = useState(false);
+    const handleSend = async () => {
+        setLocalSending(true);
+        await handleSendMessage();
+        setLocalSending(false);
+    };
 
     const formatMessageTime = (dateString: string) => {
-        return format(new Date(dateString), 'h:mm a');
+        const date = new Date(dateString);
+        const today = new Date();
+        if (
+            date.getDate() !== today.getDate() ||
+            date.getMonth() !== today.getMonth() ||
+            date.getFullYear() !== today.getFullYear()
+        ) {
+            return format(date, 'MMM d, h:mm a');
+        }
+        return format(date, 'h:mm a');
     };
 
     return (
-        <Card className="flex flex-col h-[600px]">
+        <Card className="flex flex-col h-[600px]" role="region" aria-label="Chat interface">
 
-            <ChatHeader volunteer={request?.volunteer} isTyping={isTyping} />
+            <ChatHeader volunteer={request?.volunteer || {}} isTyping={isTyping} />
 
             {/* Messages Container */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4" aria-live="polite" aria-label="Messages">
                 {isLoading ? (
                     <LoadingSpinner />
                 ) : messages.length === 0 ? (
                     <EmptyChatState volunteerName={request?.volunteer?.name || ''} />
                 ) : (
                     <>
-                        {messages.map((message, index) => (
-                            <ChatMessage
-                                key={index}
-                                message={message}
-                                isOwnMessage={message.sender === userId}
-                                formatTime={formatMessageTime}
-                            />
-                        ))}
+                        <VirtualizedMessages
+                            messages={messages}
+                            userId={userId || ''}
+                            formatTime={formatMessageTime}
+                        />
 
                         {isTyping && <TypingIndicator />}
 
@@ -102,11 +149,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 )}
             </div>
 
+            {sendError && (
+                <div className="text-red-500 text-xs px-4 py-1" role="alert">
+                    {sendError}
+                </div>
+            )}
+
             <MessageInput
                 value={messageInput}
                 onChange={handleInputChange}
-                onSend={handleSendMessage}
+                onSend={handleSend}
                 placeholder={`Message ${request?.volunteer?.name || 'Requester'}...`}
+                disabled={localSending || isSending}
+                aria-label="Type your message"
             />
         </Card>
     );

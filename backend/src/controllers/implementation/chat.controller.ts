@@ -15,20 +15,38 @@ export class ChatController implements IChatController {
         this.getConversationMessages = this.getConversationMessages.bind(this);
         this.getUserConversations = this.getUserConversations.bind(this);
         this.markConversationAsRead = this.markConversationAsRead.bind(this);
+        this.uploadMedia = this.uploadMedia.bind(this);
     }
 
     async sendMessage(req: Request, res: Response): Promise<void> {
         try {
-            const { receiverId, content, requestId, senderType, receiverType } = req.body;
+            const { receiverId, content, requestId, senderType, receiverType, uploadedMediaUrls } = req.body;
             const { userId: senderId } = req.user as JwtPayload;
 
-            const message = await this.chatService.sendMessage(senderId, receiverId, content, requestId, senderType, receiverType);
+            const message = await this.chatService.sendMessage(senderId, receiverId, content, requestId, senderType, receiverType, uploadedMediaUrls);
             res.status(HttpStatusCode.CREATED).json({ success: true, data: message });
         } catch (error) {
             console.error(ErrorMessages.CHAT_SEND_FAILED, error);
             res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: ErrorMessages.CHAT_SEND_FAILED,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    }
+
+    async uploadMedia(req: Request, res: Response): Promise<void> {
+        try {
+            const { requestId } = req.params;
+            const mediaFiles = req.files as Express.Multer.File[];
+
+            const mediaUrls = await this.chatService.uploadMedia(mediaFiles, requestId) as string[];
+            res.status(HttpStatusCode.OK).json({ success: true, mediaUrls });
+        } catch (error) {
+            console.error(ErrorMessages.CHAT_UPLOAD_MEDIA_FAILED, error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: ErrorMessages.CHAT_UPLOAD_MEDIA_FAILED,
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
         }

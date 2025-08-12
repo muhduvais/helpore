@@ -3,8 +3,10 @@ import { IMessageDocument, IConversationDocument } from '../../interfaces/chat.i
 import { IChatService } from '../interfaces/ServiceInterface';
 import { IChatRepository } from '../../repositories/interfaces/IChatRepository';
 import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
-import { io } from '../../utils';
+import { io, uploadToCloudinary } from '../../utils';
 import { ErrorMessages } from '../../constants/errorMessages';
+
+export type CloudinaryFile = { public_id: string; secure_url: string };
 
 @injectable()
 export class ChatService implements IChatService {
@@ -19,7 +21,8 @@ export class ChatService implements IChatService {
         content: string,
         requestId: string,
         senderType: 'users' | 'volunteers',
-        receiverType: 'users' | 'volunteers'
+        receiverType: 'users' | 'volunteers',
+        uploadedMediaUrls: string[]
     ): Promise<IMessageDocument> {
         try {
             const message = await this.chatRepository.createMessage({
@@ -30,6 +33,7 @@ export class ChatService implements IChatService {
                 read: false,
                 senderType,
                 receiverType,
+                media: uploadedMediaUrls,
             });
 
             await this.chatRepository.createOrUpdateConversation({
@@ -46,6 +50,7 @@ export class ChatService implements IChatService {
             io.to(`notification-${receiverId}`).emit('new-notification', {
                 type: 'message',
                 content: content.length > 50 ? `${content.substring(0, 50)}...` : content,
+                media: uploadedMediaUrls,
                 read: false,
                 requestId,
                 senderId
@@ -57,6 +62,7 @@ export class ChatService implements IChatService {
                 userType: receiverType,
                 type: 'message',
                 content: content.length > 50 ? `${content.substring(0, 50)}...` : content,
+                media: uploadedMediaUrls,
                 read: false,
                 requestId,
                 sender: senderId,
@@ -67,6 +73,20 @@ export class ChatService implements IChatService {
         } catch (error) {
             console.error(ErrorMessages.CHAT_SEND_FAILED, error);
             throw new Error(ErrorMessages.CHAT_SEND_FAILED);
+        }
+    }
+
+
+    async uploadMedia(mediaFiles: Express.Multer.File[], requestId: string): Promise<string[]> {
+        try {
+            const results = await uploadToCloudinary(mediaFiles, 'message-media', requestId);
+
+            const mediaUrls = results.map((fileObj) => fileObj.secure_url);
+
+            return mediaUrls;
+        } catch (error) {
+            console.error(ErrorMessages.CHAT_UPLOAD_MEDIA_FAILED, error);
+            throw new Error(ErrorMessages.CHAT_UPLOAD_MEDIA_FAILED);
         }
     }
 

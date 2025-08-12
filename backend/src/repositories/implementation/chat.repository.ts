@@ -13,13 +13,8 @@ export class ChatRepository extends BaseRepository<IMessageDocument> implements 
     async createMessage(messageData: Partial<IMessageDocument>): Promise<IMessageDocument> {
         const message = new Message(messageData);
         const savedMessage = await message.save();
-
-        const requestId = String(messageData.requestId);
-
-
         return savedMessage;
     }
-
 
     async getMessagesByRequestId(requestId: string): Promise<IMessageDocument[]> {
         return await Message.find({ requestId: new mongoose.Types.ObjectId(requestId) })

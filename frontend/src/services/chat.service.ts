@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 
 export const chatService = {
   // Messages
-  sendMessage: async (receiverId: string, content: string, requestId: string, senderType: 'users' | 'volunteers', receiverType: 'users' | 'volunteers') => {
+  sendMessage: async (receiverId: string, content: string, requestId: string, senderType: 'users' | 'volunteers', receiverType: 'users' | 'volunteers', uploadedMediaUrls: string[]) => {
+
     try {
       const response = await customAxios.post('/api/chats/messages', {
         receiverId,
@@ -13,7 +14,17 @@ export const chatService = {
         requestId,
         senderType,
         receiverType,
+        uploadedMediaUrls
       });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  uploadMedia: async (formData: FormData, requestId: string) => {
+    try {
+      const response = await customAxios.post(`/api/chats/media/${requestId}`, formData);
       return response;
     } catch (error) {
       throw error;

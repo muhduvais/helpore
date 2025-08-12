@@ -10,6 +10,7 @@ export interface INotificationDocument extends Document {
   sender?: mongoose.Types.ObjectId | string;
   userType?: string;
   senderType?: string;
+  media: string[];
 }
 
 const notificationSchema: Schema = new Schema({
@@ -28,7 +29,7 @@ const notificationSchema: Schema = new Schema({
   },
   content: {
     type: String,
-    required: true
+    required: false
   },
   read: {
     type: Boolean,
@@ -45,6 +46,10 @@ const notificationSchema: Schema = new Schema({
   senderType: {
     type: String,
     enum: ['users', 'volunteers']
+  },
+  media: {
+    type: [String],
+    default: []
   },
   createdAt: {
     type: Date,

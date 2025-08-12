@@ -151,6 +151,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
         }
     }
 
+
     async uploadCertificateImage(userId: string, file: Express.Multer.File): Promise<string> {
         try {
             if (!file) {
@@ -159,9 +160,11 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
             const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 10);
 
-            const result = await uploadToCloudinary(file, 'medical-certificates', uniqueId);
+            const results = await uploadToCloudinary(file, 'medical-certificates', uniqueId);
 
-            await this.userRepository.updateUserCertificates(userId, result.secure_url)
+            const result = results[0];
+
+            await this.userRepository.updateUserCertificates(userId, result.secure_url);
 
             return result.secure_url;
         } catch (error) {

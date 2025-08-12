@@ -7,7 +7,8 @@ export const MessageInput: React.FC<{
     onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
     onSend: () => Promise<void>;
     placeholder: string;
-}> = ({ value, onChange, onSend, placeholder }) => {
+    disabled: boolean | undefined;
+}> = ({ value, onChange, onSend, placeholder, disabled }) => {
     return (
         <div className="p-4 border-t">
             <div className="flex items-center gap-2">
@@ -27,7 +28,7 @@ export const MessageInput: React.FC<{
                 <Button
                     onClick={onSend}
                     size="icon"
-                    disabled={!value.trim()}
+                    disabled={!value.trim() || disabled}
                     className="bg-[#688D48] hover:bg-[#5a7a3e] text-white"
                 >
                     <Send className="h-4 w-4" />

@@ -233,17 +233,114 @@ const Layout: React.FC = () => {
                               onClick={() => handleNotificationClick(notification)}
                             >
                               <div className="flex justify-between pr-6">
-                                <span className="font-medium text-gray-800">
-                                  {notification.type === 'message' ? 'New message' : 'Meeting Scheduled'}
-                                </span>
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-medium text-gray-800">
+                                    {notification.type === 'message' ? 'New message' : 'Meeting Scheduled'}
+                                  </span>
+                                  {notification.media && notification.media.length > 0 && (
+                                    <div className="flex items-center space-x-1">
+                                      <svg className="h-3 w-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                      </svg>
+                                      <span className="text-xs text-blue-600 font-medium">
+                                        {notification.media.length}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                                 <TimeAgo date={notification.timestamp} formatter={timeFormatter} className="text-xs text-gray-500" />
                               </div>
+
                               <p className="text-sm text-gray-600 mt-1 truncate">
                                 {notification.content}
                               </p>
+
+                              {/* Media Preview */}
+                              {notification.media && notification.media.length > 0 && (
+                                <div className="mt-3 mb-1">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="text-xs text-gray-500 font-medium">
+                                      {notification.media.length} attachment{notification.media.length > 1 ? 's' : ''}
+                                    </span>
+                                  </div>
+
+                                  {notification.media.length === 1 ? (
+
+                                    <div className="relative group">
+                                      <img
+                                        src={notification.media[0]}
+                                        alt="Media attachment"
+                                        className="w-full h-20 object-cover rounded-lg border border-gray-200 group-hover:opacity-90 transition-opacity"
+
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+
+                                          const sibling = target.nextElementSibling as HTMLElement;
+                                          sibling.style.display = 'flex';
+                                        }}
+                                      />
+                                      <div className="hidden w-full h-20 bg-gray-100 rounded-lg border border-gray-200 items-center justify-center">
+                                        <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                      </div>
+                                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all duration-200"></div>
+                                    </div>
+                                  ) : (
+                                    /* Multiple Media Preview */
+                                    <div className="grid grid-cols-3 gap-1">
+                                      {notification.media.slice(0, 3).map((mediaUrl, mediaIndex) => (
+                                        <div key={mediaIndex} className="relative group">
+                                          <img
+                                            src={mediaUrl}
+                                            alt={`Media ${mediaIndex + 1}`}
+                                            className="w-full h-16 object-cover rounded border border-gray-200 group-hover:opacity-90 transition-opacity"
+
+                                            onError={(e) => {
+                                              const target = e.target as HTMLImageElement;
+                                              target.style.display = 'none';
+
+                                              const sibling = target.nextElementSibling as HTMLElement;
+                                              sibling.style.display = 'flex';
+                                            }}
+                                          />
+                                          <div className="hidden w-full h-16 bg-gray-100 rounded border border-gray-200 items-center justify-center">
+                                            <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                          </div>
+                                          {mediaIndex === 2 && notification.media.length > 3 && (
+                                            <div className="absolute inset-0 bg-black bg-opacity-60 rounded flex items-center justify-center">
+                                              <span className="text-white text-xs font-semibold">
+                                                +{notification.media.length - 3}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {/* Media Type Indicator */}
+                                  <div className="mt-2 flex items-center justify-between">
+                                    <div className="flex items-center space-x-1">
+                                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                      <span className="text-xs text-gray-500">Media message</span>
+                                    </div>
+                                    <span className="text-xs text-blue-600 font-medium hover:underline cursor-pointer">
+                                      View all
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
+
                             <button
-                              className="absolute top-3 right-3 text-gray-400 hover:text-red-500"
+                              className="absolute top-3 right-3 text-gray-400 hover:text-red-500 z-10"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 clearNotification(notification._id);

@@ -74,9 +74,9 @@ export class UserRepository extends BaseRepository<IUserDocument> implements IUs
             await this.findByIdAndUpdate(userId, { 
                 $push: { certificates: uploadedCertificateUrl }
             });
-            return true;
+            return true;  
         } catch (error) {
-            console.error("Error updating profile picture:", error);
+            console.error("Error updating user certificates:", error);
             return false;
         }
     }

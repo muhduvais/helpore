@@ -6,6 +6,7 @@ import { IDonation } from '../../models/donation.model';
 import { IDonationResponse } from '../../repositories/implementation/donation.repository';
 import { INotificationDocument } from '../../models/notification.model';
 import { IMeeting } from '../../interfaces/meeting.interface';
+import { CloudinaryFile } from '../implementation/chat.service';
 
 export interface IAuthService {
     registerUser(name: string, email: string, password: string): Promise<string | boolean | null>;
@@ -111,7 +112,7 @@ export interface IAssistanceRequestService {
     fetchAssistanceRequestDetails(requestId: string): Promise<IAssistanceRequest | null>;
     checkTasksLimit(volunteerId: string): Promise<boolean | null>;
     assignVolunteer(requestId: string, volunteerId: string): Promise<boolean>;
-    fetchPendingRequests (): Promise<IAssistanceRequest[] | null>;
+    fetchPendingRequests(): Promise<IAssistanceRequest[] | null>;
 }
 
 export interface IDonationService {
@@ -127,7 +128,8 @@ export interface IDonationService {
 }
 
 export interface IChatService {
-    sendMessage(senderId: string, receiverId: string, content: string, requestId: string, senderType: 'users' | 'volunteers', receiverType: 'users' | 'volunteers'): Promise<IMessageDocument>;
+    sendMessage(senderId: string, receiverId: string, content: string, requestId: string, senderType: 'users' | 'volunteers', receiverType: 'users' | 'volunteers', uploadedMediaUrls: string[]): Promise<IMessageDocument>;
+    uploadMedia(mediaFiles: Express.Multer.File[], requestId: string): Promise<string[]>
     getConversationMessages(requestId: string): Promise<IMessageDocument[]>;
     getUserConversations(userId: string): Promise<IConversationDocument[]>;
     markConversationAsRead(conversationId: string, userId: string): Promise<void>;
@@ -156,13 +158,13 @@ export interface IOtpService {
 }
 
 export interface IMeetingService {
-    createMeeting( adminId: string, title: string, participants: string[], scheduledTime: Date | string ): Promise<IMeeting>;
+    createMeeting(adminId: string, title: string, participants: string[], scheduledTime: Date | string): Promise<IMeeting>;
     getMeetings(page: number, limit: number, search: string, filter: string): Promise<IMeeting[] | null>;
     totalMeetingsCount(search: string, filter: string): Promise<number | null>;
     totalUserMeetingsCount(userId: string, search: string, filter: string): Promise<number | null>;
     getMeetingById(meetingId: string): Promise<IMeeting | null>;
     getUserMeetings(userId: string, page: number, limit: number, search: string, filter: string): Promise<IMeeting[] | null>;
-    updateMeetingStatus( meetingId: string, status: 'scheduled' | 'active' | 'completed' ): Promise<IMeeting | null>;
+    updateMeetingStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed'): Promise<IMeeting | null>;
     generateToken(userId: string, roomId: string, userName: string): Promise<string>;
     deleteMeeting(meetingId: string): Promise<IMeeting | null>;
     getUpcomingMeetings(): Promise<IMeeting[] | null>;

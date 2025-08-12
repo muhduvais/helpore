@@ -25,7 +25,7 @@ const messageSchema = new Schema<IMessageDocument>({
   },
   content: {
     type: String,
-    required: true,
+    required: false,
   },
   read: {
     type: Boolean,
@@ -39,7 +39,11 @@ const messageSchema = new Schema<IMessageDocument>({
   conversationId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'conversations',
-  }
+  },
+  media: [{
+    type: String,
+    required: false,
+  }],
 }, {
   timestamps: true,
 });

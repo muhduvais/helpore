@@ -29,7 +29,11 @@ import {
     Send,
     MessageSquare,
     CheckCheck,
-    Check
+    Check,
+    Paperclip,
+    X,
+    // Image as ImageIcon,
+    FileText as FileIcon
 } from 'lucide-react';
 import {
     Alert,
@@ -46,9 +50,7 @@ import { IMessageDocument } from '@/interfaces/chatInterface';
 import { Socket } from 'socket.io-client';
 import { useNotifications } from '@/context/notificationContext';
 import { IAssistanceRequest } from '@/interfaces/adminInterface';
-
-/////////////////////////////////////////////
-////////////////////////////////////////////
+import ImageModal from './MediaModal';
 
 interface HistoryEntry {
     date: string;
@@ -56,11 +58,13 @@ interface HistoryEntry {
     details: string;
 }
 
+type LocalAttachment = File & { previewUrl?: string };
+
 const AssistanceRequestDetails: React.FC = () => {
     const { id } = useParams();
 
     const [queryParams] = useSearchParams();
-
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [activeTab, setActiveTab] = useState(() => {
         return queryParams.get('tab') || 'details';
     });
@@ -84,6 +88,12 @@ const AssistanceRequestDetails: React.FC = () => {
     const authToken = useSelector((state: any) => state.auth.accessToken);
     const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
 
+    const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
+    const [isSending, setIsSending] = useState(false);
+    const [sendError, setSendError] = useState<string | null>(null);
+    const [openMediaModal, setOpenMediaModal] = useState(false);
+    const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+
     const { markAllAsRead } = useNotifications();
 
     useEffect(() => {
@@ -94,6 +104,9 @@ const AssistanceRequestDetails: React.FC = () => {
     }, [queryParams]);
 
     useEffect(() => {
+        setMessageInput('');
+        setAttachments([]);
+
         const fetchData = async () => {
             try {
                 setIsLoading(true);
@@ -215,15 +228,79 @@ const AssistanceRequestDetails: React.FC = () => {
         }
     }, [messages]);
 
-    const handleSendMessage = async () => {
-        if (!messageInput.trim() || !request?.volunteer?._id || !id) return;
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+        const file = files[0] as LocalAttachment;
+        if (file.type.startsWith('image/')) {
+            file.previewUrl = URL.createObjectURL(file);
+        }
+        setAttachments(prev => [...prev, file]);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    const handleRemoveAttachment = (fileToRemove: LocalAttachment) => {
+        setAttachments(prev =>
+            prev.filter(att =>
+                att.name !== fileToRemove.name &&
+                (att.previewUrl && fileToRemove.previewUrl && att.previewUrl !== fileToRemove.previewUrl)
+            )
+        );
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    const uploadMedia = async (): Promise<string[] | []> => {
+        if (!attachments.length) return [];
+        const formFileData = new FormData();
+        attachments.forEach(file => {
+            formFileData.append('files', file);
+        });
 
         try {
-            await chatService.sendMessage(request.volunteer._id, messageInput, id, 'volunteers', 'users');
-            setMessageInput('');
+            const mediaUploadResponse = await chatService.uploadMedia(formFileData, request?._id || '');
+            if (mediaUploadResponse.status === 200) {
+                return mediaUploadResponse.data.mediaUrls || [];
+            } else {
+                return [];
+            }
         } catch (error) {
-            console.error('Error sending message:', error);
+            if (axios.isAxiosError(error)) {
+                console.log(error.response?.data);
+            }
+            toast.error('File uploading error');
+            return [];
+        }
+    };
+
+    // Enhanced send message handler
+    const handleSendMessage = async () => {
+        if ((!messageInput.trim() && attachments.length === 0) || !request?.volunteer?._id || !id) return;
+        setIsSending(true);
+        setSendError(null);
+
+        try {
+            let uploadedMediaUrls;
+            if (attachments.length) {
+                uploadedMediaUrls = await uploadMedia();
+            }
+
+            await chatService.sendMessage(
+                request.volunteer._id,
+                messageInput || '',
+                id,
+                'volunteers',
+                'users',
+                uploadedMediaUrls || []
+            );
+            setMessageInput('');
+            setAttachments([]);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        } catch (error) {
+            console.log('error here: ', error);
+            setSendError('Failed to send message');
             toast.error('Failed to send message');
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -243,6 +320,11 @@ const AssistanceRequestDetails: React.FC = () => {
                 }
             }, 2000);
         }
+    };
+
+    const handleMediaModal = (toggle: boolean, url: string = '') => {
+        setOpenMediaModal(toggle);
+        setMediaUrl(url);
     };
 
     const handleShareRequest = () => {
@@ -505,7 +587,6 @@ const AssistanceRequestDetails: React.FC = () => {
                                     History
                                 </TabsTrigger>
 
-                                {/* Show Chat tab only if request is approved */}
                                 {request?.status === 'approved' && (
                                     <TabsTrigger
                                         value="chat"
@@ -619,7 +700,7 @@ const AssistanceRequestDetails: React.FC = () => {
                                 <TabsContent value="chat">
                                     <Card className="flex flex-col h-[600px]">
                                         {/* Chat Header */}
-                                        <div className="p-4 border-b flex items-center justify-between">
+                                        <div className="p-4 border-b flex items-center justify-between" aria-label="Chat header">
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-10 w-10">
                                                     <AvatarImage
@@ -634,7 +715,7 @@ const AssistanceRequestDetails: React.FC = () => {
                                                     <h3 className="font-medium text-gray-800">
                                                         {request?.volunteer?.name || 'Volunteer'}
                                                     </h3>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="text-xs text-gray-500" aria-live="polite">
                                                         {isTyping ? 'Typing...' : 'Available to chat'}
                                                     </p>
                                                 </div>
@@ -642,7 +723,7 @@ const AssistanceRequestDetails: React.FC = () => {
                                         </div>
 
                                         {/* Messages Container */}
-                                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                        <div className="flex-1 overflow-y-auto p-4 space-y-4" aria-live="polite" aria-label="Messages">
                                             {isLoadingMessages ? (
                                                 <div className="flex justify-center items-center h-full">
                                                     <DotLottieReact
@@ -664,17 +745,49 @@ const AssistanceRequestDetails: React.FC = () => {
                                                 <>
                                                     {messages.map((message, index) => (
                                                         <div
-                                                            key={index}
+                                                            key={message._id?.toString() || index}
                                                             className={`flex ${message.sender === userId ? 'justify-end' : 'justify-start'}`}
                                                         >
                                                             <div
                                                                 className={`rounded-2xl px-4 py-2 max-w-[80%] ${message.sender === userId
-
                                                                     ? 'bg-[#688D48] text-white'
                                                                     : 'bg-gray-100 text-gray-800'
                                                                     }`}
                                                             >
+                                                                {/* Message content */}
                                                                 <p>{message.content}</p>
+                                                                {/* Attachments */}
+                                                                {message.media && message.media.length > 0 && (
+                                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                                        {message.media.map((url: string, i: number) => {
+                                                                            const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url);
+                                                                            return (
+                                                                                <div key={i} className="relative">
+                                                                                    {isImage ? (
+                                                                                        <img
+                                                                                            onClick={() => handleMediaModal(true, url)}
+                                                                                            src={url}
+                                                                                            alt={`attachment-${i}`}
+                                                                                            className="w-24 h-24 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <a
+                                                                                            href={url}
+                                                                                            target="_blank"
+                                                                                            rel="noopener noreferrer"
+                                                                                            className="flex items-center gap-1 bg-gray-200 px-2 py-1 rounded text-blue-700 underline"
+                                                                                        >
+                                                                                            <FileIcon size={18} />
+                                                                                            <span className="text-xs break-all">
+                                                                                                {url.split('/').pop()}
+                                                                                            </span>
+                                                                                        </a>
+                                                                                    )}
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                )}
                                                                 <div className={`flex ${message.sender === userId ? 'justify-between' : 'justify-start'} items-center`}>
                                                                     <div className={`text-xs mt-1 ${message.sender === userId ? 'text-gray-200' : 'text-gray-500'
                                                                         }`}>
@@ -705,29 +818,85 @@ const AssistanceRequestDetails: React.FC = () => {
                                             )}
                                         </div>
 
-                                        {/* Message Input */}
+                                        {/* Error message */}
+                                        {sendError && (
+                                            <div className="text-red-500 text-xs px-4 py-1" role="alert">
+                                                {sendError}
+                                            </div>
+                                        )}
+
+                                        {/* Message Input with media upload */}
                                         <div className="p-4 border-t">
-                                            <div className="flex items-center gap-2">
-                                                <Textarea
-                                                    value={messageInput}
-                                                    onChange={handleInputChange}
-                                                    placeholder={`Message ${request?.volunteer?.name || 'Requester'}...`}
-                                                    className="flex-1 resize-none"
-                                                    rows={1}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                                            e.preventDefault();
-                                                            handleSendMessage();
-                                                        }
-                                                    }}
-                                                />
+                                            <div className="flex items-end gap-2">
+                                                {/* Media upload button */}
+                                                <label className="cursor-pointer flex items-center">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*,application/pdf,.doc,.docx,.txt"
+                                                        className="hidden"
+                                                        onChange={handleFileChange}
+                                                        disabled={isSending}
+                                                        ref={fileInputRef}
+                                                    />
+                                                    <Paperclip className="text-gray-500 hover:text-[#688D48]" size={22} />
+                                                </label>
+                                                <div className="flex-1">
+                                                    <Textarea
+                                                        value={messageInput}
+                                                        onChange={handleInputChange}
+                                                        placeholder={`Message ${request?.volunteer?.name || 'Requester'}...`}
+                                                        className="resize-none"
+                                                        rows={1}
+                                                        disabled={isSending}
+                                                        aria-label="Type your message"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                                e.preventDefault();
+                                                                handleSendMessage();
+                                                            }
+                                                        }}
+                                                    />
+                                                    {/* Show attachments preview */}
+                                                    {attachments.length > 0 && (
+                                                        <div className="flex flex-wrap gap-2 mt-2">
+                                                            {attachments.map(att => (
+                                                                <div key={att.name + (att.previewUrl || '')} className="relative group">
+                                                                    {att.type.startsWith('image/') ? (
+                                                                        <img src={att.previewUrl} alt={att.name} className="w-16 h-16 object-cover rounded" />
+                                                                    ) : (
+                                                                        <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
+                                                                            <FileIcon size={16} />
+                                                                            <span className="text-xs">{att.name}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    <button
+                                                                        type="button"
+                                                                        className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow group-hover:opacity-100 opacity-70"
+                                                                        onClick={() => handleRemoveAttachment(att)}
+                                                                        aria-label="Remove attachment"
+                                                                    >
+                                                                        <X size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <Button
                                                     onClick={handleSendMessage}
                                                     size="icon"
-                                                    disabled={!messageInput.trim()}
+                                                    disabled={isSending || (!messageInput.trim() && attachments.length === 0)}
                                                     className="bg-[#688D48] hover:bg-[#5a7a3e] text-white"
+                                                    aria-label="Send message"
                                                 >
-                                                    <Send className="h-4 w-4" />
+                                                    {isSending ? (
+                                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                    ) : (
+                                                        <Send className="h-4 w-4" />
+                                                    )}
                                                 </Button>
                                             </div>
                                         </div>
@@ -739,6 +908,10 @@ const AssistanceRequestDetails: React.FC = () => {
                     </motion.div>
                 </div>
             </motion.div>
+
+            {openMediaModal && (
+                <ImageModal url={mediaUrl || ''} close={() => handleMediaModal(false)} />
+            )}
 
             {/* Cancel Request Modal */}
             {/* Add CancelDialog */}

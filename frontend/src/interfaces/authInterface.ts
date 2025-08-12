@@ -1,6 +1,7 @@
+import { ObjectId } from "mongoose";
 
 export interface AuthState {
-  userId: string | null;
+  userId: string | null | ObjectId;
   isLoggedIn: boolean;
   isBlocked: boolean;
   role: string | null;

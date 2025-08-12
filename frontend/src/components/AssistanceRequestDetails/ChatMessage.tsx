@@ -1,7 +1,7 @@
 import { IMessageDocument } from "@/interfaces/chatInterface"
 
 export const ChatMessage: React.FC<{
-    key: number,
+    key: string | number,
     message: IMessageDocument,
     isOwnMessage: boolean,
     formatTime: any

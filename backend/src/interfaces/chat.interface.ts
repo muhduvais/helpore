@@ -13,6 +13,7 @@ export interface IMessage {
   conversationId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  media: string[];
 }
 
 export interface IMessageDocument extends IMessage, mongoose.Document {
