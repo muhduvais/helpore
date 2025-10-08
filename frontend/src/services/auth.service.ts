@@ -1,5 +1,5 @@
 import customAxios from '../utils/urlProxy';
-import { LoginFormData, LoginResponse, SignUpFormData, SignupResponse } from '../interfaces/authInterface';
+import { LoginFormData, LoginResponse, LogoutResponse, SignUpFormData, SignupResponse } from '../interfaces/authInterface';
 import { auth, googleProvider, signInWithPopup } from '../config/firebase.config';
 import { FirebaseError } from 'firebase/app';
 import { AxiosError } from 'axios';
@@ -17,6 +17,14 @@ export const authService = {
     login: async (data: LoginFormData, selectedRole: string) => {
         try {
             const response = await customAxios.post<LoginResponse>('/api/auth/login', { data, selectedRole });
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
+    logout: async () => {
+        try {
+            const response = await customAxios.post<LogoutResponse>('/api/auth/logout');
             return response;
         } catch (error) {
             throw error;

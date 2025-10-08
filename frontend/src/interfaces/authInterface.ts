@@ -41,6 +41,10 @@ export interface LoginResponse {
   }
 }
 
+export interface LogoutResponse {
+  message: string;
+}
+
 export interface AddAssetFormData {
   name: string;
   category: string;

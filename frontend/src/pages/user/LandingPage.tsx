@@ -1,13 +1,54 @@
-import { ArrowRight, Heart, Users } from 'lucide-react';
+import { ArrowRight, Heart, Users, Mail, Phone, MapPin } from 'lucide-react';
 import { FaHandHolding } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import helping_hand from '../../assets/helping_hand.jpg';
+import logo from '../../assets/Logo-black.png';
 
 const LandingPage = () => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
+      {/* Navigation Bar */}
+      <nav className="bg-gray-100 shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <img src={logo} alt="Welfare App Logo" className="h-10 w-auto" />
+            </div>
+            <div className="hidden md:flex space-x-8">
+              <button onClick={() => scrollToSection('home')} className="text-gray-700 hover:text-[#435D2C] transition-colors">
+                Home
+              </button>
+              <button onClick={() => scrollToSection('features')} className="text-gray-700 hover:text-[#435D2C] transition-colors">
+                Features
+              </button>
+              <button onClick={() => scrollToSection('about')} className="text-gray-700 hover:text-[#435D2C] transition-colors">
+                About
+              </button>
+              <button onClick={() => scrollToSection('contact')} className="text-gray-700 hover:text-[#435D2C] transition-colors">
+                Contact
+              </button>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link to="/user/login" className="text-[#435D2C] hover:text-[#688D48] font-semibold">
+                Login
+              </Link>
+              <Link to="/user/register" className="px-4 py-2 bg-[#435D2C] text-white rounded-lg font-semibold hover:bg-[#364B23] transition-colors">
+                Sign Up
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <header className="bg-gradient-to-r from-[#435D2C] to-[#688D48] text-white">
+      <header id="home" className="bg-gradient-to-r from-[#435D2C] to-[#688D48] text-white">
         <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
@@ -36,7 +77,7 @@ const LandingPage = () => {
       </header>
 
       {/* Features Section */}
-      <section className="py-16">
+      <section id="features" className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">How You Can Help</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -67,6 +108,61 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* About Section */}
+      <section id="about" className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold mb-6 text-gray-800">About Our Mission</h2>
+              <p className="text-gray-600 mb-4">
+                We are a dedicated welfare management platform committed to bridging the gap between those who need help and those who can provide it. Our mission is to create a compassionate community where everyone has access to the support they need.
+              </p>
+              <p className="text-gray-600 mb-4">
+                Through our platform, we facilitate meaningful connections between volunteers, donors, and individuals seeking assistance. We believe that by working together, we can create lasting positive change in our communities.
+              </p>
+              <p className="text-gray-600">
+                Our team is passionate about social welfare and is committed to transparency, efficiency, and making a real difference in people's lives. Join us in our mission to build a more caring and supportive society.
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <img src={logo} alt="Welfare App Logo" className="w-64 h-auto" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-16 bg-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
+            Get In Touch
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="flex flex-col items-center text-center bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-[#688D48]/10 rounded-full flex items-center justify-center mb-4">
+                <Mail className="w-6 h-6 text-[#688D48]" />
+              </div>
+              <p className="font-semibold text-lg mb-2">Email</p>
+              <p className="text-gray-600">support@helpore.com</p>
+            </div>
+            <div className="flex flex-col items-center text-center bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-[#688D48]/10 rounded-full flex items-center justify-center mb-4">
+                <Phone className="w-6 h-6 text-[#688D48]" />
+              </div>
+              <p className="font-semibold text-lg mb-2">Phone</p>
+              <p className="text-gray-600">+91 9746483041</p>
+            </div>
+            <div className="flex flex-col items-center text-center bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow md:col-span-2 lg:col-span-1">
+              <div className="w-12 h-12 bg-[#688D48]/10 rounded-full flex items-center justify-center mb-4">
+                <MapPin className="w-6 h-6 text-[#688D48]" />
+              </div>
+              <p className="font-semibold text-lg mb-2">Address</p>
+              <p className="text-gray-600">Kottakkal, Malappuram - 676508</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="bg-[#435D2C] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
@@ -90,7 +186,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">About Us</h3>
+              <img src={logo} alt="Welfare App Logo" className="h-8 w-auto mb-4 brightness-0 invert" />
               <p className="text-gray-400">
                 We're dedicated to connecting those in need with those who can help.
               </p>
@@ -98,9 +194,19 @@ const LandingPage = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                <li><Link to="/about" className="text-gray-400 hover:text-white">About</Link></li>
-                <li><Link to="/contact" className="text-gray-400 hover:text-white">Contact</Link></li>
-                <li><Link to="/privacy" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
+                <li>
+                  <button onClick={() => scrollToSection('about')} className="text-gray-400 hover:text-white">
+                    About
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => scrollToSection('contact')} className="text-gray-400 hover:text-white">
+                    Contact
+                  </button>
+                </li>
+                <li>
+                  <Link to="/privacy" className="text-gray-400 hover:text-white">Privacy Policy</Link>
+                </li>
               </ul>
             </div>
           </div>

@@ -25,10 +25,6 @@ const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // if (isLoggedIn && role === 'admin') {
-  //   return <Navigate to={'/admin/dashboard'} />
-  // }
-
   // Toggle password eye
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -87,64 +83,88 @@ const AdminLoginPage: React.FC = () => {
         console.error('Login failed:', error);
         setErrorMessage('An unexpected error occurred');
       }
-
     }
   }
-
 
   return (
     <>
       {/* Main container */}
-      <div className={`main-container relative w-[100vw] h-[100vh] flex items-center justify-between text-[#222222] bg-cover bg-center px-20`}
+      <div className="main-container relative w-full min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between text-[#222222] bg-cover bg-center px-4 sm:px-8 md:px-12 lg:px-20 py-8"
         style={{ backgroundImage: `url(${bgDark_1_img})` }}
       >
-        <div className="logo absolute top-16 left-28">
-          <img src={logo} alt="logo" />
+        {/* Logo */}
+        <div className="logo absolute top-4 left-4 sm:top-8 sm:left-8 lg:top-16 lg:left-28 z-10">
+          <img src={logo} alt="logo" className="h-12 sm:h-16 w-auto" />
         </div>
 
         {/* Left text */}
-        <div className="textContainer max-w-[45%] mx-20">
-          <h2 className='text-white text-5xl font-bold'>“You can always, always give something, even if it is only kindness!”</h2>
+        <div className="textContainer hidden lg:flex max-w-[45%] mx-4 xl:mx-20">
+          <h2 className='text-white text-3xl xl:text-5xl font-bold leading-tight'>
+            "You can always, always give something, even if it is only kindness!"
+          </h2>
         </div>
 
-        <div className={`login-form bg-white bg-opacity-80 transition-all duration-300 rounded-xl max-w-sm w-[400px] p-3 px-5 mr-24`}>
-          <div className='login-title flex items-center justify-start gap-x-2 p-4 pb-8 text-4xl font-bold'>
-            <h2 className={`text-[#414141]`}>Login <span className='font-light'>here</span></h2>
+        {/* Login Form */}
+        <div className="login-form bg-white bg-opacity-80 sm:bg-opacity-80 transition-all duration-300 rounded-xl w-full max-w-sm sm:max-w-md lg:max-w-sm xl:w-[400px] p-4 sm:p-5 mt-20 lg:mt-0 lg:mr-8 xl:mr-24">
+          <div className='login-title flex items-center justify-start gap-x-2 p-3 sm:p-4 pb-6 sm:pb-8 text-3xl sm:text-4xl font-bold'>
+            <h2 className='text-[#414141]'>Login <span className='font-light'>here</span></h2>
           </div>
 
-          {errorMessage && <span className='p-3 opacity-90 font-semibold text-red-500'>{errorMessage}</span>}
+          <hr />
+
+          {errorMessage && (
+            <span className='block p-3 opacity-90 font-semibold text-red-500 text-sm sm:text-base'>
+              {errorMessage}
+            </span>
+          )}
           <hr className='opacity-100' />
 
           <form onSubmit={handleLogin} className='py-3'>
-
+            {/* Email Field */}
             <div className="input-field flex flex-col p-3 pt-0 gap-y-1">
-              {formErrors.email ? <label htmlFor="email" className='opacity-90 font-semibold text-red-500'>{formErrors.email}</label>
-                : <label htmlFor="email" className='opacity-75 font-semibold'>Email</label>}
+              {formErrors.email ? (
+                <label htmlFor="email" className='opacity-90 font-semibold text-red-500 text-sm sm:text-base'>
+                  {formErrors.email}
+                </label>
+              ) : (
+                <label htmlFor="email" className='opacity-75 font-semibold text-sm sm:text-base'>
+                  Email
+                </label>
+              )}
               <input
                 type="text"
                 name="email"
                 id="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`transition-all duration-300 bg-transparent px-3 py-2 text-xl font-semibold border-b-[3px] bg-white ${formErrors.email || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
-
+                className={`transition-all duration-300 bg-transparent px-3 py-2 text-lg sm:text-xl font-semibold border-b-[3px] bg-white ${formErrors.email || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}
+              />
             </div>
 
+            {/* Password Field */}
             <div className="relative input-field flex flex-col p-3 pt-0 gap-y-2">
-              {formErrors.password ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500'>{formErrors.password}</label>
-                : <label htmlFor="password" className='opacity-75 font-semibold'>Password</label>}
+              {formErrors.password ? (
+                <label htmlFor="password" className='opacity-90 font-semibold text-red-500 text-sm sm:text-base'>
+                  {formErrors.password}
+                </label>
+              ) : (
+                <label htmlFor="password" className='opacity-75 font-semibold text-sm sm:text-base'>
+                  Password
+                </label>
+              )}
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 id="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                className={`transition-all duration-300 bg-transparent px-3 py-2  text-xl font-semibold border-b-[3px] bg-white ${formErrors.password || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
+                className={`transition-all duration-300 bg-transparent px-3 py-2 text-lg sm:text-xl font-semibold border-b-[3px] bg-white ${formErrors.password || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`}
+              />
 
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute right-7 top-11 text-xl text-gray-600"
+                className="absolute right-5 sm:right-7 top-10 sm:top-11 text-lg sm:text-xl text-gray-600 hover:text-gray-800 transition-colors"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
@@ -154,12 +174,19 @@ const AdminLoginPage: React.FC = () => {
             <div className="input-field flex flex-col px-3 py-1 mt-5">
               <button
                 type='submit'
-                className={`transition-all w-full duration-300 bg-[#688D48] px-3 py-2 text-white text-xl outline-none font-semibold`}>
+                className='transition-all w-full duration-300 bg-[#688D48] hover:bg-[#577A3A] px-3 py-2 sm:py-3 text-white text-lg sm:text-xl outline-none font-semibold rounded-md'
+              >
                 Submit
               </button>
             </div>
-
           </form>
+        </div>
+
+        {/* Mobile Quote - Shown only on small screens */}
+        <div className="lg:hidden text-center mt-8 px-4 max-w-lg">
+          <p className='text-white text-lg sm:text-xl font-semibold drop-shadow-lg'>
+            "You can always, always give something, even if it is only kindness!"
+          </p>
         </div>
       </div>
     </>

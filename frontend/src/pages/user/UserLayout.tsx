@@ -12,6 +12,8 @@ import { userService } from '@/services/user.service';
 import { AxiosError } from 'axios';
 import profile_pic from '../../assets/profile_pic.png';
 import { MdPassword } from 'react-icons/md';
+import { authService } from '@/services/auth.service';
+import { toast } from 'sonner';
 const TimeAgo = (TimeAgoModule as any).default;
 
 interface MenuItem {
@@ -98,7 +100,11 @@ const Layout: React.FC = () => {
     };
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const response = await authService.logout();
+    if (response.status === 200) {
+      toast.success(response.data.message);
+    }
     dispatch(logout());
   };
 

@@ -63,7 +63,7 @@ const AdminSidebar = () => {
     return (
         <div
             ref={sidebarRef}
-            className={`sidebar ${sidebarState ? 'p-5' : 'px-5 pb-5 pt-2'} shadow-[2px_0_8px_0_rgba(0,0,0,0.15)]`}
+            className={`sidebar ${sidebarState ? 'p-5' : 'px-5 pb-5 pt-2'} shadow-[2px_0_8px_0_rgba(0,0,0,0.15)] z-30`}
         >
             <ul className={`sideMenu w-full flex flex-col ${sidebarState ? 'items-start' : 'items-center'} justify-center gap-y-2 text-white text-sm text-nowrap`}>
                 <div className={`${sidebarState ? 'px-3 pb-5' : 'mb-5'} main-logo w-full`}>
