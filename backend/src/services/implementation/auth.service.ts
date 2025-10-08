@@ -156,7 +156,7 @@ export class AuthService implements IAuthService {
 
     async generateAccessToken(userId: string, role: string): Promise<string> {
         try {
-            return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '5m' });
+            return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: process.env.ACCESS_EXPIRES_IN! });
         } catch (error) {
             console.error(ErrorMessages.ACCESS_TOKEN_FAILED, error);
             throw new Error(ErrorMessages.ACCESS_TOKEN_FAILED);
@@ -165,7 +165,7 @@ export class AuthService implements IAuthService {
 
     async generateRefreshToken(userId: string, role: string): Promise<string> {
         try {
-            return jwt.sign({ userId, role }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '3h' });
+            return jwt.sign({ userId, role }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: process.env.REFRESH_EXPIRES_IN });
         } catch (error) {
             console.error(ErrorMessages.REFRESH_TOKEN_FAILED, error);
             throw new Error(ErrorMessages.REFRESH_TOKEN_FAILED);
@@ -236,7 +236,7 @@ export class AuthService implements IAuthService {
                 throw new Error(ErrorMessages.RESET_LINK_SECRET_MISSING);
             }
             const payload = { userId: existingUser._id, email };
-            const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: '3h' });
+            const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: process.env.RESET_EXPIRES_IN });
             const tokenExpiry = new Date(Date.now() + 3600 * 1000);
             await this.authRepository.storeResetToken(email, resetToken, tokenExpiry);
 
