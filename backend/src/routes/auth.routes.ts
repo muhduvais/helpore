@@ -14,6 +14,7 @@ router.get('/authenticateUser/:id', (req,res,next) => authController.authenticat
 
 router.post('/admin/login', (req,res,next) =>  authController.loginUser(req,res));
 router.post('/login', (req, res, next) => authController.loginUser(req, res));
+router.post('/logout', (req, res, next) => authController.logoutUser(req, res));
 router.post('/register', (req, res, next) => authController.registerUser(req, res));
 router.post('/verifyOtp', (req, res, next) => authController.verifyOtp(req, res));
 router.post('/resendOtp', (req, res, next) => authController.resendOtp(req, res));

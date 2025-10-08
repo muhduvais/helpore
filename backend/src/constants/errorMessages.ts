@@ -52,6 +52,8 @@ export const ErrorMessages = {
   INVALID_EMAIL_OR_PASSWORD: 'Invalid email or password.',
   LOGIN_SUCCESS: 'Login successful.',
   LOGIN_FAILED: 'Login failed.',
+  LOGOUT_SUCCESS: 'Logout successful.',
+  LOGOUT_FAILED: 'Logout failed.',
   REFRESH_TOKEN_MISSING: 'Refresh token is missing.',
   INVALID_REFRESH_TOKEN: 'Invalid refresh token.',
   REFRESH_TOKEN_FAILED: 'Error refreshing token.',
