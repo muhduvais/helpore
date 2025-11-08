@@ -1,20 +1,21 @@
 import { injectable, inject } from 'tsyringe';
-import { BaseService } from './base.service';
 import { IAssetService } from '../interfaces/ServiceInterface';
 import { IAsset, IAssetRequestResponse } from '../../interfaces/user.interface';
 import { IAssetRepository } from '../../repositories/interfaces/IAssetRepository';
 import { IAssetRequestRepository } from '../../repositories/interfaces/IAssetRequestRepository';
 import { uploadToCloudinary } from '../../utils';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { AssetDTO } from '../../dtos/asset.dto';
+import { toAssetDTO, toAssetListDTO } from '../../mappers/asset.mapper';
+import { AssetRequestDTO } from '../../dtos/asset-request.dto';
+import { toAssetRequestDTO, toAssetRequestListDTO } from '../../mappers/asset-request.mapper';
 
 @injectable()
-export class AssetService extends BaseService<IAsset> implements IAssetService {
+export class AssetService implements IAssetService {
     constructor(
         @inject('IAssetRepository') private readonly assetRepository: IAssetRepository,
         @inject('IAssetRequestRepository') private readonly assetRequestRepository: IAssetRequestRepository
-    ) {
-        super(assetRepository);
-    }
+    ) { }
 
     async addAsset(data: IAsset): Promise<any> {
         try {
@@ -46,7 +47,7 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         }
     }
 
-    async fetchAssets(search: string, skip: number, limit: number, sortBy: string, filterByAvailability: string): Promise<IAsset[] | null> {
+    async fetchAssets(search: string, skip: number, limit: number, sortBy: string, filterByAvailability: string): Promise<AssetDTO[] | null> {
         try {
             const query = search ? { name: { $regex: search, $options: 'i' } } : {};
 
@@ -86,16 +87,24 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
                 }
             }
 
-            return await this.assetRepository.findAssets(query, skip, limit, sortQuery);
+            const assets = await this.assetRepository.findAssets(query, skip, limit, sortQuery);
+            if (!assets) {
+                return null;
+            }
+            return toAssetListDTO(assets);
         } catch (error) {
             console.error('Error finding the assets:', error);
             return null;
         }
     }
 
-    async fetchAssetDetails(assetId: string): Promise<IAsset | null> {
+    async fetchAssetDetails(assetId: string): Promise<AssetDTO | null> {
         try {
-            return await this.assetRepository.findAssetDetails(assetId);
+            const asset = await this.assetRepository.findAssetDetails(assetId);
+            if (!asset) {
+                return null;
+            }
+            return toAssetDTO(asset);
         } catch (error) {
             console.error('Error fetching the asset details: ', error);
             return null;
@@ -160,20 +169,26 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         userId: string,
         sort: string,
         status: string,
-    ): Promise<IAssetRequestResponse[] | null> {
+    ): Promise<AssetRequestDTO[] | null> {
         try {
-            const result = await this.assetRequestRepository.findRequests(search, skip, userId, limit, sort, status);
-            return result;
+            const assetRequests = await this.assetRequestRepository.findRequests(search, skip, userId, limit, sort, status);
+            if (!assetRequests) {
+                return null;
+            }
+            return toAssetRequestListDTO(assetRequests);
         } catch (error) {
             console.error("Error fetching asset requests:", error);
             return null;
         }
     }
 
-    async fetchMyAssetRequests(search: string, filter: string, skip: number, limit: number, userId: string): Promise<IAssetRequestResponse[] | null> {
+    async fetchMyAssetRequests(search: string, filter: string, skip: number, limit: number, userId: string): Promise<AssetRequestDTO[] | null> {
         try {
-            const result = await this.assetRequestRepository.findMyRequests(search, filter, userId, skip, limit);
-            return result;
+            const assetRequests = await this.assetRequestRepository.findMyRequests(search, filter, userId, skip, limit);
+            if (!assetRequests) {
+                return null;
+            }
+            return toAssetRequestListDTO(assetRequests);
         } catch (error) {
             console.error('Error finding the asset requests:', error);
             return null;
@@ -188,7 +203,6 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
                 const quantity = Number(request.quantity) || 0;
                 return accu + quantity;
             }, 0);
-            console.log('count: ', count)
             return (count + quantity) > 3;
         } catch (error) {
             console.error('Error finding the asset requests:', error);
@@ -217,10 +231,13 @@ export class AssetService extends BaseService<IAsset> implements IAssetService {
         }
     }
 
-    async findRequestDetails(userId: string, assetId: string): Promise<any> {
+    async findRequestDetails(userId: string, assetId: string): Promise<AssetRequestDTO | null> {
         try {
             const assetRequest = await this.assetRequestRepository.findRequestDetails(userId, assetId);
-            return assetRequest;
+            if (!assetRequest) {
+                return null;
+            }
+            return toAssetRequestDTO(assetRequest);
         } catch (error) {
             console.error('Error fetching the asset request details: ', error);
             return null;

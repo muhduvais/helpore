@@ -77,7 +77,7 @@ const VirtualizedMessages: React.FC<{
         <>
             {messages.map((message: IMessageDocument) => (
                 <ChatMessage
-                    key={message._id.toString() || message.createdAt.toString()}
+                    key={message.id || message.createdAt.toString()}
                     message={message}
                     isOwnMessage={message.sender === userId}
                     formatTime={formatTime}

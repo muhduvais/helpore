@@ -164,14 +164,14 @@ const VolunteerRequests = () => {
 
                     <div className="mt-6 flex justify-between gap-4">
                         <Button
-                            onClick={() => handleRequestAction(request._id, 'approve')}
+                            onClick={() => handleRequestAction(request.id, 'approve')}
                             className="flex-1 bg-[#688D48] hover:bg-[#557239] text-white"
                         >
                             <CheckCircle2 className="mr-2 h-4 w-4" />
                             Accept
                         </Button>
                         <Button
-                            onClick={() => handleRequestAction(request._id, 'reject')}
+                            onClick={() => handleRequestAction(request.id, 'reject')}
                             variant="outline"
                             className="flex-1"
                         >
@@ -260,7 +260,7 @@ const VolunteerRequests = () => {
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {requests && requests.map((request: any) => (
-                            <RequestCard key={request._id} request={request} />
+                            <RequestCard key={request.id} request={request} />
                         ))}
                     </div>
 

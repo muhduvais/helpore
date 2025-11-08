@@ -1,5 +1,4 @@
 import { injectable, inject } from 'tsyringe';
-import { BaseService } from './base.service';
 import { IDonationService } from '../interfaces/ServiceInterface';
 import Stripe from 'stripe';
 import PDFDocument from 'pdfkit';
@@ -10,20 +9,18 @@ import { IDonation } from '../../models/donation.model';
 import { IDonationRepository } from '../../repositories/interfaces/IDonationRepository';
 import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
-import { IAddress, IUser } from '../../interfaces/user.interface';
+import { IAddressDocument } from '../../interfaces/address.interface';
 import { ErrorMessages } from '../../constants/errorMessages';
 
 dotenv.config();
 
 @injectable()
-export class DonationService extends BaseService<IDonation> implements IDonationService {
+export class DonationService implements IDonationService {
   constructor(
     @inject('IDonationRepository') private readonly donationRepository: IDonationRepository,
     @inject('IUserRepository') private readonly userRepository: IUserRepository,
     @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
-  ) {
-    super(donationRepository);
-  }
+  ) { }
 
   async createCheckoutSession(donationData: any): Promise<any> {
     try {
@@ -218,7 +215,7 @@ export class DonationService extends BaseService<IDonation> implements IDonation
     }
   }
 
-  private addReceiptContent(doc: PDFKit.PDFDocument, donation: any, userDetails: any, addressDetails: IAddress) {
+  private addReceiptContent(doc: PDFKit.PDFDocument, donation: any, userDetails: any, addressDetails: IAddressDocument) {
     const pageWidth = doc.page.width;
     const contentWidth = pageWidth - 100;
     const primaryColor = '#688D48';

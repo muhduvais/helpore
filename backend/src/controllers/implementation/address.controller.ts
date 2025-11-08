@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
-import { IUserService } from '../../services/interfaces/ServiceInterface';
 import { IAddressController } from '../interfaces/IAddressController';
 import { JwtPayload } from 'jsonwebtoken';
 import { HttpStatusCode } from '../../constants/httpStatus';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { IAddressService } from '../../services/interfaces/IAddressService';
 
 @injectable()
 export class AddressController implements IAddressController {
     constructor(
-        @inject('IUserService') private readonly userService: IUserService,
+        @inject('IAddressService') private readonly addressService: IAddressService,
     ) {
         this.createAddress = this.createAddress.bind(this);
         this.getAddresses = this.getAddresses.bind(this);
@@ -24,7 +24,7 @@ export class AddressController implements IAddressController {
         addressData.type = type;
 
         try {
-            const addressId = await this.userService.addAddress(addressData);
+            const addressId = await this.addressService.addAddress(addressData);
             if (addressId) {
                 res.status(HttpStatusCode.OK).json({ success: true, addressId });
             } else {
@@ -39,7 +39,7 @@ export class AddressController implements IAddressController {
     async getAddresses (req: Request, res: Response): Promise<void> {
         const { userId } = req.user as JwtPayload;
         try {
-            const addresses = await this.userService.fetchAddresses(userId);
+            const addresses = await this.addressService.fetchAddresses(userId);
             if (addresses) {
                 res.status(HttpStatusCode.OK).json({ success: true, addresses });
             } else {

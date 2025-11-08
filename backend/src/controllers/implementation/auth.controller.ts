@@ -106,17 +106,17 @@ export class AuthController implements IAuthController {
 
       const user = await this.authService.verifyLogin(email, password);
 
-      if (user.isBlocked) {
-        res
-          .status(HttpStatusCode.UNAUTHORIZED)
-          .json({ message: ErrorMessages.UNAUTHORIZED_USER });
-        return;
-      }
-
       if (!user || user.role !== selectedRole) {
         res
           .status(HttpStatusCode.BAD_REQUEST)
           .json({ message: ErrorMessages.INVALID_EMAIL_OR_PASSWORD });
+        return;
+      }
+
+      if (user.isBlocked) {
+        res
+          .status(HttpStatusCode.UNAUTHORIZED)
+          .json({ message: ErrorMessages.UNAUTHORIZED_USER });
         return;
       }
 

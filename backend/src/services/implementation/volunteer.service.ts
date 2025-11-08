@@ -1,7 +1,7 @@
 import { injectable, inject } from 'tsyringe';
-import { BaseService } from './base.service';
 import { IVolunteerService } from '../interfaces/ServiceInterface';
-import { IUser, IAddress, IUserDocument } from '../../interfaces/user.interface';
+import { IAddress, IAddressDocument } from '../../interfaces/address.interface';
+import { IUser } from '../../interfaces/user.interface';
 import { IAddUserForm } from '../../interfaces/admin.interface';
 import bcrypt from 'bcryptjs';
 import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
@@ -9,16 +9,18 @@ import { IAddressRepository } from '../../repositories/interfaces/IAddressReposi
 import { Types } from 'mongoose';
 import { IAssistanceRequestRepository } from '../../repositories/interfaces/IAssistanceRequestRepository';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { UserDTO } from '../../dtos/user.dto';
+import { toUserDTO, toUserListDTO } from '../../mappers/user.mapper';
+import { AddressDTO } from '../../dtos/address.dto';
+import { toAddressDTO } from '../../mappers/address.mapper';
 
 @injectable()
-export class VolunteerService extends BaseService<IUserDocument> implements IVolunteerService {
+export class VolunteerService implements IVolunteerService {
     constructor(
         @inject('IUserRepository') private readonly userRepository: IUserRepository,
         @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
         @inject('IAssistanceRequestRepository') private readonly assistanceRepository: IAssistanceRequestRepository,
-    ) {
-        super(userRepository);
-    }
+    ) { }
 
     async addVolunteer(formData: IAddUserForm): Promise<string | boolean | null> {
         try {
@@ -94,7 +96,7 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
         }
     }
 
-    async fetchVolunteers(search: string, skip: number, limit: number, isActive: string): Promise<IUser[] | null> {
+    async fetchVolunteers(search: string, skip: number, limit: number, isActive: string): Promise<UserDTO[] | null> {
         try {
             let query: any = { role: 'volunteer' };
             if (search) query.name = { $regex: search, $options: 'i' };
@@ -102,25 +104,37 @@ export class VolunteerService extends BaseService<IUserDocument> implements IVol
                 query.isActive = isActive;
                 query.tasks = { $lt: 5 };
             }
-            return await this.userRepository.findUsers(query, skip, limit);
+            const volunteers = await this.userRepository.findUsers(query, skip, limit);
+            if (!volunteers) {
+                throw new Error(ErrorMessages.VOLUNTEER_NOT_FOUND);
+            }
+            return toUserListDTO(volunteers);
         } catch (error) {
             console.error(ErrorMessages.VOLUNTEER_FETCH_FAILED, error);
             throw error;
         }
     }
 
-    async fetchVolunteerDetails(volunteerId: string): Promise<IUser | null> {
+    async fetchVolunteerDetails(volunteerId: string): Promise<UserDTO | null> {
         try {
-            return await this.userRepository.findUserDetails(volunteerId);
+            const volunteer = await this.userRepository.findUserDetails(volunteerId);
+            if (!volunteer) {
+                throw new Error(ErrorMessages.VOLUNTEER_NOT_FOUND);
+            }
+            return toUserDTO(volunteer);
         } catch (error) {
             console.error(ErrorMessages.VOLUNTEER_DETAILS_FETCH_FAILED, error);
             throw error;
         }
     }
 
-    async fetchAddress(volunteerId: string): Promise<IAddress | null> {
+    async fetchAddress(volunteerId: string): Promise<AddressDTO | null> {
         try {
-            return await this.addressRepository.findAddressByEntityId(volunteerId);
+            const address = await this.addressRepository.findAddressByEntityId(volunteerId);
+            if (!address) {
+                throw new Error(ErrorMessages.ADDRESS_NOT_FOUND);
+            }
+            return toAddressDTO(address);
         } catch (error) {
             console.error(ErrorMessages.ADDRESS_FETCH_FAILED, error);
             return null;

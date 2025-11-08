@@ -8,8 +8,8 @@ interface INotificationResponse {
     data: any
 }
 
-interface Notification {
-    _id: string;
+interface INotification {
+    id: string;
     type: 'message' | 'system';
     content: string;
     read: boolean;
@@ -20,10 +20,10 @@ interface Notification {
 }
 
 interface NotificationContextType {
-    notifications: Notification[];
+    notifications: INotification[];
     unreadCount: number;
     showNewNotifications: boolean;
-    addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void;
+    addNotification: (notification: Omit<INotification, 'timestamp'>) => void;
     markAsRead: (id: string) => void;
     markAllAsRead: () => void;
     clearAllNotifications: () => void;
@@ -48,7 +48,7 @@ interface NotificationProviderProps {
 }
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [notifications, setNotifications] = useState<INotification[]>([]);
     const [showNewNotifications, setShowNewNotifications] = useState<boolean>(false);
     const auth = useSelector((state: any) => state.auth);
 
@@ -88,7 +88,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             newSocket.emit('join-notification-room', auth.userId);
         });
 
-        newSocket.on('new-notification', (notification: Omit<Notification, 'timestamp'>) => {
+        newSocket.on('new-notification', (notification: Omit<INotification, 'timestamp'>) => {
             addNotification(notification);
             setShowNewNotifications(true);
         });
@@ -99,10 +99,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     }, [auth.accessToken, auth.userId]);
 
     // Function to add a new notification
-    const addNotification = (notification: Omit<Notification, 'timestamp'>) => {
-        const newNotification: Notification = {
+    const addNotification = (notification: Omit<INotification, 'timestamp'>) => {
+        const newNotification: INotification = {
             ...notification,
-            _id: notification._id || Math.random().toString(36).substring(2, 11),
+            id: notification.id || Math.random().toString(36).substring(2, 11),
             timestamp: new Date()
         };
 
@@ -131,7 +131,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             await customAxios.put(`/api/notifications/${notificationId}/read`);
             setNotifications(prev =>
                 prev.map(notif =>
-                    notif._id === notificationId ? { ...notif, read: true } : notif
+                    notif.id === notificationId ? { ...notif, read: true } : notif
                 )
             );
         } catch (error) {
@@ -164,7 +164,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     const clearNotification = async (id: string) => {
         try {
             await customAxios.delete(`/api/notifications/${id}`);
-            setNotifications(prev => prev.filter(notification => notification._id !== id));
+            setNotifications(prev => prev.filter(notification => notification.id !== id));
         } catch (error) {
             console.error('Failed to clear the notification:', error);
         }

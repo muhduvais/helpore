@@ -1,37 +1,43 @@
 import { injectable, inject } from 'tsyringe';
-import { BaseService } from './base.service';
 import { IUserService } from '../interfaces/ServiceInterface';
-import { IUser, IAddress, IUserDocument } from '../../interfaces/user.interface';
-import { IAddUserForm } from '../../interfaces/admin.interface';
-import cloudinary from 'cloudinary';
+import { IUser } from '../../interfaces/user.interface';
 import bcrypt from 'bcryptjs';
 import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { uploadToCloudinary } from '../../utils';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { toUserDTO, toUserListDTO } from '../../mappers/user.mapper';
+import { UserDTO } from '../../dtos/user.dto';
+import { IAddress } from '../../interfaces/address.interface';
 
 @injectable()
-export class UserService extends BaseService<IUserDocument> implements IUserService {
+export class UserService implements IUserService {
     constructor(
-        @inject('IUserRepository') private readonly userRepository: IUserRepository,
-        @inject('IAddressRepository') private readonly addressRepository: IAddressRepository
-    ) {
-        super(userRepository);
-    }
+        @inject('IUserRepository') private readonly _userRepository: IUserRepository,
+        @inject('IAddressRepository') private readonly _addressRepository: IAddressRepository
+    ) {}
 
-    async fetchUsers(search: string, skip: number, limit: number): Promise<IUser[] | null> {
+    async fetchUsers(search: string, skip: number, limit: number): Promise<UserDTO[] | null> {
         try {
             const query = search ? { name: { $regex: search, $options: 'i' }, role: 'user' } : { role: 'user' };
-            return await this.userRepository.findUsers(query, skip, limit);
+            const users = await this._userRepository.findUsers(query, skip, limit);
+            if (!users) {
+                throw new Error(ErrorMessages.USER_NOT_FOUND);
+            }
+            return toUserListDTO(users);
         } catch (error) {
             console.error(ErrorMessages.USER_FETCH_FAILED, error);
             throw new Error(ErrorMessages.USER_FETCH_FAILED);
         }
     }
 
-    async fetchUserDetails(userId: string): Promise<IUser | null> {
+    async fetchUserDetails(userId: string): Promise<UserDTO | null> {
         try {
-            return await this.userRepository.findUserDetails(userId);
+            const user = await this._userRepository.findUserDetails(userId);
+            if (!user) {
+                throw new Error(ErrorMessages.USER_NOT_FOUND);
+            }
+            return toUserDTO(user);
         } catch (error) {
             console.error(ErrorMessages.USER_FETCH_FAILED, error);
             throw new Error(ErrorMessages.USER_FETCH_FAILED);
@@ -41,7 +47,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
     async countUsers(search: string): Promise<number> {
         try {
             const query = search ? { name: { $regex: search, $options: 'i' }, role: 'user' } : { role: 'user' };
-            return await this.userRepository.countUsers(query);
+            return await this._userRepository.countUsers(query);
         } catch (error) {
             console.error(ErrorMessages.USER_FETCH_FAILED, error);
             throw new Error(ErrorMessages.USER_FETCH_FAILED);
@@ -69,9 +75,9 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
                 pincode,
             };
 
-            const user = await this.userRepository.updateUser(userId, newUser);
+            const user = await this._userRepository.updateUser(userId, newUser);
             if (!user) return;
-            await this.addressRepository.updateAddress(user._id as string, newAddress);
+            await this._addressRepository.updateAddress(user._id as string, newAddress);
             const registeredMail = user.email;
 
             return registeredMail;
@@ -83,7 +89,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
     async toggleIsBlocked(action: boolean, userId: string): Promise<boolean> {
         try {
-            await this.userRepository.findByIdAndUpdate(userId, { isBlocked: action });
+            await this._userRepository.findByIdAndUpdate(userId, { isBlocked: action });
             return true;
         } catch (error) {
             console.error(ErrorMessages.BLOCK_STATUS_UPDATE_FAILED, error);
@@ -93,7 +99,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
     async changeProfilePicture(userId: string, profilePicture: string): Promise<boolean> {
         try {
-            await this.userRepository.updateProfilePicture(userId, profilePicture);
+            await this._userRepository.updateProfilePicture(userId, profilePicture);
             return true;
         } catch (error) {
             console.error(ErrorMessages.PROFILE_UPDATE_FAILED, error);
@@ -103,7 +109,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
     async verifyCurrentPassword(userId: string, currentPassword: string): Promise<boolean | null | undefined> {
         try {
-            const password = await this.userRepository.findPassword(userId);
+            const password = await this._userRepository.findPassword(userId);
             if (!password) return;
             return bcrypt.compare(currentPassword, password);
         } catch (error) {
@@ -115,42 +121,13 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
     async changePassword(userId: string, newPassword: string): Promise<boolean> {
         try {
             const hashedPassword = await bcrypt.hash(newPassword, 10);
-            await this.userRepository.updatePassword(userId, hashedPassword);
+            await this._userRepository.updatePassword(userId, hashedPassword);
             return true;
         } catch (error) {
             console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
             return false;
         }
     }
-
-    async addAddress(addressData: IAddress): Promise<string | null> {
-        try {
-            const newAddress = await this.addressRepository.addAddress(addressData);
-            return String(newAddress._id);
-        } catch (error) {
-            console.error(ErrorMessages.ADDRESS_CREATE_FAILED, error);
-            return null;
-        }
-    }
-
-    async fetchAddresses(userId: string): Promise<IAddress[] | null> {
-        try {
-            return await this.addressRepository.findAddressesByEntityId(userId);
-        } catch (error) {
-            console.error(ErrorMessages.ADDRESS_FETCH_FAILED, error);
-            return null;
-        }
-    }
-
-    async fetchAddress(userId: string): Promise<IAddress | null> {
-        try {
-            return await this.addressRepository.findAddressByEntityId(userId);
-        } catch (error) {
-            console.error(ErrorMessages.ADDRESS_FETCH_FAILED, error);
-            return null;
-        }
-    }
-
 
     async uploadCertificateImage(userId: string, file: Express.Multer.File): Promise<string> {
         try {
@@ -164,7 +141,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
             const result = results[0];
 
-            await this.userRepository.updateUserCertificates(userId, result.secure_url);
+            await this._userRepository.updateUserCertificates(userId, result.secure_url);
 
             return result.secure_url;
         } catch (error) {
@@ -182,9 +159,9 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
                 throw new Error(ErrorMessages.CERTIFICATE_URL_REQUIRED);
             }
 
-            await this.userRepository.deleteFile(publicId);
+            await this._userRepository.deleteFile(publicId);
 
-            const updatedUser = await this.userRepository.removeCertificateUrl(userId, certificateUrl);
+            const updatedUser = await this._userRepository.removeCertificateUrl(userId, certificateUrl);
 
             return updatedUser;
         } catch (error) {
@@ -224,7 +201,7 @@ export class UserService extends BaseService<IUserDocument> implements IUserServ
 
     async checkCertificate(userId: string): Promise<boolean | undefined> {
         try {
-            return await this.userRepository.checkCertificate(userId);
+            return await this._userRepository.checkCertificate(userId);
         } catch (error) {
             console.error(ErrorMessages.CERTIFICATE_CHECK_FAILED, error);
             throw new Error(ErrorMessages.CERTIFICATE_CHECK_FAILED);

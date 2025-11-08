@@ -75,6 +75,8 @@ import { NotificationController } from "./controllers/implementation/notificatio
 import { MeetingController } from "./controllers/implementation/meeting.controller";
 import { IMeetingRepository } from "./repositories/interfaces/IMeetingRepository";
 import { MeetingRepository } from "./repositories/implementation/meeting.repository";
+import { IAddressService } from "./services/interfaces/IAddressService";
+import { AddressService } from "./services/implementation/address.service";
 
 export function registerDependencies() {
     try {
@@ -95,6 +97,7 @@ export function registerDependencies() {
         container.register<IAdminService>('IAdminService', { useClass: AdminService });
         container.register<IUserService>('IUserService', { useClass: UserService });
         container.register<IVolunteerService>('IVolunteerService', { useClass: VolunteerService });
+        container.register<IAddressService>('IAddressService', { useClass: AddressService });
         container.register<IAssetService>('IAssetService', { useClass: AssetService });
         container.register<IAssistanceRequestService>('IAssistanceRequestService', { useClass: AssistanceRequestService });
         container.register<IAuthService>('IAuthService', { useClass: AuthService });

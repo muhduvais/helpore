@@ -124,7 +124,7 @@ const RequestAssistanceForm = () => {
             if (response.status === 200) {
                 setAddresses(response.data.addresses);
                 if (response.data.addresses.length > 0) {
-                    setFormData(prev => ({ ...prev, selectedAddressId: response.data.addresses[0]._id || '' }));
+                    setFormData(prev => ({ ...prev, selectedAddressId: response.data.addresses[0].id || '' }));
                 }
             }
         } catch (error) {
@@ -218,7 +218,7 @@ const RequestAssistanceForm = () => {
             if (response.status === 200) {
                 toast.success("Address created successfully!");
                 await fetchUserAddresses();
-                setFormData(prev => ({ ...prev, selectedAddressId: response.data._id }));
+                setFormData(prev => ({ ...prev, selectedAddressId: response.data.id }));
                 setIsModalOpen(false);
                 setAddressData(initialAddressData);
             }
@@ -248,7 +248,7 @@ const RequestAssistanceForm = () => {
 
             const requestData = transformFormDataToRequest(formData);
             const response = await userService.requestAssistance(requestData);
-            if (response.status === 200) {
+            if (response.status === 201) {
                 toast.success("Request submitted successfully!", {
                     duration: 3000,
                     onAutoClose: () => navigate("/user/requests?tab=assistance")
@@ -559,8 +559,8 @@ const RequestAssistanceForm = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 {addresses.length > 0 && addresses.map((address) => (
-                                    <SelectItem key={address._id?.toString()} value={address._id ? address._id?.toString() : ''}>
-                                        <div className="flex flex-col">
+                                    <SelectItem key={address.id?.toString()} value={address.id ? address.id?.toString() : ''}>
+                                        <div className="flex flex-col text-start">
                                             <span className="font-medium">
                                                 {address.fname} {address.lname}
                                             </span>

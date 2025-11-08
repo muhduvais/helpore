@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 
 export interface IVolunteer {
-    _id: string;
+    id: string;
     name: string;
     email: string;
     phone: string;
@@ -48,7 +48,7 @@ const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({ requestId, 
                 setVolunteers(response.data.volunteers);
             } else {
                 setVolunteers((prev) => [
-                    ...prev.filter((v) => !response.data.volunteers.some((newV: IVolunteer) => newV._id === v._id)),
+                    ...prev.filter((v) => !response.data.volunteers.some((newV: IVolunteer) => newV.id === v.id)),
                     ...response.data.volunteers,
                 ]);
             }
@@ -126,7 +126,7 @@ const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({ requestId, 
                         <div className="space-y-4">
                             {volunteers.map((volunteer: IVolunteer) => (
                                 <div
-                                    key={volunteer._id}
+                                    key={volunteer.id}
                                     className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow gap-4"
                                 >
                                     <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -159,7 +159,7 @@ const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({ requestId, 
                                             <div className="text-sm text-gray-500">Tasks on hand: {volunteer.tasks}</div>
                                         </div>
                                         <Button
-                                            onClick={() => handleAssign(volunteer._id)}
+                                            onClick={() => handleAssign(volunteer.id)}
                                             disabled={!volunteer.isActive || volunteer.tasks === 5}
                                             variant="outline"
                                             className="border-[#688D48] text-[#688D48] hover:bg-[#688D48] hover:text-white disabled:opacity-50 w-full sm:w-auto"

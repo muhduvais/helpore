@@ -23,8 +23,8 @@ interface MenuItem {
   onClick?: () => void;
 }
 
-interface Notification {
-  _id: string;
+interface INotification {
+  id: string;
   type: 'message' | 'system';
   content: string;
   read: boolean;
@@ -113,9 +113,9 @@ const Layout: React.FC = () => {
     setIsProfileDropdownOpen(false);
   };
 
-  const handleNotificationClick = (notification: Notification) => {
-    if (notification._id) {
-      markAsRead(notification._id);
+  const handleNotificationClick = (notification: INotification) => {
+    if (notification.id) {
+      markAsRead(notification.id);
     }
 
     if (notification.type === 'message' && notification.requestId) {
@@ -349,7 +349,7 @@ const Layout: React.FC = () => {
                               className="absolute top-3 right-3 text-gray-400 hover:text-red-500 z-10"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                clearNotification(notification._id);
+                                clearNotification(notification.id);
                               }}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

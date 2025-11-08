@@ -237,7 +237,7 @@ const AdminAssetDetails = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-sm text-gray-500 flex items-center gap-2">
-                                        <FaClipboardList /> Asset ID: {asset?._id}
+                                        <FaClipboardList /> Asset ID: {asset?.id}
                                     </p>
                                     <p className="text-sm text-gray-500">
                                         Added: {new Date(asset?.createdAt || '').toLocaleDateString()}

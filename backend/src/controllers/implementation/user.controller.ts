@@ -5,12 +5,14 @@ import { IAdminService, IUserService } from '../../services/interfaces/ServiceIn
 import { JwtPayload } from 'jsonwebtoken';
 import { HttpStatusCode } from '../../constants/httpStatus';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { IAddressService } from '../../services/interfaces/IAddressService';
 
 @injectable()
 export class UserController implements IUserController {
   constructor(
     @inject('IUserService') private readonly userService: IUserService,
     @inject('IAdminService') private readonly adminService: IAdminService,
+    @inject('IAddressService') private readonly addressService: IAddressService,
   ) {
     this.addUser = this.addUser.bind(this);
     this.getUsers = this.getUsers.bind(this);
@@ -93,7 +95,7 @@ export class UserController implements IUserController {
 
       const [user, address] = await Promise.all([
         this.userService.fetchUserDetails(userId),
-        this.userService.fetchAddress(userId)
+        this.addressService.fetchAddress(userId)
       ]);
 
       if (user) {

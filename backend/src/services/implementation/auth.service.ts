@@ -12,7 +12,7 @@ import { IAuthService } from '../interfaces/ServiceInterface';
 import { IUserCreationData } from '../../repositories/implementation/auth.repository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { Types } from 'mongoose';
-import { ErrorMessages } from '../../constants/errorMessages'; // <-- Add this import
+import { ErrorMessages } from '../../constants/errorMessages';
 
 @injectable()
 export class AuthService implements IAuthService {

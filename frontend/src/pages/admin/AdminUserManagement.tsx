@@ -137,7 +137,7 @@ const AdminUserManagement = () => {
               </TableRow>
             ) : (
               users?.map((user, index) => (
-                <TableRow key={user._id}>
+                <TableRow key={user.id}>
                   <TableCell>{(currentPage - 1) * 5 + index + 1}</TableCell>
                   <TableCell>
                     <img
@@ -159,7 +159,7 @@ const AdminUserManagement = () => {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Link to={`/admin/userDetails/${user._id}`} className="text-blue-600">
+                    <Link to={`/admin/userDetails/${user.id}`} className="text-blue-600">
                       View
                     </Link>
                   </TableCell>

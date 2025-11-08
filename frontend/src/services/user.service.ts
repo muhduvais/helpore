@@ -76,7 +76,7 @@ export const userService = {
     // Addresses
     createAddress: async (addressData: IAddress) => {
         try {
-            const createdAddressId = await customAxios.post<{ _id: string }>('/api/addresses', { addressData });
+            const createdAddressId = await customAxios.post<{ id: string }>('/api/addresses', { addressData });
             return createdAddressId;
         } catch (error) {
             throw error
@@ -144,7 +144,7 @@ export const userService = {
     },
     fetchAssetRequestDetails: async (assetId: string) => {
         try {
-            const response = await customAxios.get<{ assetRequestDetails: IAssetRequest[] }>(`/api/assetRequests/${assetId}`);
+            const response = await customAxios.get<{ assetRequestDetails: IAssetRequest }>(`/api/assetRequests/${assetId}`);
             return response;
         } catch (error) {
             throw error

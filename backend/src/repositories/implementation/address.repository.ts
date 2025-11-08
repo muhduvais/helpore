@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { IAddress, IAddressDocument } from "../../interfaces/user.interface";
+import { IAddress, IAddressDocument } from "../../interfaces/address.interface";
 import Address from "../../models/address.model";
 import { IAddressRepository } from "../interfaces/IAddressRepository";
 import { BaseRepository } from "./base.repository";

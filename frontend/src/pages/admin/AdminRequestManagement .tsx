@@ -207,7 +207,7 @@ const AdminRequests = () => {
   const handleAction = async (type: any, request: any) => {
     if (!type || !request) return;
     try {
-      await adminService.updateAssetRequestStatus(request._id, type, actionComment)
+      await adminService.updateAssetRequestStatus(request.id, type, actionComment)
       setActionDialog({ open: false, type: null, request: null });
       setActionComment('');
       fetchRequests();
@@ -460,7 +460,7 @@ const AdminRequests = () => {
   };
 
   const RequestCard: React.FC<any> = ({ request }) => {
-    const isExpanded = expandedCard === request._id;
+    const isExpanded = expandedCard === request.id;
 
     return (
       <motion.div
@@ -483,8 +483,8 @@ const AdminRequests = () => {
                     <User className="h-4 w-4 text-gray-400" />
                     <button
                       onClick={() => {
-                        setUserDetailsDialog({ open: true, userId: request.user._id });
-                        fetchUserDetails(request.user._id);
+                        setUserDetailsDialog({ open: true, userId: request.user.id });
+                        fetchUserDetails(request.user.id);
                       }}
                       className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                     >
@@ -524,7 +524,7 @@ const AdminRequests = () => {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => setExpandedCard(isExpanded ? null : request._id)}
+              onClick={() => setExpandedCard(isExpanded ? null : request.id)}
             >
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4 mr-2" />
@@ -561,7 +561,7 @@ const AdminRequests = () => {
                         </div>
                         <div>
                           <p className="text-gray-500">Request ID</p>
-                          <p className="font-medium">{request._id}</p>
+                          <p className="font-medium">{request.id}</p>
                         </div>
                       </div>
                     </div>
@@ -679,7 +679,7 @@ const AdminRequests = () => {
               <Button
                 variant="outline"
                 className="text-[#688D48] border-[#688d4855] hover:bg-[#688D48] opacity-80 hover:opacity-100 hover:text-white transition-colors"
-                onClick={() => navigate(`/admin/assistanceRequests/${request._id}`)}
+                onClick={() => navigate(`/admin/assistanceRequests/${request.id}`)}
               >
                 View More
               </Button>
@@ -795,7 +795,7 @@ const AdminRequests = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {requests.map((request: any) => (
-                  <RequestCard key={request._id} request={request} />
+                  <RequestCard key={request.id} request={request} />
                 ))}
               </div>
 
@@ -936,7 +936,7 @@ const AdminRequests = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {assistanceRequests.map((request: IAssistanceRequest) => (
-                  <AssistanceRequestCard key={request._id} request={request} />
+                  <AssistanceRequestCard key={request.id} request={request} />
                 ))}
               </div>
 

@@ -117,6 +117,7 @@ export class AssetRequestController implements IAssetRequestController {
             const assetRequestDetails = await this.assetService.findRequestDetails(
                 userId, assetId
             );
+
             if (assetRequestDetails) {
                 res.status(HttpStatusCode.OK).json({ success: true, assetRequestDetails });
             } else {

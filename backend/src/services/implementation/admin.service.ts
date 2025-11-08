@@ -1,7 +1,8 @@
 import { inject, injectable } from 'tsyringe';
 import { IAdminService } from '../interfaces/ServiceInterface';
 import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
-import { IAddress, IUser } from '../../interfaces/user.interface';
+import { IUser } from '../../interfaces/user.interface';
+import { IAddress, IAddressDocument } from '../../interfaces/address.interface';
 import { IAddUserForm } from '../../interfaces/admin.interface';
 import bcrypt from 'bcryptjs';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
@@ -217,7 +218,7 @@ export class AdminService implements IAdminService {
     }
   }
 
-  async fetchAddresses(userId: string): Promise<IAddress[] | null> {
+  async fetchAddresses(userId: string): Promise<IAddressDocument[] | null> {
     try {
       return await this.addressRepository.findAddressesByEntityId(userId);
     } catch (error) {

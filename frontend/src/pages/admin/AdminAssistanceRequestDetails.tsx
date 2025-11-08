@@ -211,7 +211,7 @@ const AssistanceRequestDetails: React.FC = () => {
                     <div className="flex gap-2">
                         {request?.status === 'pending' && (
                             <AssignVolunteerModal
-                                requestId={request?._id}
+                                requestId={request?.id}
                                 onAssign={() => {
                                     fetchData();
                                 }}
