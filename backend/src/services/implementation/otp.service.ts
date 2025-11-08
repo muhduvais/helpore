@@ -13,7 +13,7 @@ export const sendOtpEmail = async (email: string, otp: string) => {
         from: process.env.OTP_EMAIL,
         to: email,
         subject: 'Your OTP Verification Code',
-        text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+        text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
     };
 
     try {

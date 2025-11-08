@@ -114,7 +114,7 @@ export const MeetingDetailsModal: React.FC<MeetingDetailsModalProps> = ({
                             }
                         </div>
                         <div className='flex items-center gap-[3px] cursor-pointer group'
-                            onClick={() => handleCopyLink(meeting._id)}>
+                            onClick={() => handleCopyLink(meeting.id)}>
                             <Copy className="w-4 h-4 opacity-70 hover:opacity-100 group-active:scale-[80%] transition-transform duration-150" />
                             <span className='text-xs'>Copy Link</span>
                         </div>

@@ -271,7 +271,7 @@ const DonationManagementPage: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDownloadReceipt(donation._id, donation.userId?._id as string)}
+                            onClick={() => handleDownloadReceipt(donation._id, donation.userId?.id as string)}
                             className="text-[#688D48] border-[#688D48] hover:bg-[#688D48]/10"
                           >
                             <FaDownload className="mr-2" /> Receipt

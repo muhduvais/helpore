@@ -58,7 +58,7 @@ const AdminDashboard = () => {
                 return meetings.map((meeting: any) => {
                     const meetingDate = new Date(meeting.scheduledTime);
                     return {
-                        id: meeting._id,
+                        id: meeting.id,
                         title: meeting.title,
                         date: meetingDate.toISOString().split('T')[0],
                         time: meetingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),

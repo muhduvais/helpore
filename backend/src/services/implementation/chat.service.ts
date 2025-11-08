@@ -5,6 +5,10 @@ import { IChatRepository } from '../../repositories/interfaces/IChatRepository';
 import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
 import { io, uploadToCloudinary } from '../../utils';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { MessageDTO } from '../../dtos/message.dto';
+import { toMessageListDTO } from '../../mappers/message.mapper';
+import { ConversationDTO } from '../../dtos/conversation.dto';
+import { toConversationListDTO } from '../../mappers/conversation.mapper';
 
 export type CloudinaryFile = { public_id: string; secure_url: string };
 
@@ -90,18 +94,26 @@ export class ChatService implements IChatService {
         }
     }
 
-    async getConversationMessages(requestId: string): Promise<IMessageDocument[]> {
+    async getConversationMessages(requestId: string): Promise<MessageDTO[]> {
         try {
-            return await this.chatRepository.getMessagesByRequestId(requestId);
+            const messages = await this.chatRepository.getMessagesByRequestId(requestId);
+            if (!messages) {
+                throw new Error(ErrorMessages.CHAT_FETCH_MESSAGES_FAILED);
+            }
+            return toMessageListDTO(messages);
         } catch (error) {
             console.error(ErrorMessages.CHAT_FETCH_MESSAGES_FAILED, error);
             throw new Error(ErrorMessages.CHAT_FETCH_MESSAGES_FAILED);
         }
     }
 
-    async getUserConversations(userId: string): Promise<IConversationDocument[]> {
+    async getUserConversations(userId: string): Promise<ConversationDTO[]> {
         try {
-            return await this.chatRepository.getUserConversations(userId);
+            const conversations = await this.chatRepository.getUserConversations(userId);
+            if (!conversations) {
+                throw new Error(ErrorMessages.CHAT_FETCH_MESSAGES_FAILED);
+            }
+            return toConversationListDTO(conversations);
         } catch (error) {
             console.error(ErrorMessages.CHAT_FETCH_CONVERSATIONS_FAILED, error);
             throw new Error(ErrorMessages.CHAT_FETCH_CONVERSATIONS_FAILED);

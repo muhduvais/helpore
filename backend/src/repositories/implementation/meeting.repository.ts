@@ -1,8 +1,7 @@
 import { injectable } from 'tsyringe';
 import Meeting from '../../models/meeting.model';
-import { IMeeting } from '../../interfaces/meeting.interface';
+import { IMeeting, IMeetingDocument } from '../../interfaces/meeting.interface';
 import { IMeetingRepository } from '../interfaces/IMeetingRepository';
-import { Types } from 'mongoose';
 
 @injectable()
 export class MeetingRepository implements IMeetingRepository {
@@ -16,7 +15,7 @@ export class MeetingRepository implements IMeetingRepository {
         }
     }
 
-    async findById(meetingId: string): Promise<IMeeting | null> {
+    async findById(meetingId: string): Promise<IMeetingDocument | null> {
         try {
             return await Meeting.findById(meetingId);
         } catch (error) {
@@ -25,7 +24,7 @@ export class MeetingRepository implements IMeetingRepository {
         }
     }
 
-    async findAll(query: any, skip: number, limit: number): Promise<IMeeting[]> {
+    async findAll(query: any, skip: number, limit: number): Promise<IMeetingDocument[]> {
         try {
             return await Meeting.find(query)
                 .skip(skip)
@@ -46,7 +45,7 @@ export class MeetingRepository implements IMeetingRepository {
         }
     }
 
-    async findUpcomingMeetings(): Promise<IMeeting[] | null> {
+    async findUpcomingMeetings(): Promise<IMeetingDocument[] | null> {
         try {
             return await Meeting.find({ status: 'scheduled' })
                 .sort({ scheduledTime: 1 });

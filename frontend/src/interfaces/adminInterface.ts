@@ -13,7 +13,7 @@ export interface AddAssetData {
 }
 
 export interface IAsset {
-    _id: string;
+    id: string;
     name: string;
     category: string;
     description: string;
@@ -24,7 +24,7 @@ export interface IAsset {
 }
 
 export interface IAssistanceRequest {
-    _id: string;
+    id: string;
     type: requestType;
     description: string;
     status: statusType;
@@ -33,21 +33,21 @@ export interface IAssistanceRequest {
     priority: 'urgent' | 'normal';
     volunteerType?: 'medical' | 'eldercare' | 'maintenance' | 'transportation' | 'general';
     user?: {
-        _id: string;
+        id: string;
         name: string;
         phone: string;
         email: string;
         profilePicture: string;
     };
     volunteer?: {
-        _id: string;
+        id: string;
         name: string;
         phone: string;
         email: string;
         profilePicture: string;
     };
     address: {
-        _id: string;
+        id: string;
         street: string;
         city: string;
         state: string;
@@ -58,7 +58,7 @@ export interface IAssistanceRequest {
 }
 
 export interface IAssistanceRequestResponse {
-    _id: string;
+    id: string;
     user: Types.ObjectId;
     type: 'volunteer' | 'ambulance';
     description?: string;

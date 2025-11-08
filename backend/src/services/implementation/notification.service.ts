@@ -2,6 +2,8 @@ import { injectable, inject } from 'tsyringe';
 import { INotificationService } from '../interfaces/ServiceInterface';
 import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
 import { INotificationDocument } from '../../models/notification.model';
+import { NotificationDTO } from '../../dtos/notification.dto';
+import { toNotificationListDTO } from '../../mappers/notification.mapper';
 
 @injectable()
 export class NotificationService implements INotificationService {
@@ -30,8 +32,9 @@ export class NotificationService implements INotificationService {
         });
     }
 
-    async getUserNotifications(userId: string): Promise<INotificationDocument[]> {
-        return await this.notificationRepository.getUserNotifications(userId);
+    async getUserNotifications(userId: string): Promise<NotificationDTO[]> {
+        const notifications = await this.notificationRepository.getUserNotifications(userId);
+        return toNotificationListDTO(notifications);
     }
 
     async getUnreadCount(userId: string): Promise<number> {

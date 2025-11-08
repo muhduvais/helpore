@@ -100,14 +100,14 @@ const MeetingsPage: React.FC = () => {
 
                 setUsers(
                     usersResponse.data?.users?.map((user: any) => ({
-                        id: user._id,
+                        id: user.id,
                         name: user.name
                     })) || []
                 );
 
                 setVolunteers(
                     volunteersResponse.data?.volunteers?.map((volunteer: any) => ({
-                        id: volunteer._id,
+                        id: volunteer.id,
                         name: volunteer.name
                     })) || []
                 );
@@ -157,7 +157,7 @@ const MeetingsPage: React.FC = () => {
             await meetingService.updateMeetingStatus(cancelMeetingId, 'cancelled');
 
             setMeetings(meetings.map(meeting => {
-                if (meeting._id === cancelMeetingId) {
+                if (meeting.id === cancelMeetingId) {
                     const updatedMeeting = meeting;
                     updatedMeeting.status = 'cancelled';
                     return updatedMeeting;
@@ -181,7 +181,7 @@ const MeetingsPage: React.FC = () => {
         try {
             await meetingService.deleteMeeting(deleteMeetingId);
 
-            setMeetings(meetings.filter(meeting => meeting._id !== deleteMeetingId));
+            setMeetings(meetings.filter(meeting => meeting.id !== deleteMeetingId));
 
             toast.success('Meeting deleted!');
         } catch (error) {
@@ -329,7 +329,7 @@ const MeetingsPage: React.FC = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {meetings && meetings.map((meeting) => (
-                                        <TableRow key={meeting._id}>
+                                        <TableRow key={meeting.id}>
                                             <TableCell>{meeting.title}</TableCell>
                                             <TableCell>
                                                 {format(new Date(meeting.scheduledTime), 'PPp')}
@@ -342,7 +342,7 @@ const MeetingsPage: React.FC = () => {
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        onClick={() => handleJoinMeeting(meeting._id)}
+                                                        onClick={() => handleJoinMeeting(meeting.id)}
                                                     >
                                                         <Video className="mr-2 w-4 h-4 text-green-500" /> Join
                                                     </Button>
@@ -359,20 +359,20 @@ const MeetingsPage: React.FC = () => {
                                                     size="sm"
                                                     variant="outline"
                                                     className='text-red-500 hover:text-red-700'
-                                                    onClick={() => openCancelDialog(meeting._id)}
+                                                    onClick={() => openCancelDialog(meeting.id)}
                                                 >
                                                     <XCircle className="mr-2 w-4 h-4 text-red-500 hover:text-red-700" /> Cancel
                                                 </Button>}
                                             </TableCell>
                                             <TableCell className="">
                                                 <button
-                                                    onClick={() => handleCopyLink(meeting._id)}>
+                                                    onClick={() => handleCopyLink(meeting.id)}>
                                                     <Copy className="mr-2 w-4 h-4 opacity-70 hover:opacity-100 active:-scale-[80%]" />
                                                 </button>
                                             </TableCell>
                                             <TableCell className="">
                                                 <button
-                                                    onClick={() => openDeleteDialog(meeting._id)}>
+                                                    onClick={() => openDeleteDialog(meeting.id)}>
                                                     <Trash2 className="mr-2 w-4 h-4 text-red-300 hover:text-red-500" />
                                                 </button>
                                             </TableCell>

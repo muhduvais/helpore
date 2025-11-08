@@ -40,7 +40,6 @@ const LoginPage: React.FC = () => {
   }
 
   const [formData, setFormData] = useState<any>(initialData);
-  const [formErrors, setFormErrors] = useState<any>(initialData);
   const [isLoading, setIsLoading] = useState<any>(false);
 
   const [showPassword, setShowPassword] = useState(false)
@@ -80,24 +79,6 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
 
     const selectedRole = isVolunteer ? 'volunteer' : 'user';
-
-    let hasError = false;
-
-    const newFormErrors = { ...formErrors };
-
-    Object.keys(formData).forEach((field: any) => {
-      const validationResult = validateForm(field, formData[field]);
-      if (validationResult?.error) {
-        newFormErrors[field] = validationResult.error;
-        hasError = true;
-      } else {
-        newFormErrors[field] = '';
-      }
-    });
-
-    setFormErrors(newFormErrors);
-
-    if (hasError) return;
 
     setIsLoading(true);
 
@@ -292,21 +273,19 @@ const LoginPage: React.FC = () => {
           <form onSubmit={handleLogin} className='py-2 sm:py-3'>
 
             <div className="input-field flex flex-col p-2 sm:p-3 pt-0 gap-y-1">
-              {formErrors.email ? <label htmlFor="email" className='opacity-90 font-semibold text-red-500 text-sm'>{formErrors.email}</label>
-                : <label htmlFor="email" className='opacity-75 font-semibold text-sm'>Email</label>}
+              <label htmlFor="email" className='opacity-75 font-semibold text-sm'>Email</label>
               <input
                 type="text"
                 name="email"
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white ${formErrors.email || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none`} />
+                className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white border-[#fff] border-opacity-60 focus:border-opacity-75 outline-none`} />
 
             </div>
 
             <div className="relative input-field flex flex-col p-2 sm:p-3 pt-0 gap-y-1 sm:gap-y-2">
-              {formErrors.password ? <label htmlFor="password" className='opacity-90 font-semibold text-red-500 text-sm'>{formErrors.password}</label>
-                : <label htmlFor="password" className='opacity-75 font-semibold text-sm'>Password</label>}
+              <label htmlFor="password" className='opacity-75 font-semibold text-sm'>Password</label>
               <div className="relative w-full">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -314,7 +293,7 @@ const LoginPage: React.FC = () => {
                   id="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white ${formErrors.password || errorMessage ? 'border-red-500' : 'border-[#fff]'} border-opacity-60 focus:border-opacity-75 outline-none w-full`} />
+                  className={`transition-all duration-300 bg-transparent px-3 py-2 text-base sm:text-lg md:text-xl font-semibold border-b-[3px] bg-white border-[#fff] border-opacity-60 focus:border-opacity-75 outline-none w-full`} />
 
                 <button
                   type="button"

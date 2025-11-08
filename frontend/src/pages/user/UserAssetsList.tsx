@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { useDebounce } from 'use-debounce';
-import { format } from 'date-fns';
+import React, { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { useDebounce } from "use-debounce";
+import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -23,27 +23,131 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Label } from '@/components/ui/label';
-import { FaAngleLeft, FaAngleRight, FaBox } from 'react-icons/fa';
-import { CiSearch } from 'react-icons/ci';
-import { userService } from '@/services/user.service';
-import { IAsset } from '@/interfaces/adminInterface';
-import asset_picture from '../../assets/asset_picture.png';
+import { Label } from "@/components/ui/label";
+import { FaAngleLeft, FaAngleRight, FaBox } from "react-icons/fa";
+import { CiSearch } from "react-icons/ci";
+import { userService } from "@/services/user.service";
+import { IAsset } from "@/interfaces/adminInterface";
+import asset_picture from "../../assets/asset_picture.png";
 import { toast } from "sonner";
-import 'react-toastify/dist/ReactToastify.css';
-import { CalendarIcon, MinusCircle, PlusCircle } from 'lucide-react';
+import "react-toastify/dist/ReactToastify.css";
+import { CalendarIcon, MinusCircle, PlusCircle } from "lucide-react";
+import { startOfDay } from "date-fns";
 
-import loading_logo from '../../assets/Logo-black-short.png';
+import loading_logo from "../../assets/Logo-black-short.png";
+
+// Request Modal Component
+const RequestModal = ({
+  isOpen,
+  onClose,
+  selectedAsset,
+  selectedDate,
+  setSelectedDate,
+  isSubmitting,
+  handleRequest,
+}: any) => {
+  const [qty, setQty] = useState(1);
+  const maxStocks =
+    selectedAsset && selectedAsset.stocks > 3 ? 3 : selectedAsset?.stocks || 0;
+  const today = useMemo(() => startOfDay(new Date()), []);
+
+  const incrementQty = () => qty < maxStocks && setQty(qty + 1);
+  const decrementQty = () => qty > 1 && setQty(qty - 1);
+  const handleQtyChange = (e: any) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 1 && value <= maxStocks) setQty(value);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Request Asset</DialogTitle>
+          <DialogDescription>
+            Select a date and quantity for when you need the{" "}
+            {selectedAsset?.name}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="py-4 space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <CalendarIcon className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600">
+                {selectedDate ? format(selectedDate, "PPP") : "Select a date"}
+              </span>
+            </div>
+
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              disabled={(date) => date < today}
+              className="rounded-md border"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="quantity">{`Quantity (Max: ${maxStocks})`}</Label>
+            <div className="flex items-center space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={decrementQty}
+                disabled={qty <= 1}
+                className="h-8 w-8"
+              >
+                <MinusCircle className="h-4 w-4" />
+              </Button>
+              <Input
+                id="quantity"
+                type="number"
+                value={qty}
+                min="1"
+                max={maxStocks}
+                onChange={handleQtyChange}
+                className="w-20 text-center"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={incrementQty}
+                disabled={qty >= maxStocks}
+                className="h-8 w-8"
+              >
+                <PlusCircle className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => handleRequest(qty)}
+            disabled={!selectedDate || isSubmitting}
+            className="bg-[#688D48] hover:bg-[#557239] text-white"
+          >
+            {isSubmitting ? "Submitting..." : "Submit Request"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const AssetListing = () => {
-
   const [assets, setAssets] = useState<IAsset[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [sortBy, setSortBy] = useState('name');
-  const [filterByAvailability, setFilterByAvailability] = useState('all');
+  const [sortBy, setSortBy] = useState("name");
+  const [filterByAvailability, setFilterByAvailability] = useState("all");
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<IAsset | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -74,9 +178,12 @@ const AssetListing = () => {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Error fetching the assets:', error.response?.data.message);
+        console.error(
+          "Error fetching the assets:",
+          error.response?.data.message
+        );
       } else {
-        console.error('Unknown error:', error);
+        console.error("Unknown error:", error);
       }
     } finally {
       setIsLoading(false);
@@ -100,152 +207,35 @@ const AssetListing = () => {
 
     try {
       setIsSubmitting(true);
-      const assetId = selectedAsset?._id || '';
+      const assetId = selectedAsset?.id || "";
       const response = await userService.requestAsset(assetId, {
-        requestedDate: format(selectedDate, 'yyyy-MM-dd'), quantity: qty
+        requestedDate: format(selectedDate, "yyyy-MM-dd"),
+        quantity: qty,
       });
       if (response.status === 200) {
         setIsRequestModalOpen(false);
         toast.success("Asset requested successfully!", {
           duration: 3000,
-          onAutoClose: () => window.location.reload()
+          onAutoClose: () => window.location.reload(),
         });
       }
     } catch (error) {
       setIsRequestModalOpen(false);
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || 'Error requesting asset!');
+        toast.error(error.response?.data?.message || "Error requesting asset!");
       } else {
-        toast.error('Error requesting asset!');
-        console.error('Error requesting asset:', error);
+        toast.error("Error requesting asset!");
+        console.error("Error requesting asset:", error);
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Request Modal Component
-  const RequestModal = () => {
-    const [qty, setQty] = React.useState(1);
-
-    const incrementQty = () => {
-      if (qty < 3) {
-        setQty(qty + 1);
-      }
-    };
-
-    const decrementQty = () => {
-      if (qty > 1) {
-        setQty(qty - 1);
-      }
-    };
-
-    const handleQtyChange = (e: any) => {
-      const value = parseInt(e.target.value);
-      if (!isNaN(value) && value >= 1 && value <= 3) {
-        setQty(value);
-      }
-    };
-
-    const maxStocks = selectedAsset && selectedAsset.stocks > 3 ? 3 : selectedAsset?.stocks || 0;
-
-    return (
-      <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Request Asset</DialogTitle>
-            <DialogDescription>
-              Select a date and quantity for when you need the {selectedAsset?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="flex flex-col space-y-6">
-
-              {/* Date Selection */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <CalendarIcon className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">
-                    {selectedDate ? format(selectedDate, "PPP") : "Select a date"}
-                  </span>
-                </div>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  disabled={(date) => date < new Date()}
-                  className="rounded-md border"
-                />
-              </div>
-
-              {/* Quantity Selection */}
-              <div className="space-y-2">
-                <Label htmlFor="quantity">{`Quantity (Max: ${maxStocks} )`}</Label>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={decrementQty}
-                    disabled={qty <= 1}
-                    className="h-8 w-8"
-                  >
-                    <MinusCircle className="h-4 w-4" />
-                  </Button>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    min="1"
-                    max={maxStocks}
-                    value={qty}
-                    onChange={handleQtyChange}
-                    className="w-20 text-center"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={incrementQty}
-                    disabled={qty >= maxStocks}
-                    className="h-8 w-8"
-                  >
-                    <PlusCircle className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsRequestModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => handleRequest(qty)}
-              disabled={!selectedDate || isSubmitting}
-              className="bg-[#688D48] hover:bg-[#557239] text-white"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Request'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  };
-
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header Section */}
       <div className="flex flex-col gap-6">
-        <div className="flex items-center gap-3">
-          <FaBox className="text-2xl text-[#688D48]" />
-          <h1 className="text-2xl font-semibold text-gray-800">Available Assets</h1>
-        </div>
-
         {/* Filters and Search */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
@@ -259,10 +249,7 @@ const AssetListing = () => {
             />
           </div>
 
-          <Select
-            value={sortBy}
-            onValueChange={setSortBy}
-          >
+          <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-full md:w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
@@ -296,7 +283,7 @@ const AssetListing = () => {
       {/* Loading State */}
       {isLoading && (
         <div className="flex justify-center items-center h-72">
-          <img src={loading_logo} alt="Loading..." className='flip-animation' />
+          <img src={loading_logo} alt="Loading..." className="flip-animation" />
         </div>
       )}
 
@@ -304,7 +291,10 @@ const AssetListing = () => {
       {!isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {assets.map((asset) => (
-            <Card key={asset._id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200 relative h-[400px] flex flex-col">
+            <Card
+              key={asset.id}
+              className="overflow-hidden hover:shadow-lg transition-shadow duration-200 relative h-[400px] flex flex-col"
+            >
               <div className="aspect-video w-full overflow-hidden bg-gray-100">
                 <img
                   src={asset.image || asset_picture}
@@ -315,14 +305,20 @@ const AssetListing = () => {
               </div>
               <div className="p-4 flex flex-col flex-grow">
                 <div className="flex justify-between items-start gap-2 mb-2">
-                  <h3 className="font-semibold text-lg text-gray-800 max-w-[200px] truncate">
+                  <h3
+                    className="font-semibold text-lg text-gray-800 max-w-[200px] truncate cursor-default hover:underline"
+                    title={asset.name}
+                  >
                     {asset.name}
                   </h3>
                   <Badge
-                    variant={asset.stocks > 5 ? "default" : asset.stocks > 0 ? "secondary" : "destructive"}
-                    className={`${asset.stocks > 0 ? "bg-[#688D48]" : ""}`}
+                    variant={asset.stocks > 0 ? "default" : "destructive"}
+                    className={`${
+                      asset.stocks > 0 ? "bg-[#688D48]" : "w-[150px]"
+                    } text-center cursor-default`}
+                    title="Stocks Available"
                   >
-                    {asset.stocks > 0 ? `${asset.stocks} available` : 'Out of stock'}
+                    {asset.stocks > 0 ? `${asset.stocks}` : "Out of stock"}
                   </Badge>
                 </div>
                 <p className="text-gray-600 text-sm flex-grow line-clamp-3">
@@ -336,7 +332,7 @@ const AssetListing = () => {
                   >
                     Request Asset
                   </Button>
-                  <Link to={`/user/assets/${asset._id}`} className="w-full">
+                  <Link to={`/user/assets/${asset.id}`} className="w-full">
                     <Button
                       variant="outline"
                       className="w-full text-[#688D48] hover:text-white hover:bg-[#688D48]"
@@ -355,7 +351,9 @@ const AssetListing = () => {
       {!isLoading && assets.length === 0 && (
         <div className="text-center py-12">
           <FaBox className="mx-auto text-4xl text-gray-300 mb-4" />
-          <h3 className="text-xl font-medium text-gray-600 mb-2">No Assets Found</h3>
+          <h3 className="text-xl font-medium text-gray-600 mb-2">
+            No Assets Found
+          </h3>
           <p className="text-gray-500">Try adjusting your search or filters.</p>
         </div>
       )}
@@ -410,7 +408,15 @@ const AssetListing = () => {
       )}
 
       {/* Request Modal */}
-      <RequestModal />
+      <RequestModal
+        isOpen={isRequestModalOpen}
+        onClose={() => setIsRequestModalOpen(false)}
+        selectedAsset={selectedAsset}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        isSubmitting={isSubmitting}
+        handleRequest={handleRequest}
+      />
     </div>
   );
 };

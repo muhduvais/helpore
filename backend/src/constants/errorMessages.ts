@@ -22,6 +22,9 @@ export const ErrorMessages = {
   ASSET_NOT_FOUND: 'Asset not found!',
   NO_IMAGE_UPLOADED: 'No image uploaded!',
 
+  // Asset-request
+  ASSET_REQUEST_NOT_FOUND: 'Asset request not found.',
+
   // Assistance request
   ASSISTANCE_REQUEST_CREATE_SUCCESS: 'Assistance request created successfully.',
   ASSISTANCE_REQUEST_CREATE_FAILED: 'Error creating the assistance request!',

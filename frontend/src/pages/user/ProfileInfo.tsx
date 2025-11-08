@@ -9,9 +9,24 @@ import { userService } from '../../services/user.service';
 import { IAddress, IUser } from '../../interfaces/userInterface';
 import axios from 'axios';
 import { adminService } from '@/services/admin.service';
-import EditProfileModal, { IAddressData, IUserData } from '@/components/EditUserProfile';
+import EditProfileModal from '@/components/EditUserProfile';
 import { useSearchParams } from 'react-router-dom';
 import loading_logo from "../../assets/Logo-black-short.png"
+
+export interface IUserData {
+  name: string;
+  age: number;
+  gender: string;
+  phone: number;
+}
+
+export interface IAddressData {
+  street: string;
+  city: string;
+  state: string;
+  country: string;
+  pincode: string;
+}
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('info');

@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "tsyringe": "^4.8.0"
   }
 }

@@ -10,9 +10,9 @@ export interface IAssetRequestRepository extends IBaseRepository<IAssetRequest> 
     limit: number,
     sort: string,
     status: string,
-  ): Promise<IAssetRequestResponse[] | null>
-  findMyRequests(search: string, filter: string, userId: string, skip: number, limit: number): Promise<IAssetRequestResponse[] | null>
-  findRequestDetails(userId: string, assetId: string): Promise<IAssetRequest[]>;
+  ): Promise<IAssetRequest[] | null>
+  findMyRequests(search: string, filter: string, userId: string, skip: number, limit: number): Promise<IAssetRequest[] | null>
+  findRequestDetails(userId: string, assetId: string): Promise<IAssetRequest | null>;
   countMyRequests(query: object): Promise<number>;
   countRequests(query: object): Promise<number>;
   updateStatus(requestId: string, status: string, comment: string): Promise<IAssetRequest | null>;

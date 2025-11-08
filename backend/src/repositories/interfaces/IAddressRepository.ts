@@ -1,4 +1,4 @@
-import { IAddress, IAddressDocument } from "../../interfaces/user.interface";
+import { IAddress, IAddressDocument } from "../../interfaces/address.interface";
 import { IBaseRepository } from "./IBaseRepository";
 
 export interface IAddressRepository extends IBaseRepository<IAddressDocument> {

@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IAddress, IAddressDocument } from "../interfaces/user.interface";
+import { IAddressDocument } from "../interfaces/address.interface";
 
 const addressSchema = new Schema<IAddressDocument>({
     fname: {

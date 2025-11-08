@@ -113,7 +113,7 @@ const AdminAssetManagement = () => {
       {!isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {assets.map((asset) => (
-            <Card key={asset._id} className="overflow-hidden hover:shadow-lg transition-shadow relative h-[370px]">
+            <Card key={asset.id} className="overflow-hidden hover:shadow-lg transition-shadow relative h-[370px]">
               <div className="aspect-video w-full overflow-hidden bg-gray-100">
                 <img
                   src={asset.image || asset_picture}
@@ -138,7 +138,7 @@ const AdminAssetManagement = () => {
                   <span className="text-sm text-gray-500">
                     Added {new Date(asset.createdAt).toLocaleDateString()}
                   </span>
-                  <Link to={`/admin/assets/${asset._id}?page=${currentPage}`}>
+                  <Link to={`/admin/assets/${asset.id}?page=${currentPage}`}>
                     <Button variant="outline" size="sm" className="text-[#688D48] hover:text-white hover:bg-[#688D48]">
                       <FaEye className="mr-2" />
                       View Details

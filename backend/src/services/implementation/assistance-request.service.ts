@@ -6,6 +6,8 @@ import { IAddressRepository } from "../../repositories/interfaces/IAddressReposi
 import { calculateDistance, MAX_DISTANCE, MIN_DISTANCE } from '../../utils';
 import { IAssistanceRequestRepository } from "../../repositories/interfaces/IAssistanceRequestRepository";
 import { ErrorMessages } from '../../constants/errorMessages';
+import { AssistanceRequestDTO } from "../../dtos/assistance-request.dto";
+import { toAssistanceRequestDTO, toAssistanceRequestListDTO } from "../../mappers/assistance-request.mapper";
 
 @injectable()
 export class AssistanceRequestService implements IAssistanceRequestService {
@@ -177,53 +179,47 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async fetchAssistanceRequests(
         search: string, filter: string, skip: number, limit: number, sort: string, priority: string
-    ): Promise<IAssistanceRequestResponse[] | null> {
+    ): Promise<AssistanceRequestDTO[] | null> {
         try {
-            const results = await this.assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority);
+            const assistanceRequests = await this.assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority);
 
-            if (!results) return null;
-
-            return results.map((request: IAssistanceRequestResponse) => ({
-                ...request,
-                requestedDate: new Date(request.requestedDate).toISOString(),
-                address: request.address instanceof Types.ObjectId ? undefined : request.address,
-            }));
+            if (!assistanceRequests) {
+                throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
+            }
+ 
+            return toAssistanceRequestListDTO(assistanceRequests);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
-            return null;
+            throw new Error(ErrorMessages.SERVER_ERROR);
         }
     }
 
     async fetchMyAssistanceRequests(
         userId: string, search: string, filter: string, skip: number, limit: number, sort: string, priority: string
-    ): Promise<IAssistanceRequestResponse[] | null> {
+    ): Promise<AssistanceRequestDTO[] | null> {
         try {
-            const results = await this.assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority, userId);
+            const assistanceRequests = await this.assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority, userId);
 
-            if (!results) return null;
+            if (!assistanceRequests) {
+                throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND)
+            }
 
-            return results.map((request: IAssistanceRequestResponse) => ({
-                ...request,
-                requestedDate: new Date(request.requestedDate).toISOString(),
-                address: request.address instanceof Types.ObjectId ? undefined : request.address,
-            }));
+            return toAssistanceRequestListDTO(assistanceRequests);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
-            return null;
+            throw new Error(ErrorMessages.SERVER_ERROR);
         }
     }
 
-    async fetchPendingRequests(): Promise<IAssistanceRequest[] | null> {
+    async fetchPendingRequests(): Promise<AssistanceRequestDTO[] | null> {
         try {
-            const results = await this.assistanceRepository.findPendingAssistanceRequests();
+            const assistanceRequests = await this.assistanceRepository.findPendingAssistanceRequests();
 
-            if (!results) return null;
+            if (!assistanceRequests) {
+                throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
+            }
 
-            return results.map((request: IAssistanceRequest) => ({
-                ...request,
-                requestedDate: new Date(request.requestedDate).toISOString(),
-                address: request.address instanceof Types.ObjectId ? undefined : request.address,
-            }));
+            return toAssistanceRequestListDTO(assistanceRequests);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_PENDING_FAILED, error);
             return null;
@@ -232,16 +228,14 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async fetchProcessingRequests(
         search: string, filter: string, skip: number, limit: number, volunteerId: string
-    ): Promise<IAssistanceRequestResponse[] | null> {
+    ): Promise<AssistanceRequestDTO[] | null> {
         try {
-            const results = await this.assistanceRepository.findProcessingRequests(search, filter, skip, limit, volunteerId);
-            if (!results) return null;
+            const assistanceRequests = await this.assistanceRepository.findProcessingRequests(search, filter, skip, limit, volunteerId);
+            if (!assistanceRequests) {
+                throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
+            }
 
-            return results.map((request: IAssistanceRequestResponse) => ({
-                ...request,
-                requestedDate: new Date(request.requestedDate).toISOString(),
-                address: request.address instanceof Types.ObjectId ? undefined : request.address,
-            }));
+            return toAssistanceRequestListDTO(assistanceRequests);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_PROCESSING_FAILED, error);
             return null;
@@ -275,9 +269,14 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         }
     }
 
-    async fetchAssistanceRequestDetails(requestId: string): Promise<any> {
+    async fetchAssistanceRequestDetails(requestId: string): Promise<AssistanceRequestDTO | null> {
         try {
-            return await this.assistanceRepository.findAssistanceRequestDetails(requestId);
+            const assistanceRequest = await this.assistanceRepository.findAssistanceRequestDetails(requestId);
+            if (!assistanceRequest) {
+                throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
+            }
+
+            return toAssistanceRequestDTO(assistanceRequest);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_DETAILS_FETCH_FAILED, error);
             return null;

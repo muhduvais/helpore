@@ -26,7 +26,7 @@ export const meetingService = {
 
       const response = await customAxios.post('/api/meetings/generateToken', {
         roomId,
-        userId: currentUser._id,
+        userId: currentUser.id,
         userName: currentUser.name
       });
 
@@ -48,7 +48,7 @@ export const meetingService = {
 
       const roomPayload = {
         roomId,
-        hostId: currentUser._id,
+        hostId: currentUser.id,
         participants,
         createdAt: new Date(),
         status: 'scheduled' as const

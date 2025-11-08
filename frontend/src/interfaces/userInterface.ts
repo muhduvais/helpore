@@ -20,7 +20,7 @@ export interface IUser {
     googleId: string;
     resetToken: string;
     resetTokenExpiry: Date;
-    _id?: string;
+    id?: string;
     uid?: string;
     createdAt?: Date;
 }
@@ -49,7 +49,7 @@ export interface IUserDocument extends Document {
 }
 
 export interface IAddress {
-    _id?: string;
+    id?: string;
     fname: string;
     lname: string;
     street: string;
@@ -74,7 +74,7 @@ export interface ChangePasswordData {
 }
 
 export interface IAssetRequest {
-    _id: string;
+    id: string;
     asset: IAsset;
     requestedDate: string;
     quantity: number;
@@ -100,7 +100,7 @@ export interface IAssistanceRequest {
 }
 
 export interface IAssistanceRequestResponse {
-    _id: string;
+    id: string;
     user: Types.ObjectId;
     type: 'volunteer' | 'ambulance';
     description?: string;

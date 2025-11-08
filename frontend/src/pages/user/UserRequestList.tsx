@@ -217,19 +217,19 @@ const UserRequests = () => {
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <img
-                src={request.asset.image || asset_picture}
+                src={request?.asset?.image || asset_picture}
                 alt={'asset'}
                 className="w-16 h-16 rounded-lg object-cover"
               />
               <div>
-                <h3 className="font-medium text-gray-800">{request.asset.name}</h3>
-                <p className="text-sm text-gray-500">{request.asset.category}</p>
+                <h3 className="font-medium text-gray-800">{request?.asset?.name || ''}</h3>
+                <p className="text-sm text-gray-500">{request?.asset?.category || ''}</p>
               </div>
             </div>
-            <Badge className={getStatusColor(request.status)}>
+            <Badge className={getStatusColor(request?.status || '')}>
               <span className="flex items-center gap-1">
-                {getStatusIcon(request.status)}
-                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                {request?.status ? getStatusIcon(request?.status) : ''}
+                {request?.status ? request.status.charAt(0).toUpperCase() + request.status.slice(1) : ''}
               </span>
             </Badge>
           </div>
@@ -240,21 +240,21 @@ const UserRequests = () => {
               <Calendar className="h-4 w-4" />
               <div>
                 <p className="font-medium">Requested For</p>
-                <p>{format(new Date(request.requestedDate), 'PPP')}</p>
+                <p>{request?.requestedDate ? format(new Date(request.requestedDate), 'PPP') : ''}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <Package className="h-4 w-4" />
               <div>
                 <p className="font-medium">Quantity</p>
-                <p>{request.quantity} units</p>
+                <p>{request?.quantity ?? ''} units</p>
               </div>
             </div>
           </div>
 
           {/* Comment Section */}
           <div className="mt-4 flex-1 min-h-[80px]">
-            {request.comment ? (
+            {request?.comment ? (
               <div className="h-full p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
                 <p className="font-medium">Admin Comment:</p>
                 <p>{request.comment}</p>
@@ -281,23 +281,23 @@ const UserRequests = () => {
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                {getTypeIcon(request.type)}
+                {getTypeIcon(request?.type)}
               </div>
               <div>
                 <h3 className="font-medium text-gray-800">
-                  {request.type.charAt(0).toUpperCase() + request.type.slice(1)} Assistance
+                  {request?.type ? request.type.charAt(0).toUpperCase() + request.type.slice(1) : ''} Assistance
                 </h3>
                 <p className="text-sm text-gray-500">
-                  {request.description && request.description.length > 50
+                  {request?.description && request.description.length > 50
                     ? `${request.description.substring(0, 50)}...`
-                    : request.description}
+                    : request?.description || ''}
                 </p>
               </div>
             </div>
-            <Badge className={getStatusColor(request.status)}>
+            <Badge className={getStatusColor(request?.status || '')}>
               <span className="flex items-center gap-1">
-                {getStatusIcon(request.status)}
-                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                {request?.status ? getStatusIcon(request.status) : ''}
+                {request?.status ? request.status.charAt(0).toUpperCase() + request.status.slice(1) : ''}
               </span>
             </Badge>
           </div>
@@ -307,15 +307,15 @@ const UserRequests = () => {
               <Calendar className="h-4 w-4" />
               <div>
                 <p className="font-medium">Requested For</p>
-                <p>{format(new Date(request.requestedDate), 'PPP')}</p>
+                <p>{request?.requestedDate ? format(new Date(request.requestedDate), 'PPP') : ''}</p>
               </div>
             </div>
-            {request.volunteer && (
+            {request?.volunteer && (
               <div className="flex items-center gap-2 text-gray-600">
                 <User className="h-4 w-4" />
                 <div>
                   <p className="font-medium">Assigned Volunteer</p>
-                  <p>{request.volunteer.name || 'volunteer name'}</p>
+                  <p>{request?.volunteer?.name || 'volunteer name'}</p>
                 </div>
               </div>
             )}
@@ -326,7 +326,7 @@ const UserRequests = () => {
             <Button
               variant="outline"
               className="text-[#688D48] border-[#688d4855] hover:bg-[#688D48] opacity-80 hover:opacity-100 hover:text-white transition-colors"
-              onClick={() => navigate(`/user/assistanceRequests/${request._id}`)}
+              onClick={() => request?.id && navigate(`/user/assistanceRequests/${request.id}`)}
             >
               View More
             </Button>
@@ -340,7 +340,7 @@ const UserRequests = () => {
     <div className="p-4 sm:p-6 space-y-6 mt-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">My Requests</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-gray-800"></h1>
         <div className="flex gap-4">
           <Link to="/user/assets">
             <Button className="bg-[#688D48] hover:bg-[#557239] text-white">
@@ -448,7 +448,7 @@ const UserRequests = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {requests.map((request) => (
-                  <RequestCard key={request._id} request={request} />
+                  <RequestCard key={request.id} request={request} />
                 ))}
               </div>
 
@@ -584,7 +584,7 @@ const UserRequests = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {assistanceRequests.map((request) => (
-                  <AssistanceRequestCard key={request._id} request={request} />
+                  <AssistanceRequestCard key={request.id} request={request} />
                 ))}
               </div>
 

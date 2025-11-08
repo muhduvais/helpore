@@ -217,7 +217,7 @@ const VolunteerMeetingsPage: React.FC = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {meetings.map((meeting) => (
-                                        <TableRow key={meeting._id}>
+                                        <TableRow key={meeting.id}>
                                             <TableCell>{meeting.title}</TableCell>
                                             <TableCell>
                                                 {format(new Date(meeting.scheduledTime), 'PPp')}
@@ -230,7 +230,7 @@ const VolunteerMeetingsPage: React.FC = () => {
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        onClick={() => handleJoinMeeting(meeting._id)}
+                                                        onClick={() => handleJoinMeeting(meeting.id)}
                                                     >
                                                         <Video className="mr-2 w-4 h-4 text-green-500" /> Join
                                                     </Button>
@@ -246,7 +246,7 @@ const VolunteerMeetingsPage: React.FC = () => {
                                             </TableCell>
                                             <TableCell className="">
                                                 <button
-                                                    onClick={() => handleCopyLink(meeting._id)}>
+                                                    onClick={() => handleCopyLink(meeting.id)}>
                                                     <Copy className="mr-2 w-4 h-4 opacity-70 hover:opacity-100 active:-scale-[80%]" />
                                                 </button>
                                             </TableCell>

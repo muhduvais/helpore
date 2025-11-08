@@ -144,7 +144,8 @@ const AssistanceRequestDetails: React.FC = () => {
                 },
                 (data) => {
                     setIsTyping(data.isTyping && data.userId !== userId);
-                }
+                },
+                () => { markAllAsRead() }
             );
 
             return () => {
@@ -197,10 +198,10 @@ const AssistanceRequestDetails: React.FC = () => {
     }, [messages]);
 
     const handleSendMessage = async () => {
-        if (!messageInput.trim() || !request?.volunteer?._id || !id) return;
+        if (!messageInput.trim() || !request?.volunteer?.id || !id) return;
 
         try {
-            await chatService.sendMessage(request.volunteer._id, messageInput, id, 'volunteers', 'users');
+            await chatService.sendMessage(request.volunteer.id, messageInput, id, 'volunteers', 'users', []);
             setMessageInput('');
         } catch (error) {
             console.error('Error sending message:', error);

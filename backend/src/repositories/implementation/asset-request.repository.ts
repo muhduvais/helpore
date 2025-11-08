@@ -14,7 +14,6 @@ export class AssetRequestRepository extends BaseRepository<IAssetRequest> implem
 
   async createAssetRequest(assetId: string, userId: string, requestedDate: Date, quantity: number): Promise<boolean> {
     try {
-      console.log('qty: ', quantity)
       const assetRequest = new AssetRequest({ asset: assetId, user: userId, requestedDate, quantity, status: 'pending' });
       await assetRequest.save();
       await Asset.findByIdAndUpdate(assetId, { $inc: { stocks: -quantity } })
@@ -32,9 +31,10 @@ export class AssetRequestRepository extends BaseRepository<IAssetRequest> implem
     limit: number,
     sort: string,
     status: string,
-  ): Promise<IAssetRequestResponse[] | null> {
+  ): Promise<IAssetRequest[] | null> {
     try {
       let query: any = {};
+      console.log('Fetching asset requests...')
 
       if (userId !== "all") {
         if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -94,24 +94,14 @@ export class AssetRequestRepository extends BaseRepository<IAssetRequest> implem
         }
       ]);
 
-      return requests.map(request => ({
-        _id: request._id.toString(),
-        asset: request.asset,
-        user: request.user,
-        requestedDate: request.requestedDate.toISOString(),
-        quantity: request.quantity,
-        status: request.status,
-        comment: request.comment,
-        createdAt: request.createdAt.toISOString(),
-        updatedAt: request.updatedAt.toISOString(),
-      }));
+      return requests;
     } catch (error) {
       console.error("Error finding asset requests:", error);
       return null;
     }
   }
 
-  async findMyRequests(search: string, filter: string, userId: string, skip: number, limit: number): Promise<IAssetRequestResponse[] | null> {
+  async findMyRequests(search: string, filter: string, userId: string, skip: number, limit: number): Promise<IAssetRequest[] | null> {
     try {
       const matchStage: any = filter ? { user: new mongoose.Types.ObjectId(userId), status: filter } : { user: new mongoose.Types.ObjectId(userId) };
 
@@ -147,7 +137,7 @@ export class AssetRequestRepository extends BaseRepository<IAssetRequest> implem
         }
       ]);
 
-      return requests as IAssetRequestResponse[];
+      return requests;
     } catch (error) {
       console.error('Error finding the asset requests:', error);
       return null;
@@ -164,9 +154,10 @@ export class AssetRequestRepository extends BaseRepository<IAssetRequest> implem
     }
   }
 
-  async findRequestDetails(userId: string, assetId: string): Promise<IAssetRequest[]> {
+  async findRequestDetails(userId: string, assetId: string): Promise<IAssetRequest | null> {
     try {
-      return await AssetRequest.find({ asset: assetId, user: userId });
+      const result = await AssetRequest.findOne({ user: userId, asset: assetId });
+      return result;
     } catch (error) {
       console.error('Error finding asset request details:', error);
       throw error;

@@ -155,7 +155,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
         setIsSubmitting(true);
 
         try {
-            const response = await adminService.updateAsset(asset?._id as string, finalFormData);
+            const response = await adminService.updateAsset(asset?.id as string, finalFormData);
 
             if (response.data) {
                 console.log('response', response)

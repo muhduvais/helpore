@@ -207,7 +207,7 @@ const VolunteerRequests: React.FC = () => {
               <Button
                 variant="outline"
                 className="text-[#688D48] border-[#688d4855] hover:bg-[#688D48] opacity-80 hover:opacity-100 hover:text-white transition-colors"
-                onClick={() => navigate(`/volunteer/assistanceRequests/${request._id}`)}
+                onClick={() => navigate(`/volunteer/assistanceRequests/${request.id}`)}
               >
                 View More
               </Button>
@@ -322,7 +322,7 @@ const VolunteerRequests: React.FC = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {assistanceRequests.map((request: IAssistanceRequestResponse) => (
-                  <AssistanceRequestCard key={request._id} request={request} />
+                  <AssistanceRequestCard key={request.id} request={request} />
                 ))}
               </div>
 
@@ -461,7 +461,7 @@ const VolunteerRequests: React.FC = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {assistanceRequests.map((request: IAssistanceRequestResponse) => (
-                  <AssistanceRequestCard key={request._id} request={request} />
+                  <AssistanceRequestCard key={request.id} request={request} />
                 ))}
               </div>
 

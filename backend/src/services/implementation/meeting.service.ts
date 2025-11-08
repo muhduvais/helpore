@@ -1,5 +1,4 @@
 import { inject, injectable } from 'tsyringe';
-import * as jwt from 'jsonwebtoken';
 import { IMeetingService } from '../interfaces/ServiceInterface';
 import { IMeetingRepository } from '../../repositories/interfaces/IMeetingRepository';
 import { IMeeting } from '../../interfaces/meeting.interface';
@@ -8,6 +7,8 @@ import { io } from '../../utils';
 import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
 import { generateToken04 } from '../../utils/zegoToken.util';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { MeetingDTO } from '../../dtos/meeting.dto';
+import { toMeetingDTO, toMeetingListDTO } from '../../mappers/meeting.mapper';
 
 @injectable()
 export class MeetingService implements IMeetingService {
@@ -65,7 +66,7 @@ export class MeetingService implements IMeetingService {
         }
     }
 
-    async getMeetings(page: number, limit: number, search: string, filter: string): Promise<IMeeting[] | null> {
+    async getMeetings(page: number, limit: number, search: string, filter: string): Promise<MeetingDTO[] | null> {
         try {
             let skip = (page - 1) * limit;
             let query: any = {};
@@ -78,7 +79,11 @@ export class MeetingService implements IMeetingService {
                 query.status = filter;
             }
 
-            return await this.meetingRepository.findAll(query, skip, limit);
+            const meetings = await this.meetingRepository.findAll(query, skip, limit);
+            if (!meetings) {
+                throw new Error(ErrorMessages.MEETING_NOT_FOUND);
+            }
+            return toMeetingListDTO(meetings);
         } catch (error) {
             console.error(ErrorMessages.MEETING_FETCH_FAILED, error);
             return null;
@@ -118,25 +123,33 @@ export class MeetingService implements IMeetingService {
         }
     }
 
-    async getUpcomingMeetings(): Promise<IMeeting[] | null> {
+    async getUpcomingMeetings(): Promise<MeetingDTO[] | null> {
         try {
-            return await this.meetingRepository.findUpcomingMeetings();
+            const meetings = await this.meetingRepository.findUpcomingMeetings();
+            if (!meetings) {
+                throw new Error(ErrorMessages.MEETING_NOT_FOUND);
+            }
+            return toMeetingListDTO(meetings);
         } catch (error) {
             console.error(ErrorMessages.MEETING_FETCH_UPCOMING_FAILED, error);
             return null;
         }
     }
 
-    async getMeetingById(meetingId: string): Promise<IMeeting | null> {
+    async getMeetingById(meetingId: string): Promise<MeetingDTO | null> {
         try {
-            return await this.meetingRepository.findById(meetingId);
+            const meeting = await this.meetingRepository.findById(meetingId);
+            if (!meeting) {
+                throw new Error(ErrorMessages.MEETING_NOT_FOUND);
+            }
+            return toMeetingDTO(meeting);
         } catch (error) {
             console.error(ErrorMessages.MEETING_DETAILS_FETCH_FAILED, error);
             return null;
         }
     }
 
-    async getUserMeetings(userId: string, page: number, limit: number, search: string, filter: string): Promise<IMeeting[] | null> {
+    async getUserMeetings(userId: string, page: number, limit: number, search: string, filter: string): Promise<MeetingDTO[] | null> {
         try {
             let skip = (page - 1) * limit;
             let query: any = {};
@@ -152,7 +165,11 @@ export class MeetingService implements IMeetingService {
             const userObjectId = new Types.ObjectId(userId);
             query.participants = userObjectId
 
-            return await this.meetingRepository.findAll(query, skip, limit);
+            const meetings = await this.meetingRepository.findAll(query, skip, limit);
+            if (!meetings) {
+                throw new Error(ErrorMessages.MEETING_NOT_FOUND);
+            }
+            return toMeetingListDTO(meetings);
         } catch (error) {
             console.error(ErrorMessages.MEETING_USER_FETCH_FAILED, error);
             return null;
