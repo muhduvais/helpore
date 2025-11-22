@@ -232,12 +232,13 @@ const DonationManagementPage: React.FC = () => {
                     <TableHead className="whitespace-nowrap">Donor</TableHead>
                     <TableHead className="whitespace-nowrap">Message</TableHead>
                     <TableHead className="whitespace-nowrap">Status</TableHead>
+                    <TableHead className="whitespace-nowrap">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {donations.length > 0 ? (
                     donations.map((donation) => (
-                      <TableRow key={donation._id} className="hover:bg-gray-50">
+                      <TableRow key={donation.id} className="hover:bg-gray-50">
                         <TableCell className="font-medium">
                           {format(new Date(donation.date), 'MMM dd, yyyy')}
                         </TableCell>
@@ -271,7 +272,7 @@ const DonationManagementPage: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDownloadReceipt(donation._id, donation.userId?.id as string)}
+                            onClick={() => handleDownloadReceipt(donation.id, donation.userId?.id as string)}
                             className="text-[#688D48] border-[#688D48] hover:bg-[#688D48]/10"
                           >
                             <FaDownload className="mr-2" /> Receipt

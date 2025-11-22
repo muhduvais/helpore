@@ -14,7 +14,7 @@ interface IDonationsResponse {
 
 export const donationService = {
   fetchDonationHistory: async () => {
-    return await customAxios.get<IDonationsResponse>('/api/donations/history');
+    return await customAxios.get<IDonation[]>('/api/donations/history');
   },
 
   fetchRecentDonations: async () => {

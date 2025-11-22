@@ -47,7 +47,7 @@ const DonationPage = () => {
                 const response = await donationService.fetchDonationHistory();
 
                 if (response.status === 200) {
-                    setDonationHistory(response.data.donations || []);
+                    setDonationHistory(response.data || []);
                 }
             } catch (error) {
                 console.error('Error fetching donation history:', error);
@@ -113,15 +113,15 @@ const DonationPage = () => {
         const success = query.get('success');
 
         if (success === 'true' && sessionId) {
-            console.log('amount after success: ', amount)
             setSuccessDonationCampaign(campaign);
             setIsSuccessModalOpen(true);
 
             if (showHistory) {
+                console.log('Fetching updated donation history...');
                 donationService.fetchDonationHistory()
                     .then(response => {
                         if (response.status === 200) {
-                            setDonationHistory(response.data.donations || []);
+                            setDonationHistory(response.data || []);
                         }
                     })
                     .catch(error => console.error('Error fetching updated history:', error));
@@ -302,7 +302,7 @@ const DonationPage = () => {
                                             <div className="space-y-4">
                                                 {donationHistory.map((donation) => (
                                                     <div
-                                                        key={donation._id}
+                                                        key={donation.id}
                                                         className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50"
                                                     >
                                                         <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ const DonationPage = () => {
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                onClick={() => handleDownloadReceipt(donation._id)}
+                                                                onClick={() => handleDownloadReceipt(donation.id)}
                                                                 className="text-[#688D48] border-[#688D48] hover:bg-[#688D48]/10"
                                                             >
                                                                 <FaDownload className="mr-2" /> Receipt

@@ -77,10 +77,6 @@ export class DonationController implements IDonationController {
     const { donationId } = req.params;
     const userId = !req.query.userId && req.user?.role !== 'admin' ? req.user?.userId : req.query.userId as string;
     try {
-      if (!userId) {
-        res.status(HttpStatusCode.BAD_REQUEST).json({ message: ErrorMessages.INVALID_USER_ID });
-        return;
-      }
       const pdfBuffer = await this.donationService.generateAndSendReceipt(donationId, userId);
 
       res.contentType('application/pdf');

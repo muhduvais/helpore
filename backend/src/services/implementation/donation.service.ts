@@ -11,6 +11,8 @@ import { IUserRepository } from '../../repositories/interfaces/IUserRepository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { IAddressDocument } from '../../interfaces/address.interface';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { toDonationListDTO } from '../../mappers/donation.mapper';
+import { DonationDTO } from '../../dtos/donation.dto';
 
 dotenv.config();
 
@@ -109,21 +111,21 @@ export class DonationService implements IDonationService {
     }
   }
 
-  async getUserDonationHistory(userId: string): Promise<any> {
+  async getUserDonationHistory(userId: string): Promise<DonationDTO[]> {
     if (!userId) {
       throw new Error(ErrorMessages.INVALID_USER_ID);
     }
 
     try {
       const donations = await this.donationRepository.findByUserId(userId);
-      return { donations };
+      return toDonationListDTO(donations);
     } catch (error) {
       console.error(ErrorMessages.DONATION_HISTORY_FAILED, error);
       throw new Error(ErrorMessages.DONATION_HISTORY_FAILED);
     }
   }
 
-  async getAllDonations(page: number, limit: number, search: string, campaign: string): Promise<IDonation[] | null> {
+  async getAllDonations(page: number, limit: number, search: string, campaign: string): Promise<DonationDTO[] | null> {
     try {
       let skip = (page - 1) * limit;
       let query: any = {};
@@ -137,17 +139,23 @@ export class DonationService implements IDonationService {
         query.campaign = campaign;
       }
       const donations = await this.donationRepository.findAll(query, skip, limit);
-      return donations;
+      if (!donations) {
+        return null;
+      }
+      return toDonationListDTO(donations);
     } catch (error) {
       console.error(ErrorMessages.DONATION_FETCH_FAILED, error);
       throw new Error(ErrorMessages.DONATION_FETCH_FAILED);
     }
   }
 
-  async getRecentDonations(): Promise<IDonation[] | null> {
+  async getRecentDonations(): Promise<DonationDTO[] | null> {
     try {
       const donations = await this.donationRepository.findRecentDonations();
-      return donations;
+      if (!donations) {
+        return null;
+      }
+      return toDonationListDTO(donations);
     } catch (error) {
       console.error(ErrorMessages.DONATION_FETCH_FAILED, error);
       throw new Error(ErrorMessages.DONATION_FETCH_FAILED);
@@ -179,11 +187,11 @@ export class DonationService implements IDonationService {
     }
   }
 
-  async generateAndSendReceipt(donationId: string, userId: string): Promise<Buffer> {
+  async generateAndSendReceipt(donationId: string, userId?: string): Promise<Buffer> {
     try {
       const donation = await this.donationRepository.findById(donationId);
-      const userDetails = await this.userRepository.findById(userId);
-      const addressDetailsResponse = await this.addressRepository.findAddressesByEntityId(userId);
+      const userDetails = userId ? await this.userRepository.findById(userId) : null;
+      const addressDetailsResponse = userId ? await this.addressRepository.findAddressesByEntityId(userId) : [];
       const addressDetails = addressDetailsResponse[0];
       return new Promise((resolve, reject) => {
         const doc = new PDFDocument({
