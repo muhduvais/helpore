@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { IUserDocument } from '../interfaces/user.interface';
 
 export interface IDonation extends Document {
   stripeSessionId: string;
@@ -7,7 +8,7 @@ export interface IDonation extends Document {
   campaign: string;
   message?: string;
   isAnonymous: boolean;
-  userId?: mongoose.Types.ObjectId | null;
+  userId?: mongoose.Types.ObjectId | IUserDocument | null;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   date: Date;
   createdAt: Date;
