@@ -16,6 +16,8 @@ import { AssetRequestDTO } from '../../dtos/asset-request.dto';
 import { AddressDTO } from '../../dtos/address.dto';
 import { AssistanceRequestDTO } from '../../dtos/assistance-request.dto';
 import { DonationDTO } from '../../dtos/donation.dto';
+import { AddUserRequestDTO } from '../../dtos/requests/addUser-request.dto';
+import { UpdateUserRequestDTO } from '../../dtos/requests/updateUser-request.dto';
 
 export interface IAuthService {
     registerUser(name: string, email: string, password: string): Promise<string | boolean | null>;
@@ -39,7 +41,7 @@ export interface IUserService {
     fetchUserDetails(userId: string): Promise<UserDTO | null>;
     countUsers(search: string): Promise<number>;
     toggleIsBlocked(action: boolean, userId: string): Promise<boolean>;
-    editUser(userId: string, formData: IAddUserForm): Promise<string | null | undefined>;
+    editUser(userId: string, formData: UpdateUserRequestDTO): Promise<string | null | undefined>;
     changeProfilePicture(userId: string, profilePicture: string): Promise<boolean>;
     verifyCurrentPassword(userId: string, currentPassword: string): Promise<boolean | null | undefined>;
     changePassword(userId: string, newPassword: string): Promise<boolean>;
@@ -49,7 +51,7 @@ export interface IUserService {
 }
 
 export interface IAdminService {
-    addUser(formData: IAddUserForm): Promise<string | boolean | null>;
+    addUser(dto: AddUserRequestDTO): Promise<string | boolean | null>;
     editUser(userId: string, formData: IAddUserForm): Promise<string | null>;
     fetchUsers(search: string, skip: number, limit: number): Promise<IUser[] | null>;
     fetchUserDetails(userId: string): Promise<IUser | null>;

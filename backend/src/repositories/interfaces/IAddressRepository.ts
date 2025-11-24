@@ -6,5 +6,5 @@ export interface IAddressRepository extends IBaseRepository<IAddressDocument> {
   findAddressByEntityId(entityId: string): Promise<IAddressDocument | null>;
   findAddressesByQuery(query: object): Promise<IAddressDocument | null>;
   addAddress(addressData: IAddress): Promise<IAddressDocument>;
-  updateAddress(entityId: string, submitData: IAddress): Promise<IAddressDocument | null>;
+  updateAddress(entityId: string, submitData: Partial<IAddress>): Promise<IAddressDocument | null>;
 }
