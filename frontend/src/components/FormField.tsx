@@ -11,7 +11,8 @@ export const FormField = React.memo(({
     onChange,
     onBlur,
     error,
-    disabled
+    disabled,
+    placeholder = '',
   }: {
     name: string;
     label: string;
@@ -22,11 +23,12 @@ export const FormField = React.memo(({
     onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
     error?: string;
     disabled?: boolean;
+    placeholder?: string;
   }) => (
     <div className="relative space-y-2 group">
       <Label htmlFor={name} className="text-sm font-medium">
         <div className="flex items-center gap-2">
-          <Icon className="text-gray-500 group-hover:text-[#688D48] transition-colors" size={16} />
+          <Icon className="text-gray-400 group-hover:text-[#688D48] transition-colors" size={13} />
           <span className={`${error ? 'text-red-500' : 'text-gray-500'}`}>
             {error || label}
           </span>
@@ -39,11 +41,9 @@ export const FormField = React.memo(({
         value={value}
         onChange={onChange}
         onBlur={onBlur}
-        className={`transition-all duration-200 ${error
-          ? 'border-red-500 focus:border-red-500'
-          : 'border-gray-200 hover:border-[#688D48] focus:border-[#688D48]'
-          }`}
+        className={`transition-all duration-200`}
         disabled={disabled}
+        placeholder={placeholder}
       />
     </div>
   ));

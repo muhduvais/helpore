@@ -239,7 +239,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({
                         </Label>
                         <div className="col-span-3">
                             <Select
-                                value={formData.category}
+                                value={formData.category || ""}
                                 onValueChange={(value) => {
                                     setFormData(prev => ({ ...prev, category: value }));
                                     setErrors(prev => ({ ...prev, category: '' }));

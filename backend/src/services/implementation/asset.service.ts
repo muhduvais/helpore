@@ -1,6 +1,6 @@
 import { injectable, inject } from 'tsyringe';
 import { IAssetService } from '../interfaces/ServiceInterface';
-import { IAsset, IAssetRequestResponse } from '../../interfaces/user.interface';
+import { IAsset } from '../../interfaces/asset.interface';
 import { IAssetRepository } from '../../repositories/interfaces/IAssetRepository';
 import { IAssetRequestRepository } from '../../repositories/interfaces/IAssetRequestRepository';
 import { uploadToCloudinary } from '../../utils';
@@ -8,7 +8,8 @@ import { ErrorMessages } from '../../constants/errorMessages';
 import { AssetDTO } from '../../dtos/asset.dto';
 import { toAssetDTO, toAssetListDTO } from '../../mappers/asset.mapper';
 import { AssetRequestDTO } from '../../dtos/asset-request.dto';
-import { toAssetRequestDTO, toAssetRequestListDTO } from '../../mappers/asset-request.mapper';
+import { toAssetRequestDTO, toAssetRequestListDTO } from '../../mappers/assetRequest.mapper';
+import { AddAssetRequestDTO } from '../../dtos/requests/addAsset-request.dto';
 
 @injectable()
 export class AssetService implements IAssetService {
@@ -17,9 +18,10 @@ export class AssetService implements IAssetService {
         @inject('IAssetRequestRepository') private readonly assetRequestRepository: IAssetRequestRepository
     ) { }
 
-    async addAsset(data: IAsset): Promise<any> {
+    async addAsset(dto: AddAssetRequestDTO): Promise<AssetDTO> {
         try {
-            return await this.assetRepository.addAsset(data);
+            const addedAsset = await this.assetRepository.addAsset(dto);
+            return toAssetDTO(addedAsset);
         } catch (error: any) {
             console.error(ErrorMessages.ASSET_CREATE_FAILED, error);
             throw new Error(`${ErrorMessages.ASSET_CREATE_FAILED}: ${error.message}`);

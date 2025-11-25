@@ -23,12 +23,12 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
 const upload = multer({
     storage,
     fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 },
+    limits: { fileSize: 5 * 1000 * 1000 },
 });
 
 export const handleInvalidFile = (req: Request, res: Response, next: NextFunction) => {
     if (req.fileValidationError) {
-        res.status(400).json({ error: req.fileValidationError });
+        res.status(400).json({ message: req.fileValidationError });
         return;
     }
 
@@ -45,12 +45,11 @@ export const handleInvalidFile = (req: Request, res: Response, next: NextFunctio
 const multerErrorHandler = (err: any, res: Response) => {
     if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-            return res.status(400).json({ error: 'File size too large. Max 5MB allowed.' });
+            return res.status(400).json({ message: 'File size is too large (Max size: 5MB).' });
         }
-        return res.status(400).json({ error: err.message });
-    } else if (err) {
-        return res.status(400).json({ error: err.message });
+        return res.status(400).json({ message: err.message });
     }
+    return res.status(400).json({ message: err.message });
 };
 
 // Error handler - single file

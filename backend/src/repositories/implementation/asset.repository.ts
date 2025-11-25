@@ -1,8 +1,9 @@
 import { injectable } from "tsyringe";
-import { IAsset } from "../../interfaces/user.interface";
+import { IAsset } from "../../interfaces/asset.interface";
 import Asset from "../../models/asset.model";
 import { IAssetRepository } from "../interfaces/IAssetRepository";
 import { BaseRepository } from "./base.repository";
+import { AddAssetRequestDTO } from "../../dtos/requests/addAsset-request.dto";
 
 @injectable()
 export class AssetRepository extends BaseRepository<IAsset> implements IAssetRepository {
@@ -10,12 +11,11 @@ export class AssetRepository extends BaseRepository<IAsset> implements IAssetRep
     super(Asset);
   }
 
-  async addAsset(assetData: IAsset): Promise<any> {
+  async addAsset(assetData: AddAssetRequestDTO): Promise<IAsset> {
     try {
       console.log('Asset data: ', assetData);
       const newAsset = new Asset(assetData);
-      await newAsset.save();
-      return true;
+      return await newAsset.save();
     } catch (error: any) {
       console.error("Mongoose save error:", error);
       throw new Error(`Error saving asset: ${error.message}`);

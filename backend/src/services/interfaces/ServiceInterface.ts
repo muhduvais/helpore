@@ -1,8 +1,8 @@
-import { IUser, IAsset, IAssetRequestResponse, IAssetRequest, IUserDocument, IAssistanceRequestResponse } from '../../interfaces/user.interface';
+import { IUser, IUserDocument, IAssistanceRequestResponse } from '../../interfaces/user.interface';
+import { IAsset } from '../../interfaces/asset.interface';
 import { IAddUserForm } from '../../interfaces/admin.interface';
 import { IAssistanceRequest } from '../../interfaces/user.interface';
-import { IConversationDocument, IMessageDocument } from '../../interfaces/chat.interface';
-import { IDonation } from '../../models/donation.model';
+import { IMessageDocument } from '../../interfaces/chat.interface';
 import { INotificationDocument } from '../../models/notification.model';
 import { IMeeting } from '../../interfaces/meeting.interface';
 import { UserDTO } from '../../dtos/user.dto';
@@ -18,6 +18,7 @@ import { AssistanceRequestDTO } from '../../dtos/assistance-request.dto';
 import { DonationDTO } from '../../dtos/donation.dto';
 import { AddUserRequestDTO } from '../../dtos/requests/addUser-request.dto';
 import { UpdateUserRequestDTO } from '../../dtos/requests/updateUser-request.dto';
+import { AddAssetRequestDTO } from '../../dtos/requests/addAsset-request.dto';
 
 export interface IAuthService {
     registerUser(name: string, email: string, password: string): Promise<string | boolean | null>;
@@ -81,7 +82,7 @@ export interface IVolunteerService {
 }
 
 export interface IAssetService {
-    addAsset(data: IAsset): Promise<any>;
+    addAsset(dto: AddAssetRequestDTO): Promise<AssetDTO>;
     uploadAssetImage(file: Express.Multer.File): Promise<string>;
     fetchAssets(search: string, skip: number, limit: number, sortBy: string, filterByAvailability: string): Promise<AssetDTO[] | null>;
     fetchAssetDetails(assetId: string): Promise<AssetDTO | null>;

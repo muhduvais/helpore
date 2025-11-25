@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { IAssetRequest, IAssetRequestResponse } from "../../interfaces/user.interface";
+import { IAssetRequest } from "../../interfaces/asset.interface";
 import AssetRequest from "../../models/asset-request.model";
 import { IAssetRequestRepository } from "../interfaces/IAssetRequestRepository";
 import mongoose from "mongoose";
