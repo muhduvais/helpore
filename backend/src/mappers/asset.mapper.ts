@@ -1,7 +1,7 @@
 
 import { plainToInstance } from 'class-transformer';
 import { AssetDTO } from '../dtos/asset.dto';
-import { IAsset } from '../interfaces/user.interface';
+import { IAsset } from '../interfaces/asset.interface';
 
 export const toAssetDTO = (asset: IAsset): AssetDTO => {
   return plainToInstance(AssetDTO, {

@@ -259,7 +259,7 @@ export const validateAddAsset = (formData: AddAssetFormData) => {
   }
 
   if (!formData.category.trim()) {
-    errors.description = 'Category is required'
+    errors.category = 'Category is required'
     isValid = false
   }
 

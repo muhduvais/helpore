@@ -12,54 +12,66 @@ import {
   FaImage,
   FaTags,
   FaCloudUploadAlt,
-  FaTrash
+  FaTrash,
 } from "react-icons/fa";
 import { validateAddAsset } from "@/utils/validation";
 import { toast } from "sonner";
 import axios from "axios";
 import { adminService } from "@/services/admin.service";
 import { FormField } from "@/components/FormField";
-import { AddAssetFormData, AddAssetFormErrors } from "@/interfaces/authInterface";
+import {
+  AddAssetFormData,
+  AddAssetFormErrors,
+} from "@/interfaces/authInterface";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AddAsset = () => {
   const navigate = useNavigate();
 
   const initialData = {
-    name: '',
-    category: '',
-    description: '',
+    name: "",
+    category: "",
+    description: "",
     stocks: 0,
     image: null as File | null,
   };
 
   const initialErrorData = {
-    name: '',
-    category: '',
-    description: '',
-    stocks: '',
-    image: '',
+    name: "",
+    category: "",
+    description: "",
+    stocks: "",
+    image: "",
   };
 
   const [formData, setFormData] = useState<AddAssetFormData>(initialData);
-  const [formErrors, setFormErrors] = useState<AddAssetFormErrors>(initialErrorData);
-  const [newImageUrl, setNewImageUrl] = useState('');
+  const [formErrors, setFormErrors] =
+    useState<AddAssetFormErrors>(initialErrorData);
+  const [newImageUrl, setNewImageUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     const { errors } = validateAddAsset({ ...formData, [name]: value });
-    setFormErrors(prev => ({ ...prev, [name]: errors[name] }));
+    setFormErrors((prev) => ({ ...prev, [name]: errors[name] }));
   };
 
   // Handle image change
@@ -87,7 +99,7 @@ const AddAsset = () => {
     setIsDragging(false);
 
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type.startsWith('image/')) {
+    if (droppedFile && droppedFile.type.startsWith("image/")) {
       setFile(droppedFile);
       const previewUrl = URL.createObjectURL(droppedFile);
       setNewImageUrl(previewUrl);
@@ -96,33 +108,47 @@ const AddAsset = () => {
 
   const handleRemoveImage = () => {
     setFile(null);
-    setNewImageUrl('');
+    setNewImageUrl("");
   };
 
-  const handleBlur = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleBlur = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     const { errors } = validateAddAsset({ ...formData, [name]: value });
-    setFormErrors(prev => ({ ...prev, [name]: errors[name] }));
+    setFormErrors((prev) => ({ ...prev, [name]: errors[name] }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage('');
+    setErrorMessage("");
 
     let uploadedImageUrl = null;
 
     if (file) {
       const formFileData = new FormData();
-      formFileData.append('file', file);
+      formFileData.append("file", file);
 
       setIsLoading(true);
 
       try {
-        const uploadResponse = await adminService.uploadAssetImage(formFileData);
+        const uploadResponse = await adminService.uploadAssetImage(
+          formFileData
+        );
         uploadedImageUrl = uploadResponse.data.imageUrl;
       } catch (error) {
-        setErrorMessage('Failed to upload asset image!');
-        console.error('File uploading error: ', error);
+        if (axios.isAxiosError(error)) {
+          setErrorMessage(
+            error.response?.data?.message || "Failed to upload asset image!"
+          );
+          console.error("File uploading error: ", error);
+        } else if (error instanceof Error) {
+          setErrorMessage("An unexpected error occurred during file upload");
+          console.error("Unexpected error: ", error);
+        } else {
+          setErrorMessage("An unknown error occurred during file upload");
+          console.error("Unknown error: ", error);
+        }
         return;
       } finally {
         setIsLoading(false);
@@ -148,17 +174,17 @@ const AddAsset = () => {
       if (response.status === 201) {
         toast.success("Asset added successfully!", {
           duration: 3000,
-          onAutoClose: () => navigate("/admin/assetManagement")
+          onAutoClose: () => navigate("/admin/assetManagement"),
         });
       }
-
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || 'An error occurred';
+        const errorMessage =
+          error.response?.data?.message || "An error occurred";
         setErrorMessage(errorMessage);
       } else {
-        console.error('Asset addition failed:', error);
-        setErrorMessage('An unexpected error occurred');
+        console.error("Asset addition failed:", error);
+        setErrorMessage("An unexpected error occurred");
       }
     } finally {
       setIsLoading(false);
@@ -169,7 +195,9 @@ const AddAsset = () => {
     <div className="p-8 space-y-6 max-w-7xl mx-auto">
       {errorMessage && (
         <Alert variant="destructive" className="animate-slideDown shadow-md">
-          <AlertDescription className="flex items-center">{errorMessage}</AlertDescription>
+          <AlertDescription className="flex items-center">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -203,7 +231,9 @@ const AddAsset = () => {
                   <h3 className="text-xl font-semibold text-[#557239] mb-1">
                     Asset Details
                   </h3>
-                  <p className="text-sm text-gray-500">Enter the basic information about the asset</p>
+                  <p className="text-sm text-gray-500">
+                    Enter the basic information about the asset
+                  </p>
                 </div>
 
                 <FormField
@@ -215,50 +245,59 @@ const AddAsset = () => {
                   onBlur={handleBlur}
                   error={formErrors.name}
                   disabled={isLoading}
+                  placeholder="Enter the name of the asset"
                 />
 
                 <div className="space-y-2">
-                  <Label className={`text-sm font-medium ${formErrors.category ? 'text-red-500' : 'text-gray-700'} flex items-center gap-2`}>
+                  <Label
+                    className={`text-sm font-medium ${
+                      formErrors.category ? "text-red-500" : "text-gray-700"
+                    } flex items-center gap-2`}
+                  >
                     <FaTags className="text-gray-400" />
-                    Category
+                    {formErrors.category ? formErrors.category : "Category"}
                   </Label>
                   <Select
                     disabled={isLoading}
                     value={formData.category}
-                    onValueChange={(value) => handleSelectChange('category', value)}
+                    onValueChange={(value) =>
+                      handleSelectChange("category", value)
+                    }
                   >
-                    <SelectTrigger className="w-full focus:ring-2 focus:ring-[#688D48] focus:border-transparent">
+                    <SelectTrigger className={`w-full focus:border`}>
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="wheelchair">Wheelchair</SelectItem>
                       <SelectItem value="airbed">Airbed</SelectItem>
-                      <SelectItem value="walkingStick">Walking Stick</SelectItem>
+                      <SelectItem value="walkingStick">
+                        Walking Stick
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  {formErrors.category && (
-                    <p className="text-sm text-red-500 mt-1">{formErrors.category}</p>
-                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label className={`text-sm font-medium ${formErrors.description ? 'text-red-500' : 'text-gray-700'} flex items-center gap-2`}>
+                  <Label
+                    className={`text-sm font-medium ${
+                      formErrors.description ? "text-red-500" : "text-gray-700"
+                    } flex items-center gap-2`}
+                  >
                     <FaFileAlt className="text-gray-400" />
-                    Description
+                    {formErrors.description
+                      ? formErrors.description
+                      : "Description"}
                   </Label>
                   <Textarea
                     name="description"
                     rows={5}
-                    className="w-full resize-none focus:ring-2 focus:ring-[#688D48] focus:border-transparent"
+                    className={`w-full resize-none`}
                     value={formData.description}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     disabled={isLoading}
                     placeholder="Describe the asset's features and condition"
                   />
-                  {formErrors.description && (
-                    <p className="text-sm text-red-500 mt-1">{formErrors.description}</p>
-                  )}
                 </div>
               </div>
 
@@ -268,7 +307,9 @@ const AddAsset = () => {
                   <h3 className="text-xl font-semibold text-[#557239] mb-1">
                     Additional Details
                   </h3>
-                  <p className="text-sm text-gray-500">Add inventory and visual information</p>
+                  <p className="text-sm text-gray-500">
+                    Add inventory and visual information
+                  </p>
                 </div>
 
                 <FormField
@@ -276,7 +317,7 @@ const AddAsset = () => {
                   label="Stock Quantity"
                   icon={FaWarehouse}
                   type="number"
-                  value={formData.stocks?.toString() ?? ''}
+                  value={formData.stocks?.toString() ?? ""}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={formErrors.stocks}
@@ -284,14 +325,21 @@ const AddAsset = () => {
                 />
 
                 <div className="space-y-2">
-                  <Label className={`text-sm font-medium ${formErrors.image ? 'text-red-500' : 'text-gray-700'} flex items-center gap-2`}>
+                  <Label
+                    className={`text-sm font-medium ${
+                      formErrors.image ? "text-red-500" : "text-gray-700"
+                    } flex items-center gap-2`}
+                  >
                     <FaImage className="text-gray-400" />
                     Asset Image
                   </Label>
 
                   <div
-                    className={`border-2 border-dashed rounded-lg p-4 transition-colors ${isDragging ? 'border-[#688D48] bg-[#f0f4ed]' : 'border-gray-300'
-                      } ${newImageUrl ? 'bg-gray-50' : ''}`}
+                    className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
+                      isDragging
+                        ? "border-[#688D48] bg-[#f0f4ed]"
+                        : "border-gray-300"
+                    } ${newImageUrl ? "bg-gray-50" : ""}`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
@@ -299,12 +347,16 @@ const AddAsset = () => {
                     {!newImageUrl ? (
                       <div className="text-center py-8">
                         <FaCloudUploadAlt className="mx-auto text-4xl text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-500 mb-2">Drag and drop an image here or</p>
+                        <p className="text-sm text-gray-500 mb-2">
+                          Drag and drop an image here or
+                        </p>
                         <Button
                           type="button"
                           variant="outline"
                           className="bg-white hover:bg-gray-50"
-                          onClick={() => document.getElementById('fileInput')?.click()}
+                          onClick={() =>
+                            document.getElementById("fileInput")?.click()
+                          }
                           disabled={isLoading}
                         >
                           Select File
@@ -318,7 +370,9 @@ const AddAsset = () => {
                           className="hidden"
                           disabled={isLoading}
                         />
-                        <p className="text-xs text-gray-400 mt-2">Supported formats: JPG, PNG, GIF</p>
+                        <p className="text-xs text-gray-400 mt-2">
+                          Supported formats: JPG, JPEG, PNG
+                        </p>
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -340,14 +394,20 @@ const AddAsset = () => {
                           </Button>
                         </div>
                         <p className="text-sm text-center text-gray-500">
-                          {file?.name} • {(file?.size ? (file.size / (1024 * 1024)).toFixed(2) : 0)} MB
+                          {file?.name} •{" "}
+                          {file?.size
+                            ? (file.size / (1024 * 1024)).toFixed(2)
+                            : 0}{" "}
+                          MB
                         </p>
                       </div>
                     )}
                   </div>
 
                   {formErrors.image && (
-                    <p className="text-sm text-red-500 mt-1">{formErrors.image}</p>
+                    <p className="text-sm text-red-500 mt-1">
+                      {formErrors.image}
+                    </p>
                   )}
                 </div>
               </div>
@@ -375,7 +435,7 @@ const AddAsset = () => {
                     Processing...
                   </span>
                 ) : (
-                  'Add Asset'
+                  "Add Asset"
                 )}
               </Button>
             </div>

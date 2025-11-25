@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IAsset } from "../interfaces/user.interface";
+import { IAsset } from "../interfaces/asset.interface";
 
 const assetSchema = new Schema<IAsset>({
     name: {

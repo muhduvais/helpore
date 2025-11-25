@@ -4,6 +4,7 @@ import { IAssetService } from '../../services/interfaces/ServiceInterface';
 import { IAssetController } from '../interfaces/IAssetController';
 import { HttpStatusCode } from '../../constants/httpStatus';
 import { ErrorMessages } from '../../constants/errorMessages';
+import { AddAssetRequestDTO } from '../../dtos/requests/addAsset-request.dto';
 
 @injectable()
 export class AssetController implements IAssetController {
@@ -19,10 +20,12 @@ export class AssetController implements IAssetController {
 
     async addAsset(req: Request, res: Response): Promise<void> {
         try {
-            const data = req.body.formData;
-            await this.assetService.addAsset(data);
+            const dto = AddAssetRequestDTO.fromRequest(req.body.formData ?? req.body);
+
+            const createdAsset = await this.assetService.addAsset(dto);
             res.status(HttpStatusCode.CREATED).json({
                 success: true,
+                createdAsset,
                 message: ErrorMessages.ASSET_CREATE_SUCCESS,
             });
         } catch (error) {

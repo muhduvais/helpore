@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IAssetRequest } from "../interfaces/user.interface";
+import { IAssetRequest } from "../interfaces/asset.interface";
 
 const assetRequestSchema = new Schema<IAssetRequest>({
     asset: {
