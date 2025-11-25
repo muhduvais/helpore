@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
   }
 
   const [formData, setFormData] = useState<any>(initialData);
-  const [isLoading, setIsLoading] = useState<any>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -240,7 +240,7 @@ const LoginPage: React.FC = () => {
         </div>
 
         <div className="login-form bg-white bg-opacity-80 transition-all duration-300 rounded-xl w-full max-w-sm mx-auto md:mr-8 lg:mr-16 xl:mr-24 p-3 px-5">
-          <div className='login-title flex items-center justify-start gap-x-4 p-2 sm:p-4 pb-4 sm:pb-8 text-2xl sm:text-3xl md:text-4xl font-bold'>
+          <div className='login-title flex items-end justify-start gap-x-4 p-2 sm:p-4 pb-4 sm:pb-8 text-2xl sm:text-3xl md:text-4xl font-bold'>
             <h2 className="text-[#414141]">Login <span className='font-light'>here</span></h2>
             {isLoading &&
               <DotLottieReact

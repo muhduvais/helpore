@@ -9,6 +9,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { validateForm } from '../../utils/validation';
 import { Fields } from '../../interfaces/formInterface';
 import { authService } from '../../services/auth.service';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const AdminLoginPage: React.FC = () => {
 
@@ -21,6 +22,7 @@ const AdminLoginPage: React.FC = () => {
   const [formErrors, setFormErrors] = useState<any>(initialFormData);
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -60,6 +62,8 @@ const AdminLoginPage: React.FC = () => {
 
     if (hasError) return;
 
+    setIsLoading(true);
+
     try {
       const response = await authService.adminLogin(formData);
 
@@ -83,6 +87,8 @@ const AdminLoginPage: React.FC = () => {
         console.error('Login failed:', error);
         setErrorMessage('An unexpected error occurred');
       }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -106,8 +112,16 @@ const AdminLoginPage: React.FC = () => {
 
         {/* Login Form */}
         <div className="login-form bg-white bg-opacity-80 sm:bg-opacity-80 transition-all duration-300 rounded-xl w-full max-w-sm sm:max-w-md lg:max-w-sm xl:w-[400px] p-4 sm:p-5 mt-20 lg:mt-0 lg:mr-8 xl:mr-24">
-          <div className='login-title flex items-center justify-start gap-x-2 p-3 sm:p-4 pb-6 sm:pb-8 text-3xl sm:text-4xl font-bold'>
-            <h2 className='text-[#414141]'>Login <span className='font-light'>here</span></h2>
+
+          <div className='login-title flex items-end justify-start gap-x-4 p-2 sm:p-4 pb-4 sm:pb-8 text-2xl sm:text-3xl md:text-4xl font-bold'>
+            <h2 className="text-[#414141]">Login <span className='font-light'>here</span></h2>
+            {isLoading &&
+              <DotLottieReact
+                src="https://lottie.host/525ff46b-0a14-4aea-965e-4b22ad6a8ce7/wGcySY4DHd.lottie"
+                loop
+                autoplay
+                style={{ width: "30px", height: "50px", paddingTop: "15px" }}
+              />}
           </div>
 
           <hr />
