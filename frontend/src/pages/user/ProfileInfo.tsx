@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { MdOutlinePhotoCamera } from "react-icons/md";
-import { User, Key, Cog, Upload } from 'lucide-react';
+import { User, Key, Cog, Upload, Calendar, Phone, Mail, MapPin, Info, BookText } from 'lucide-react';
 import profile_pic from '../../assets/profile_pic.png';
 import loading_Profile from '../../assets/loadingProfile.webp';
 import { toast } from 'sonner';
@@ -30,7 +30,7 @@ export interface IAddressData {
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('info');
-    const [user, setUser] = useState<any | null>(null);
+    const [user, setUser] = useState<IUser | null>(null);
     const [address, setAddress] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isProfileUploading, setIsProfileUploading] = useState(false);
@@ -75,6 +75,7 @@ const Profile = () => {
             const response = await userService.fetchUserDetails();
 
             if (response.status === 200) {
+                console.log('user: ', response.data.user)
                 setUser(response.data.user);
                 setAddress(response.data.address);
             }
@@ -119,10 +120,13 @@ const Profile = () => {
             const uploadedCertificateUrl = uploadResponse.data.certificateUrl;
 
             // Update certificates
-            setUser((prevUser: IUser) => ({
-                ...prevUser,
-                certificates: [...(prevUser?.certificates || []), uploadedCertificateUrl]
-            }));
+            setUser((prevUser: IUser | null) => {
+                if (!prevUser) return prevUser;
+                return {
+                   ...prevUser,
+                   certificates: [...(prevUser?.certificates || []), uploadedCertificateUrl]
+                }
+            });
 
             // Reset file input
             setCertificateFile(null);
@@ -253,10 +257,13 @@ const Profile = () => {
             try {
                 const response = await userService.deleteCertificate(certificateToDelete.url);
                 if (response.status === 200) {
-                    setUser((prevUser: IUser) => ({
-                        ...prevUser,
-                        certificates: prevUser.certificates?.filter(cert => cert !== certificateToDelete.url)
-                    }))
+                    setUser((prevUser: IUser | null) => {
+                        if (!prevUser) return prevUser;
+                        return { 
+                            ...prevUser,
+                            certificates: prevUser.certificates?.filter(cert => cert !== certificateToDelete.url)
+                        }
+                    })
                     toast.success("Certificate deleted!");
                 }
             } catch (error) {
@@ -272,10 +279,10 @@ const Profile = () => {
     };
 
     const handleProfileUpdate = (userData: IUserData, addressData: IAddressData) => {
-        setUser((prevUser: IUser) => ({
-            ...prevUser,
-            ...userData
-        }));
+        setUser((prevUser: IUser | null) => {
+            if (!prevUser) return prevUser;
+            return { ...prevUser, ...userData }
+        });
 
         setAddress((prevAddr: IAddress) => ({
             ...prevAddr,
@@ -343,7 +350,10 @@ const Profile = () => {
                         {/* Profile Info */}
                         <div className="text-center md:text-left">
                             <h1 className="text-4xl font-bold text-white mb-2">{user?.name}</h1>
-                            <p className="text-xl text-white/80">{user?.email}</p>
+                            <div className="flex gap-x-3 header-info">
+                                <p className="text-md font-semibold text-gray-200/70 bg-transparent border-2 border-gray-400/40 rounded-3xl px-3 py-1">{user?.email}</p>
+                                <p className="flex items-center gap-x-2 text-md font-semibold text-gray-200/70 bg-transparent border-2 border-gray-400/40 rounded-3xl px-3 py-1"><span className='text-xs'>Joined: </span><span>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : ''}</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -375,35 +385,35 @@ const Profile = () => {
 
                                 <div className="profile-header flex flex-col gap-y-2">
                                     {[user?.age, user?.phone, user?.gender, address?.street, address?.state, address?.pincode, address?.country].some(field => !field) &&
-                                        <p className='complete-profile text-sm text-black font-semibold px-4 py-1 transform animate-pulse -translate-x-1 bg-yellow-300 rounded-2xl'>Please complete your profile to avail our full services.</p>}
-                                    <h2 className="text-2xl font-bold mb-6 text-gray-700">Personal Information</h2>
+                                    <p className='complete-profile text-sm text-black font-semibold px-4 py-1 transform animate-pulse -translate-x-1 bg-yellow-300 rounded-2xl'>Please complete your profile to avail our full services.</p>}
+                                    <h2 className="flex items-center gap-x-1 text-2xl font-bold mb-6 text-gray-700"><span><BookText size={20} color='gray' /></span><span>Personal Information</span></h2>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
-                                        <p className="text-sm text-gray-500">Name</p>
+                                        <p className="flex items-center gap-x-1 text-sm text-gray-500"><span><User size={15} color='gray' /></span><span>Name</span></p>
                                         <p className={`text-lg font-medium text-gray-700 ${user?.name ? '' : 'bg-yellow-100'}`}>{user?.name || 'N/A'}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Age</p>
+                                        <p className="flex items-center gap-x-1 text-sm text-gray-500"><span><Calendar size={15} color='gray' /></span><span>Age</span></p>
                                         <p className={`text-lg font-medium text-gray-700 ${user?.age ? '' : 'bg-yellow-100'}`}>{user?.age || 'N/A'}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Phone</p>
+                                        <p className="flex items-center gap-x-1 text-sm text-gray-500"><span><Phone size={15} color='gray' /></span><span>Phone</span></p>
                                         <p className={`text-lg font-medium text-gray-700 ${user?.phone ? '' : 'bg-yellow-100'}`}>{user?.phone || 'N/A'}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Gender</p>
+                                        <p className="flex items-center gap-x-1 text-sm text-gray-500"><span><User size={15} color='gray' /></span><span>Gender</span></p>
                                         <p className={`text-lg font-medium text-gray-700 ${user?.gender ? '' : 'bg-yellow-100'}`}>{user?.gender || 'N/A'}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Email</p>
+                                        <p className="flex items-center gap-x-1 text-sm text-gray-500"><span><Mail size={15} color='gray' /></span><span>Email</span></p>
                                         <p className={`text-lg font-medium text-gray-700 ${user?.email ? '' : 'bg-yellow-100'}`}>{user?.email || 'N/A'}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">DOJ</p>
+                                        <p className="flex items-center gap-x-1 text-sm text-gray-500"><span><Calendar size={15} color='gray' /></span><span>Doj</span></p>
                                         <p className={`text-lg font-medium text-gray-700`}>
-                                            {user?.createdAt?.toString().slice(0, 10) || 'N/A'}
+                                            {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : 'N/A'}
                                         </p>
                                     </div>
                                 </div>
@@ -412,7 +422,7 @@ const Profile = () => {
                             {/* Address Section */}
                             <div className="relative bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
 
-                                <h2 className="text-xl font-bold mb-4 text-gray-500">Address</h2>
+                                <h2 className="flex items-center gap-x-1 text-xl font-bold mb-4 text-gray-500"><span><MapPin size={20} /></span><span>Address</span></h2>
                                 <div className="text-gray-700">
                                     <p className="text-sm text-gray-500">Street</p>
                                     <p className={`text-lg font-medium ${address?.street ? '' : 'bg-yellow-100'} `}>{address?.street || 'N/A'}</p>
@@ -712,7 +722,7 @@ const Profile = () => {
                 {activeTab === 'info' ? (
                     <div className="bg-gray-100 p-4 flex items-center justify-between border-t">
                         <button
-                            className={`ml-3 px-8 py-2 bg-[#688D48] rounded text-white ${[user?.age, user?.phone, user?.gender, address?.street, address?.state, address?.pincode, address?.country].some(field => !field) ? 'animate-pulse' : ''}`}
+                            className={`ml-3 px-8 py-2 bg-[#688D48] rounded-md active:scale-95 text-white ${[user?.age, user?.phone, user?.gender, address?.street, address?.state, address?.pincode, address?.country].some(field => !field) ? 'animate-pulse' : ''}`}
                             onClick={() => setIsEditModalOpen(true)}
                         >Edit Profile</button>
                         <p className="text-sm text-gray-600 px-3">Profile - {user?.name}</p>
