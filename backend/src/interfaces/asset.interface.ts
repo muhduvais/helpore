@@ -19,6 +19,14 @@ export interface IAddAsset {
   image: string;
 }
 
+export interface IUpdateAsset {
+  name: string;
+  category: string;
+  description: string;
+  stocks: number;
+  image: string;
+}
+
 export interface IAssetRequest extends Document {
   _id: Types.ObjectId;
   asset: Types.ObjectId;

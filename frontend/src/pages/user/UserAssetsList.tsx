@@ -11,6 +11,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
@@ -31,7 +36,7 @@ import { IAsset } from "@/interfaces/adminInterface";
 import asset_picture from "../../assets/asset_picture.png";
 import { toast } from "sonner";
 import "react-toastify/dist/ReactToastify.css";
-import { CalendarIcon, MinusCircle, PlusCircle } from "lucide-react";
+import { CalendarIcon, MinusCircle, PlusCircle, Info } from "lucide-react";
 import { startOfDay } from "date-fns";
 
 import loading_logo from "../../assets/Logo-black-short.png";
@@ -137,6 +142,102 @@ const RequestModal = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+};
+
+// Asset Details Popover Component
+const AssetDetailsPopover = ({ asset }: { asset: IAsset }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <div className="flex justify-between items-start gap-2 mb-2 px-3 py-1">
+          <h3
+            className="font-semibold text-lg text-gray-800 max-w-[200px] truncate cursor-default hover:underline"
+            onMouseEnter={() => setOpen(true)}
+            onMouseLeave={() => setOpen(false)}
+          >
+            {asset.name}
+          </h3>
+
+          <Badge
+            variant={asset.stocks > 0 ? "default" : "destructive"}
+            className={`${
+              asset.stocks > 0 ? "bg-[#688D48]" : ""
+            } text-center cursor-default`}
+            title="Stocks Available"
+          >
+            {asset.stocks > 0 ? `${asset.stocks}` : 0}
+          </Badge>
+        </div>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-80 p-4"
+        style={{ boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)' }}
+        side="bottom"
+        align="start"
+        sideOffset={-8}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+      >
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <img
+              src={asset.image || asset_picture}
+              alt={asset.name}
+              className="w-16 h-16 rounded object-cover"
+              onError={(e) => {
+                e.currentTarget.src = asset_picture;
+              }}
+            />
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-sm text-gray-900 mb-1">
+                {asset.name}
+              </h4>
+              <Badge
+                variant={asset.stocks > 0 ? "default" : "destructive"}
+                className={`${asset.stocks > 0 ? "bg-[#688D48]" : ""} text-xs`}
+              >
+                {asset.stocks > 0 ? `${asset.stocks} in stock` : "Out of stock"}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="border-t pt-3">
+            <p className="text-xs font-medium text-gray-500 mb-1">
+              Description
+            </p>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {asset.description}
+            </p>
+          </div>
+
+          {asset.category && (
+            <div>
+              <p className="text-xs font-medium text-gray-500 mb-1">Category</p>
+              <p className="text-sm text-gray-700">{asset.category}</p>
+            </div>
+          )}
+
+          {
+            <div>
+              <p className="text-xs font-medium text-gray-400 mb-1">
+                Recorded Date
+              </p>
+              <p className="text-sm text-gray-700">{asset.createdAt ? new Date(asset.createdAt).toLocaleDateString("en-GB") : ''}</p>
+            </div>
+          }
+
+          {
+            <div>
+              <p className="text-xs font-medium text-gray-500 mb-1">Available Stock</p>
+              <p className="text-sm text-gray-700">{asset.stocks} {asset.stocks > 1 ? 'stocks' : 'stock'}</p>
+            </div>
+          }
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -303,27 +404,13 @@ const AssetListing = () => {
                   onError={handleImageError}
                 />
               </div>
+              <AssetDetailsPopover asset={asset} />
               <div className="p-4 flex flex-col flex-grow">
-                <div className="flex justify-between items-start gap-2 mb-2">
-                  <h3
-                    className="font-semibold text-lg text-gray-800 max-w-[200px] truncate cursor-default hover:underline"
-                    title={asset.name}
-                  >
-                    {asset.name}
-                  </h3>
-                  <Badge
-                    variant={asset.stocks > 0 ? "default" : "destructive"}
-                    className={`${
-                      asset.stocks > 0 ? "bg-[#688D48]" : "w-[150px]"
-                    } text-center cursor-default`}
-                    title="Stocks Available"
-                  >
-                    {asset.stocks > 0 ? `${asset.stocks}` : "Out of stock"}
-                  </Badge>
+                <div className="relative">
+                  <p className="text-gray-600 text-sm flex-grow max-w-[220px] truncate">
+                    {asset.description}
+                  </p>
                 </div>
-                <p className="text-gray-600 text-sm flex-grow line-clamp-3">
-                  {asset.description}
-                </p>
                 <div className="flex flex-col gap-2 mt-4">
                   <Button
                     onClick={() => openRequestModal(asset)}

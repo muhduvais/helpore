@@ -18,7 +18,7 @@ export class AssetService implements IAssetService {
         @inject('IAssetRequestRepository') private readonly assetRequestRepository: IAssetRequestRepository
     ) { }
 
-    async addAsset(dto: AddAssetRequestDTO): Promise<AssetDTO> {
+    async addAsset(dto: AddAssetRequestDTO): Promise<AssetDTO | null> {
         try {
             const addedAsset = await this.assetRepository.addAsset(dto);
             return toAssetDTO(addedAsset);
@@ -113,9 +113,10 @@ export class AssetService implements IAssetService {
         }
     }
 
-    async updateAsset(assetId: string, submitData: any): Promise<IAsset | null> {
+    async updateAsset(assetId: string, submitData: AddAssetRequestDTO): Promise<AssetDTO | null> {
         try {
-            return await this.assetRepository.updateById(assetId, submitData);
+            const updatedAsset = await this.assetRepository.updateById(assetId, submitData);
+            return toAssetDTO(updatedAsset);
         } catch (error) {
             console.error('Error updating the asset: ', error);
             return null;

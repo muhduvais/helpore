@@ -1,3 +1,4 @@
+import { AssetDTO } from "../../dtos/asset.dto";
 import { AddAssetRequestDTO } from "../../dtos/requests/addAsset-request.dto";
 import { IAsset } from "../../interfaces/asset.interface";
 import { IBaseRepository } from "./IBaseRepository";
