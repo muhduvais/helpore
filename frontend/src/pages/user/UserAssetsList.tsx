@@ -36,7 +36,7 @@ import { IAsset } from "@/interfaces/adminInterface";
 import asset_picture from "../../assets/asset_picture.png";
 import { toast } from "sonner";
 import "react-toastify/dist/ReactToastify.css";
-import { CalendarIcon, MinusCircle, PlusCircle, Info } from "lucide-react";
+import { CalendarIcon, MinusCircle, PlusCircle } from "lucide-react";
 import { startOfDay } from "date-fns";
 
 import loading_logo from "../../assets/Logo-black-short.png";
