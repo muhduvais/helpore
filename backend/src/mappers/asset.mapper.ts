@@ -1,9 +1,10 @@
-
 import { plainToInstance } from 'class-transformer';
 import { AssetDTO } from '../dtos/asset.dto';
 import { IAsset } from '../interfaces/asset.interface';
 
-export const toAssetDTO = (asset: IAsset): AssetDTO => {
+export const toAssetDTO = (asset: IAsset | null): AssetDTO | null => {
+  if (!asset) return null;
+
   return plainToInstance(AssetDTO, {
     id: asset._id.toString(),
     name: asset.name,
@@ -16,6 +17,8 @@ export const toAssetDTO = (asset: IAsset): AssetDTO => {
   });
 };
 
-export const toAssetListDTO = (assets: IAsset[]): AssetDTO[] => {
-  return assets.map(toAssetDTO);
+export const toAssetListDTO = (assets: IAsset[] | null): AssetDTO[] | null => {
+  if (!assets) return null;
+
+  return assets.map(asset => toAssetDTO(asset)!) as AssetDTO[];
 };

@@ -82,11 +82,11 @@ export interface IVolunteerService {
 }
 
 export interface IAssetService {
-    addAsset(dto: AddAssetRequestDTO): Promise<AssetDTO>;
+    addAsset(dto: AddAssetRequestDTO): Promise<AssetDTO | null>;
     uploadAssetImage(file: Express.Multer.File): Promise<string>;
     fetchAssets(search: string, skip: number, limit: number, sortBy: string, filterByAvailability: string): Promise<AssetDTO[] | null>;
     fetchAssetDetails(assetId: string): Promise<AssetDTO | null>;
-    updateAsset(assetId: string, submitData: any): Promise<IAsset | null>;
+    updateAsset(assetId: string, submitData: any): Promise<AssetDTO | null>;
     countAssets(search: string): Promise<number>;
     createRequest(assetId: string, userId: string, requestedDate: Date, quantity: number): Promise<boolean>;
     countRequests(userId: string, search: string): Promise<number>;

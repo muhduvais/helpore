@@ -13,6 +13,7 @@ import {
   FaTags,
   FaCloudUploadAlt,
   FaTrash,
+  FaSave,
 } from "react-icons/fa";
 import { validateAddAsset } from "@/utils/validation";
 import { toast } from "sonner";
@@ -58,6 +59,7 @@ const AddAsset = () => {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isDragging, setIsDragging] = useState(false);
 
@@ -123,13 +125,18 @@ const AddAsset = () => {
     e.preventDefault();
     setErrorMessage("");
 
+    const { isValid, errors } = validateAddAsset(formData);
+    setFormErrors(errors);
+
+    if (!isValid) return;
+
     let uploadedImageUrl = null;
 
     if (file) {
       const formFileData = new FormData();
       formFileData.append("file", file);
 
-      setIsLoading(true);
+      setIsImageUploading(true);
 
       try {
         const uploadResponse = await adminService.uploadAssetImage(
@@ -151,7 +158,7 @@ const AddAsset = () => {
         }
         return;
       } finally {
-        setIsLoading(false);
+        setIsImageUploading(false);
       }
     }
 
@@ -161,21 +168,16 @@ const AddAsset = () => {
       stocks: Number(formData.stocks),
     };
 
-    const { isValid, errors } = validateAddAsset(finalFormData);
-    setFormErrors(errors);
-
-    if (!isValid) return;
-
     setIsLoading(true);
 
     try {
       const response = await adminService.addAsset(finalFormData);
 
       if (response.status === 201) {
-        toast.success("Asset added successfully!", {
-          duration: 3000,
-          onAutoClose: () => navigate("/admin/assetManagement"),
-        });
+        toast.success("Asset added successfully!");
+        setTimeout(() => {
+          navigate("/admin/assetManagement");
+        }, 1000);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -426,16 +428,23 @@ const AddAsset = () => {
               </Button>
               <Button
                 type="submit"
-                className="min-w-32 bg-[#688D48] hover:bg-[#557239] transition-colors"
-                disabled={isLoading}
+                className={`1min-w-32 bg-[#688D48] hover:bg-[#557239] transition-colors ${isImageUploading || isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                {isLoading ? (
+                {isImageUploading ? (
                   <span className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4 rounded-full animate-spin" />
-                    Processing...
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Uploading image...
+                  </span>
+                ) : isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
                   </span>
                 ) : (
-                  "Add Asset"
+                  <span className="flex items-center gap-2">
+                    <FaSave className="mr-2" />
+                    Save Changes
+                  </span>
                 )}
               </Button>
             </div>

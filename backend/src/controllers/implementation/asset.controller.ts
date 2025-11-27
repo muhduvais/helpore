@@ -5,6 +5,7 @@ import { IAssetController } from '../interfaces/IAssetController';
 import { HttpStatusCode } from '../../constants/httpStatus';
 import { ErrorMessages } from '../../constants/errorMessages';
 import { AddAssetRequestDTO } from '../../dtos/requests/addAsset-request.dto';
+import { UpdateAssetRequestDTO } from '../../dtos/requests/updateAsset-request.dto';
 
 @injectable()
 export class AssetController implements IAssetController {
@@ -113,9 +114,10 @@ export class AssetController implements IAssetController {
 
     async updateAsset(req: Request, res: Response): Promise<void> {
         const assetId = req.params.id;
-        const submitData = req.body.submitData;
         try {
-            const asset = await this.assetService.updateAsset(assetId, submitData);
+            const dto = UpdateAssetRequestDTO.fromRequest(req.body.submitData ?? req.body);
+            
+            const asset = await this.assetService.updateAsset(assetId, dto);
             if (asset) {
                 res.status(HttpStatusCode.OK).json({ success: true, asset });
             } else {
