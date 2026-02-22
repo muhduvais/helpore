@@ -8,8 +8,8 @@ import { HttpStatusCode } from '../../constants/httpStatus';
 @injectable()
 export class AssetRequestController implements IAssetRequestController {
     constructor(
-        @inject('IAssetService') private readonly assetService: IAssetService,
-        @inject('IUserService') private readonly userService: IUserService,
+        @inject('IAssetService') private readonly _assetService: IAssetService,
+        @inject('IUserService') private readonly _userService: IUserService,
     ) {
         this.requestAsset = this.requestAsset.bind(this);
         this.getAssetRequests = this.getAssetRequests.bind(this);
@@ -24,21 +24,21 @@ export class AssetRequestController implements IAssetRequestController {
         const { requestedDate, quantity } = req.body;
 
         try {
-            const isCertificateAdded = await this.userService.checkCertificate(userId);
+            const isCertificateAdded = await this._userService.checkCertificate(userId);
 
             if (!isCertificateAdded) {
                 res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, noCertificate: true, message: 'You cannot request without adding your medical certificates. Pease go to \'Profile > Uploads\' and upload the documents.' });
                 return;
             }
 
-            const isLimit = await this.assetService.checkIsRequestLimit(userId, quantity);
+            const isLimit = await this._assetService.checkIsRequestLimit(userId, quantity);
 
             if (isLimit) {
                 res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, isRequestLimit: true, message: 'You cannot have more than 3 requests at a time! Try requesting lesser quantity.' });
                 return;
             }
 
-            const createAssetRequest = await this.assetService.createRequest(
+            const createAssetRequest = await this._assetService.createRequest(
                 assetId, userId, requestedDate, quantity
             );
             if (createAssetRequest) {
@@ -56,13 +56,13 @@ export class AssetRequestController implements IAssetRequestController {
 
             const skip = (Number(page) - 1) * Number(limit);
 
-            const documentsCount = await this.assetService.countRequests(
+            const documentsCount = await this._assetService.countRequests(
                 search as string,
                 status as string,
             );
             const totalPages = Math.ceil(documentsCount / Number(limit));
 
-            const assetRequests = await this.assetService.fetchAssetRequests(
+            const assetRequests = await this._assetService.fetchAssetRequests(
                 search as string,
                 skip,
                 Number(limit),
@@ -94,8 +94,8 @@ export class AssetRequestController implements IAssetRequestController {
         const { userId } = req.user as JwtPayload;
 
         try {
-            const assetRequests = await this.assetService.fetchMyAssetRequests(search, filter, skip, limit, userId);
-            const documentsCount = await this.assetService.countMyAssetRequests(userId, search, filter) || 0;
+            const assetRequests = await this._assetService.fetchMyAssetRequests(search, filter, skip, limit, userId);
+            const documentsCount = await this._assetService.countMyAssetRequests(userId, search, filter) || 0;
             const totalPages = Math.ceil(documentsCount / limit);
 
             if (assetRequests) {
@@ -114,7 +114,7 @@ export class AssetRequestController implements IAssetRequestController {
         const assetId = req.params.id;
 
         try {
-            const assetRequestDetails = await this.assetService.findRequestDetails(
+            const assetRequestDetails = await this._assetService.findRequestDetails(
                 userId, assetId
             );
 
@@ -134,7 +134,7 @@ export class AssetRequestController implements IAssetRequestController {
         const { status, comment } = req.body;
 
         try {
-            const updatedRequest = await this.assetService.updateStatus(requestId, status, comment);
+            const updatedRequest = await this._assetService.updateStatus(requestId, status, comment);
             if (!updatedRequest) {
                 res.status(HttpStatusCode.NOT_FOUND).json({ message: 'Asset request not found' });
                 return;

@@ -12,13 +12,13 @@ import { toAssistanceRequestDTO, toAssistanceRequestListDTO } from "../../mapper
 @injectable()
 export class AssistanceRequestService implements IAssistanceRequestService {
     constructor(
-        @inject('IAssistanceRequestRepository') private readonly assistanceRepository: IAssistanceRequestRepository,
-        @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
+        @inject('IAssistanceRequestRepository') private readonly _assistanceRepository: IAssistanceRequestRepository,
+        @inject('IAddressRepository') private readonly _addressRepository: IAddressRepository,
     ) { }
 
     async createAssistanceRequest(formData: IAssistanceRequest): Promise<boolean> {
         try {
-            await this.assistanceRepository.createAssistanceRequest(formData);
+            await this._assistanceRepository.createAssistanceRequest(formData);
             return true;
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_CREATE_FAILED, error);
@@ -47,7 +47,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
                 rejectedBy: { $nin: [volunteerId] }
             };
 
-            const volunteerAddress = await this.addressRepository.findAddressesByQuery(query);
+            const volunteerAddress = await this._addressRepository.findAddressesByQuery(query);
 
             if (!volunteerAddress) {
                 throw new Error(ErrorMessages.ADDRESS_NOT_FOUND);
@@ -69,7 +69,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
             let skip = (page - 1) * 4;
 
-            const pendingRequests = await this.assistanceRepository.findPendingRequests(requestQuery, skip);
+            const pendingRequests = await this._assistanceRepository.findPendingRequests(requestQuery, skip);
 
             if (!pendingRequests || !pendingRequests.length) {
                 return [];
@@ -138,7 +138,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
     }
 
     async updateRequestStatus(requestId: string, volunteerId: string, action: string): Promise<string> {
-        const request = await this.assistanceRepository.findRequestById(requestId);
+        const request = await this._assistanceRepository.findRequestById(requestId);
 
         if (!request) {
             throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
@@ -151,7 +151,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         if (action === 'approve') {
             request.volunteer = volunteerId;
             request.status = 'approved';
-            await this.assistanceRepository.incrementVolunteerTasks(volunteerId);
+            await this._assistanceRepository.incrementVolunteerTasks(volunteerId);
         }
 
         if (action === 'reject') {
@@ -162,10 +162,10 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
         if (action === 'complete') {
             request.status = 'completed';
-            await this.assistanceRepository.decrementVolunteerTasks(volunteerId);
+            await this._assistanceRepository.decrementVolunteerTasks(volunteerId);
         }
 
-        await this.assistanceRepository.updateRequest(request);
+        await this._assistanceRepository.updateRequest(request);
 
         if (action === 'approve') {
             return ErrorMessages.ASSISTANCE_REQUEST_APPROVED;
@@ -181,7 +181,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         search: string, filter: string, skip: number, limit: number, sort: string, priority: string
     ): Promise<AssistanceRequestDTO[] | null> {
         try {
-            const assistanceRequests = await this.assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority);
+            const assistanceRequests = await this._assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority);
 
             if (!assistanceRequests) {
                 throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
@@ -198,7 +198,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         userId: string, search: string, filter: string, skip: number, limit: number, sort: string, priority: string
     ): Promise<AssistanceRequestDTO[] | null> {
         try {
-            const assistanceRequests = await this.assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority, userId);
+            const assistanceRequests = await this._assistanceRepository.findAssistanceRequests(search, filter, skip, limit, sort, priority, userId);
 
             if (!assistanceRequests) {
                 throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND)
@@ -213,7 +213,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async fetchPendingRequests(): Promise<AssistanceRequestDTO[] | null> {
         try {
-            const assistanceRequests = await this.assistanceRepository.findPendingAssistanceRequests();
+            const assistanceRequests = await this._assistanceRepository.findPendingAssistanceRequests();
 
             if (!assistanceRequests) {
                 throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
@@ -230,7 +230,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
         search: string, filter: string, skip: number, limit: number, volunteerId: string
     ): Promise<AssistanceRequestDTO[] | null> {
         try {
-            const assistanceRequests = await this.assistanceRepository.findProcessingRequests(search, filter, skip, limit, volunteerId);
+            const assistanceRequests = await this._assistanceRepository.findProcessingRequests(search, filter, skip, limit, volunteerId);
             if (!assistanceRequests) {
                 throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
             }
@@ -244,7 +244,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async countAssistanceRequests(search: string, filter: string, priority: string): Promise<number> {
         try {
-            return await this.assistanceRepository.countAssistanceRequests(search, filter, priority);
+            return await this._assistanceRepository.countAssistanceRequests(search, filter, priority);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
             return 0;
@@ -253,7 +253,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async countMyAssistanceRequests(userId: string, search: string, filter: string, priority: string): Promise<number> {
         try {
-            return await this.assistanceRepository.countAssistanceRequests(search, filter, priority, userId);
+            return await this._assistanceRepository.countAssistanceRequests(search, filter, priority, userId);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_FAILED, error);
             return 0;
@@ -262,7 +262,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async countProcessingRequests(search: string, filter: string, volunteerId: string): Promise<number> {
         try {
-            return await this.assistanceRepository.countProcessingRequests(search, filter, volunteerId);
+            return await this._assistanceRepository.countProcessingRequests(search, filter, volunteerId);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_FETCH_PROCESSING_FAILED, error);
             return 0;
@@ -271,7 +271,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async fetchAssistanceRequestDetails(requestId: string): Promise<AssistanceRequestDTO | null> {
         try {
-            const assistanceRequest = await this.assistanceRepository.findAssistanceRequestDetails(requestId);
+            const assistanceRequest = await this._assistanceRepository.findAssistanceRequestDetails(requestId);
             if (!assistanceRequest) {
                 throw new Error(ErrorMessages.ASSISTANCE_REQUEST_NOT_FOUND);
             }
@@ -285,7 +285,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async checkTasksLimit(volunteerId: string): Promise<boolean | null> {
         try {
-            return await this.assistanceRepository.checkTasksLimit(volunteerId);
+            return await this._assistanceRepository.checkTasksLimit(volunteerId);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_TASK_LIMIT, error);
             return null;
@@ -294,7 +294,7 @@ export class AssistanceRequestService implements IAssistanceRequestService {
 
     async assignVolunteer(requestId: string, volunteerId: string): Promise<any> {
         try {
-            return await this.assistanceRepository.assignVolunteer(requestId, volunteerId);
+            return await this._assistanceRepository.assignVolunteer(requestId, volunteerId);
         } catch (error) {
             console.error(ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_ASSIGN_FAILED, error);
             return null;

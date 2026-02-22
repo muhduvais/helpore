@@ -9,7 +9,7 @@ import { IAddressService } from '../../services/interfaces/IAddressService';
 @injectable()
 export class AddressController implements IAddressController {
     constructor(
-        @inject('IAddressService') private readonly addressService: IAddressService,
+        @inject('IAddressService') private readonly _addressService: IAddressService,
     ) {
         this.createAddress = this.createAddress.bind(this);
         this.getAddresses = this.getAddresses.bind(this);
@@ -24,7 +24,7 @@ export class AddressController implements IAddressController {
         addressData.type = type;
 
         try {
-            const addressId = await this.addressService.addAddress(addressData);
+            const addressId = await this._addressService.addAddress(addressData);
             if (addressId) {
                 res.status(HttpStatusCode.OK).json({ success: true, addressId });
             } else {
@@ -39,7 +39,7 @@ export class AddressController implements IAddressController {
     async getAddresses (req: Request, res: Response): Promise<void> {
         const { userId } = req.user as JwtPayload;
         try {
-            const addresses = await this.addressService.fetchAddresses(userId);
+            const addresses = await this._addressService.fetchAddresses(userId);
             if (addresses) {
                 res.status(HttpStatusCode.OK).json({ success: true, addresses });
             } else {

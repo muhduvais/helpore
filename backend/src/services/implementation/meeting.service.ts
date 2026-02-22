@@ -16,8 +16,8 @@ export class MeetingService implements IMeetingService {
     private serverSecret: string;
 
     constructor(appId: number, serverSecret: string,
-        @inject('IMeetingRepository') private meetingRepository: IMeetingRepository,
-        @inject('INotificationRepository') private notificationRepository: INotificationRepository,
+        @inject('IMeetingRepository') private _meetingRepository: IMeetingRepository,
+        @inject('INotificationRepository') private _notificationRepository: INotificationRepository,
     ) {
         this.appId = appId;
         this.serverSecret = serverSecret;
@@ -34,7 +34,7 @@ export class MeetingService implements IMeetingService {
                 createdAt: new Date()
             };
 
-            const newMeeting = await this.meetingRepository.create(meetingData);
+            const newMeeting = await this._meetingRepository.create(meetingData);
 
             const notification = {
                 type: 'system',
@@ -51,7 +51,7 @@ export class MeetingService implements IMeetingService {
             }
 
             // Create a notification for the receiver
-            await this.notificationRepository.createNotification({
+            await this._notificationRepository.createNotification({
                 type: 'system',
                 content: `${ErrorMessages.MEETING_SCHEDULED}: "${title}" on ${new Date(scheduledTime).toLocaleString()}`,
                 read: false,
@@ -79,7 +79,7 @@ export class MeetingService implements IMeetingService {
                 query.status = filter;
             }
 
-            const meetings = await this.meetingRepository.findAll(query, skip, limit);
+            const meetings = await this._meetingRepository.findAll(query, skip, limit);
             if (!meetings) {
                 throw new Error(ErrorMessages.MEETING_NOT_FOUND);
             }
@@ -99,7 +99,7 @@ export class MeetingService implements IMeetingService {
             if (filter && filter !== 'all') {
                 query.status = filter;
             }
-            return await this.meetingRepository.countMeetings(query);
+            return await this._meetingRepository.countMeetings(query);
         } catch (error) {
             console.error(ErrorMessages.MEETING_COUNT_FAILED, error);
             throw new Error(ErrorMessages.MEETING_COUNT_FAILED);
@@ -116,7 +116,7 @@ export class MeetingService implements IMeetingService {
             if (filter && filter !== 'all') {
                 query.status = filter;
             }
-            return await this.meetingRepository.countMeetings(query);
+            return await this._meetingRepository.countMeetings(query);
         } catch (error) {
             console.error(ErrorMessages.MEETING_COUNT_FAILED, error);
             throw new Error(ErrorMessages.MEETING_COUNT_FAILED);
@@ -125,7 +125,7 @@ export class MeetingService implements IMeetingService {
 
     async getUpcomingMeetings(): Promise<MeetingDTO[] | null> {
         try {
-            const meetings = await this.meetingRepository.findUpcomingMeetings();
+            const meetings = await this._meetingRepository.findUpcomingMeetings();
             if (!meetings) {
                 throw new Error(ErrorMessages.MEETING_NOT_FOUND);
             }
@@ -138,7 +138,7 @@ export class MeetingService implements IMeetingService {
 
     async getMeetingById(meetingId: string): Promise<MeetingDTO | null> {
         try {
-            const meeting = await this.meetingRepository.findById(meetingId);
+            const meeting = await this._meetingRepository.findById(meetingId);
             if (!meeting) {
                 throw new Error(ErrorMessages.MEETING_NOT_FOUND);
             }
@@ -165,7 +165,7 @@ export class MeetingService implements IMeetingService {
             const userObjectId = new Types.ObjectId(userId);
             query.participants = userObjectId
 
-            const meetings = await this.meetingRepository.findAll(query, skip, limit);
+            const meetings = await this._meetingRepository.findAll(query, skip, limit);
             if (!meetings) {
                 throw new Error(ErrorMessages.MEETING_NOT_FOUND);
             }
@@ -178,7 +178,7 @@ export class MeetingService implements IMeetingService {
 
     async updateMeetingStatus(meetingId: string, status: 'scheduled' | 'active' | 'completed'): Promise<IMeeting | null> {
         try {
-            return await this.meetingRepository.updateStatus(meetingId, status);
+            return await this._meetingRepository.updateStatus(meetingId, status);
         } catch (error) {
             console.error(ErrorMessages.MEETING_UPDATE_FAILED, error);
             throw new Error(ErrorMessages.MEETING_UPDATE_FAILED);
@@ -207,7 +207,7 @@ export class MeetingService implements IMeetingService {
 
     async deleteMeeting(meetingId: string): Promise<IMeeting | null> {
         try {
-            return await this.meetingRepository.deleteById(meetingId);
+            return await this._meetingRepository.deleteById(meetingId);
         } catch (error) {
             console.error(ErrorMessages.MEETING_DELETE_FAILED, error);
             throw new Error(ErrorMessages.MEETING_DELETE_FAILED);

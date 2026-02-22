@@ -9,7 +9,7 @@ import { ErrorMessages } from '../../constants/errorMessages';
 @injectable()
 export class DonationController implements IDonationController {
   constructor(
-    @inject('IDonationService') private readonly donationService: IDonationService,
+    @inject('IDonationService') private readonly _donationService: IDonationService,
   ) {
     this.createCheckoutSession = this.createCheckoutSession.bind(this);
     this.webhook = this.webhook.bind(this);
@@ -25,7 +25,7 @@ export class DonationController implements IDonationController {
       const { amount, campaign, message, isAnonymous } = req.body;
       const userId = req.user?.userId;
 
-      const result = await this.donationService.createCheckoutSession({
+      const result = await this._donationService.createCheckoutSession({
         amount,
         campaign,
         message,
@@ -44,13 +44,13 @@ export class DonationController implements IDonationController {
     const sig = req.headers['stripe-signature'];
 
     try {
-      const event = await this.donationService.constructEvent(
+      const event = await this._donationService.constructEvent(
         req.body,
         sig,
         process.env.STRIPE_WEBHOOK_SECRET
       );
 
-      const result = await this.donationService.handleWebhookEvent(event);
+      const result = await this._donationService.handleWebhookEvent(event);
       res.status(HttpStatusCode.OK).json(result);
     } catch (err: any) {
       res.status(HttpStatusCode.BAD_REQUEST).send(`${ErrorMessages.DONATION_WEBHOOK_FAILED}: ${err.message}`);
@@ -66,7 +66,7 @@ export class DonationController implements IDonationController {
         return;
       }
 
-      const result = await this.donationService.getUserDonationHistory(userId);
+      const result = await this._donationService.getUserDonationHistory(userId);
       res.status(HttpStatusCode.OK).json(result);
     } catch (error: any) {
       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: ErrorMessages.DONATION_HISTORY_FAILED, error: error.message });
@@ -77,7 +77,7 @@ export class DonationController implements IDonationController {
     const { donationId } = req.params;
     const userId = !req.query.userId && req.user?.role !== 'admin' ? req.user?.userId : req.query.userId as string;
     try {
-      const pdfBuffer = await this.donationService.generateAndSendReceipt(donationId, userId);
+      const pdfBuffer = await this._donationService.generateAndSendReceipt(donationId, userId);
 
       res.contentType('application/pdf');
       res.setHeader('Content-Disposition', `inline; filename=donation_receipt_${donationId}.pdf`);
@@ -97,14 +97,14 @@ export class DonationController implements IDonationController {
       const search = req.query.search as string;
       const filter = req.query.filter as string;
       
-      const donations = await this.donationService.getAllDonations(
+      const donations = await this._donationService.getAllDonations(
         page,
         10,
         search,
         filter
       );
 
-      const documentsCount = await this.donationService.totalDonationsCount(search, filter) || 0;
+      const documentsCount = await this._donationService.totalDonationsCount(search, filter) || 0;
 
       res.status(HttpStatusCode.OK).json({
         donations: donations,
@@ -119,7 +119,7 @@ export class DonationController implements IDonationController {
 
   async getRecentDonations(req: Request, res: Response): Promise<void> {
     try {
-      const donations = await this.donationService.getRecentDonations();
+      const donations = await this._donationService.getRecentDonations();
 
       res.status(HttpStatusCode.OK).json({
         donations: donations,
@@ -135,7 +135,7 @@ export class DonationController implements IDonationController {
       const search = req.query.search as string;
       const filter = req.query.filter as string;
   
-      const donations = await this.donationService.getAllDonations(
+      const donations = await this._donationService.getAllDonations(
         1,
         1000,
         search,

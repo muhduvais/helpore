@@ -15,9 +15,9 @@ import { UpdateUserRequestDTO } from "../../dtos/requests/updateUser-request.dto
 @injectable()
 export class UserController implements IUserController {
   constructor(
-    @inject("IUserService") private readonly userService: IUserService,
-    @inject("IAdminService") private readonly adminService: IAdminService,
-    @inject("IAddressService") private readonly addressService: IAddressService
+    @inject("IUserService") private readonly _userService: IUserService,
+    @inject("IAdminService") private readonly _adminService: IAdminService,
+    @inject("IAddressService") private readonly _addressService: IAddressService
   ) {
     this.addUser = this.addUser.bind(this);
     this.getUsers = this.getUsers.bind(this);
@@ -34,7 +34,7 @@ export class UserController implements IUserController {
     try {
       const dto = AddUserRequestDTO.fromRequest(req.body.formData ?? req.body);
 
-      const registeredMail = await this.adminService.addUser(dto);
+      const registeredMail = await this._adminService.addUser(dto);
 
       if (registeredMail) {
         res.status(HttpStatusCode.CREATED).json({
@@ -75,8 +75,8 @@ export class UserController implements IUserController {
       const skip = !search ? (page - 1) * limit : 0;
 
       const [users, documentsCount] = await Promise.all([
-        this.userService.fetchUsers(search, skip, limit),
-        this.userService.countUsers(search),
+        this._userService.fetchUsers(search, skip, limit),
+        this._userService.countUsers(search),
       ]);
 
       const totalPages = Math.ceil(documentsCount / limit);
@@ -110,8 +110,8 @@ export class UserController implements IUserController {
         : (req.user as JwtPayload).userId;
 
       const [user, address] = await Promise.all([
-        this.userService.fetchUserDetails(userId),
-        this.addressService.fetchAddress(userId),
+        this._userService.fetchUserDetails(userId),
+        this._addressService.fetchAddress(userId),
       ]);
 
       if (user) {
@@ -139,7 +139,7 @@ export class UserController implements IUserController {
         req.body.formData ?? req.body
       );
 
-      const registeredMail = await this.userService.editUser(userId, dto);
+      const registeredMail = await this._userService.editUser(userId, dto);
 
       if (registeredMail) {
         res.status(HttpStatusCode.OK).json({
@@ -168,7 +168,7 @@ export class UserController implements IUserController {
     const { profilePicture } = req.body;
 
     try {
-      const changeProfilePicture = await this.userService.changeProfilePicture(
+      const changeProfilePicture = await this._userService.changeProfilePicture(
         userId,
         profilePicture
       );
@@ -199,7 +199,7 @@ export class UserController implements IUserController {
 
     try {
       const verifyCurrentPassword =
-        await this.userService.verifyCurrentPassword(userId, currentPassword);
+        await this._userService.verifyCurrentPassword(userId, currentPassword);
 
       if (!verifyCurrentPassword) {
         res.status(HttpStatusCode.BAD_REQUEST).json({
@@ -208,7 +208,7 @@ export class UserController implements IUserController {
         });
         return;
       }
-      const changePassword = await this.userService.changePassword(
+      const changePassword = await this._userService.changePassword(
         userId,
         newPassword
       );
@@ -231,7 +231,7 @@ export class UserController implements IUserController {
     try {
       const userId = req.params.id;
       const action = req.params.blockAction === "block";
-      const toggleResponse = await this.userService.toggleIsBlocked(
+      const toggleResponse = await this._userService.toggleIsBlocked(
         action,
         userId
       );
@@ -263,7 +263,7 @@ export class UserController implements IUserController {
         return;
       }
 
-      const uploadResponse = await this.userService.uploadCertificateImage(
+      const uploadResponse = await this._userService.uploadCertificateImage(
         userId,
         file
       );
@@ -305,7 +305,7 @@ export class UserController implements IUserController {
         return;
       }
 
-      const result = await this.userService.deleteCertificate(
+      const result = await this._userService.deleteCertificate(
         userId,
         certificateUrl
       );

@@ -16,7 +16,7 @@ import { UpdateUserRequestDTO } from "../../dtos/requests/updateUser-request.dto
 @injectable()
 export class AdminService implements IAdminService {
   constructor(
-    @inject("IUserRepository") private readonly userRepository: IUserRepository,
+    @inject("IUserRepository") private readonly _userRepository: IUserRepository,
     @inject("IAddressRepository")
     private readonly addressRepository: IAddressRepository,
     @inject("IAssistanceRequestRepository")
@@ -25,14 +25,14 @@ export class AdminService implements IAdminService {
 
   async addUser(dto: AddUserRequestDTO): Promise<string | boolean | null> {
     try {
-      const existingUser = await this.userRepository.findUserByEmail(dto.email);
+      const existingUser = await this._userRepository.findUserByEmail(dto.email);
       if (existingUser) return false;
 
       const userEntity = UserMapper.toUserEntity(dto);
 
       userEntity.password = await bcrypt.hash(dto.password, 10);
 
-      const user = await this.userRepository.createUser(userEntity);
+      const user = await this._userRepository.createUser(userEntity);
 
       const addressEntity = UserMapper.toAddressEntity(dto);
       addressEntity.entity = user._id as Types.ObjectId;
@@ -54,7 +54,7 @@ export class AdminService implements IAdminService {
       const userData = UserMapper.toUpdateUserEntity(dto);
       const addressData = UserMapper.toUpdateAddressEntity(dto);
 
-      const user = await this.userRepository.updateUser(userId, userData);
+      const user = await this._userRepository.updateUser(userId, userData);
       if (!user) return null;
 
       await this.addressRepository.updateAddress(
@@ -78,7 +78,7 @@ export class AdminService implements IAdminService {
       const query = search
         ? { name: { $regex: search, $options: "i" }, role: "user" }
         : { role: "user" };
-      return await this.userRepository.findUsers(query, skip, limit);
+      return await this._userRepository.findUsers(query, skip, limit);
     } catch (error) {
       console.error(ErrorMessages.USER_FETCH_FAILED, error);
       throw error;
@@ -87,7 +87,7 @@ export class AdminService implements IAdminService {
 
   async fetchUserDetails(userId: string): Promise<IUser | null> {
     try {
-      return await this.userRepository.findUserDetails(userId);
+      return await this._userRepository.findUserDetails(userId);
     } catch (error) {
       console.error(ErrorMessages.USER_FETCH_FAILED, error);
       throw error;
@@ -99,7 +99,7 @@ export class AdminService implements IAdminService {
       const query = search
         ? { name: { $regex: search, $options: "i" }, role: "user" }
         : { role: "user" };
-      return await this.userRepository.countUsers(query);
+      return await this._userRepository.countUsers(query);
     } catch (error) {
       console.error(ErrorMessages.USER_FETCH_FAILED, error);
       throw error;
@@ -108,7 +108,7 @@ export class AdminService implements IAdminService {
 
   async toggleIsBlocked(action: boolean, userId: string): Promise<boolean> {
     try {
-      await this.userRepository.findByIdAndUpdate(userId, {
+      await this._userRepository.findByIdAndUpdate(userId, {
         isBlocked: action,
       });
       return true;
@@ -135,7 +135,7 @@ export class AdminService implements IAdminService {
         country,
         pincode,
       } = formData;
-      const existingUser = await this.userRepository.findUserByEmail(email);
+      const existingUser = await this._userRepository.findUserByEmail(email);
       if (existingUser) {
         return false;
       }
@@ -163,7 +163,7 @@ export class AdminService implements IAdminService {
         type: "volunteer",
       };
 
-      const user = await this.userRepository.createUser(newUser);
+      const user = await this._userRepository.createUser(newUser);
       newAddress.entity = user._id as Types.ObjectId;
       await this.addressRepository.addAddress(newAddress);
       const registeredMail = user.email;
@@ -189,7 +189,7 @@ export class AdminService implements IAdminService {
         query.tasks = { $lt: 5 };
       }
 
-      return await this.userRepository.findUsers(query, skip, limit);
+      return await this._userRepository.findUsers(query, skip, limit);
     } catch (error) {
       console.error(ErrorMessages.USER_FETCH_FAILED, error);
       return null;
@@ -198,7 +198,7 @@ export class AdminService implements IAdminService {
 
   async fetchVolunteerDetails(volunteerId: string): Promise<IUser | null> {
     try {
-      return await this.userRepository.findUserDetails(volunteerId);
+      return await this._userRepository.findUserDetails(volunteerId);
     } catch (error) {
       console.error(ErrorMessages.USER_FETCH_FAILED, error);
       return null;
@@ -210,7 +210,7 @@ export class AdminService implements IAdminService {
       const query = search
         ? { name: { $regex: search, $options: "i" }, role: "volunteer" }
         : { role: "volunteer" };
-      return await this.userRepository.countUsers(query);
+      return await this._userRepository.countUsers(query);
     } catch (error) {
       console.error(ErrorMessages.USER_FETCH_FAILED, error);
       throw error;

@@ -9,7 +9,7 @@ import { ErrorMessages } from '../../constants/errorMessages';
 @injectable()
 export class AssistanceRequestController implements IAssistanceRequestController {
     constructor(
-        @inject("IAssistanceRequestService") private readonly assistanceRequestService: IAssistanceRequestService) {
+        @inject("IAssistanceRequestService") private readonly _assistanceRequestService: IAssistanceRequestService) {
         this.requestAssistance = this.requestAssistance.bind(this);
         this.getNearbyRequests = this.getNearbyRequests.bind(this);
         this.updateRequestStatus = this.updateRequestStatus.bind(this);
@@ -30,7 +30,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
         formData.volunteer = null;
 
         try {
-            const createAssistanceRequest = await this.assistanceRequestService.createAssistanceRequest(formData);
+            const createAssistanceRequest = await this._assistanceRequestService.createAssistanceRequest(formData);
             if (createAssistanceRequest) {
                 res.status(HttpStatusCode.CREATED).json({ success: true, message: ErrorMessages.ASSISTANCE_REQUEST_CREATE_SUCCESS });
             }
@@ -47,7 +47,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const search = req.query.search as string;
             const filter = req.query.filter as string;
 
-            const { requests, metadata } = await this.assistanceRequestService.getNearbyRequests(
+            const { requests, metadata } = await this._assistanceRequestService.getNearbyRequests(
                 volunteerId,
                 page,
                 search,
@@ -75,7 +75,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const requestId = req.params.id;
             const { action } = req.body;
 
-            const updatedRequest = await this.assistanceRequestService.updateRequestStatus(
+            const updatedRequest = await this._assistanceRequestService.updateRequestStatus(
                 requestId,
                 volunteerId,
                 action,
@@ -116,8 +116,8 @@ export class AssistanceRequestController implements IAssistanceRequestController
         let skip = !search ? (page - 1) * limit : 0;
 
         try {
-            const assistanceRequests = await this.assistanceRequestService.fetchAssistanceRequests(search, filter, skip, limit, sort, priority);
-            const documentsCount = await this.assistanceRequestService.countAssistanceRequests(search, filter, priority);
+            const assistanceRequests = await this._assistanceRequestService.fetchAssistanceRequests(search, filter, skip, limit, sort, priority);
+            const documentsCount = await this._assistanceRequestService.countAssistanceRequests(search, filter, priority);
             const totalPages = Math.ceil(documentsCount / limit);
 
             res.status(HttpStatusCode.OK).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });
@@ -138,8 +138,8 @@ export class AssistanceRequestController implements IAssistanceRequestController
             const sort = req.query.sort as string;
             let skip = !search ? (page - 1) * limit : 0;
 
-            const assistanceRequests = await this.assistanceRequestService.fetchMyAssistanceRequests(userId, search, filter, skip, limit, sort, priority);
-            const documentsCount = await this.assistanceRequestService.countMyAssistanceRequests(userId, search, filter, priority);
+            const assistanceRequests = await this._assistanceRequestService.fetchMyAssistanceRequests(userId, search, filter, skip, limit, sort, priority);
+            const documentsCount = await this._assistanceRequestService.countMyAssistanceRequests(userId, search, filter, priority);
             const totalPages = Math.ceil(documentsCount / limit);
 
             res.status(HttpStatusCode.OK).json({ success: true, assistanceRequests, totalPages, totalRequests: documentsCount });
@@ -151,7 +151,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
 
     async getPendingRequests(req: Request, res: Response): Promise<void> {
         try {
-            const pendingRequests = await this.assistanceRequestService.fetchPendingRequests();
+            const pendingRequests = await this._assistanceRequestService.fetchPendingRequests();
 
             res.status(HttpStatusCode.OK).json({ success: true, pendingRequests });
         } catch (error) {
@@ -170,8 +170,8 @@ export class AssistanceRequestController implements IAssistanceRequestController
         let skip = !search ? (page - 1) * limit : 0;
 
         try {
-            const processingRequests = await this.assistanceRequestService.fetchProcessingRequests(search, filter, skip, limit, volunteerId);
-            const documentsCount = await this.assistanceRequestService.countProcessingRequests(search, filter, volunteerId);
+            const processingRequests = await this._assistanceRequestService.fetchProcessingRequests(search, filter, skip, limit, volunteerId);
+            const documentsCount = await this._assistanceRequestService.countProcessingRequests(search, filter, volunteerId);
             const totalPages = Math.ceil(documentsCount / limit);
 
             res.status(HttpStatusCode.OK).json({ success: true, processingRequests, totalPages, totalRequests: documentsCount });
@@ -184,7 +184,7 @@ export class AssistanceRequestController implements IAssistanceRequestController
     async getAssistanceRequestDetails(req: Request, res: Response): Promise<void> {
         const requestId = req.params.id;
         try {
-            const requestDetails = await this.assistanceRequestService.fetchAssistanceRequestDetails(requestId);
+            const requestDetails = await this._assistanceRequestService.fetchAssistanceRequestDetails(requestId);
             if (requestDetails) {
                 res.status(HttpStatusCode.OK).json({ success: true, requestDetails });
             } else {
@@ -201,13 +201,13 @@ export class AssistanceRequestController implements IAssistanceRequestController
         const { volunteerId } = req.body;
 
         try {
-            const isTasksLimit = await this.assistanceRequestService.checkTasksLimit(volunteerId);
+            const isTasksLimit = await this._assistanceRequestService.checkTasksLimit(volunteerId);
             if (isTasksLimit) {
                 res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_TASK_LIMIT });
                 return;
             }
 
-            const assignSuccess = await this.assistanceRequestService.assignVolunteer(requestId, volunteerId);
+            const assignSuccess = await this._assistanceRequestService.assignVolunteer(requestId, volunteerId);
             if (assignSuccess) {
                 res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.ASSISTANCE_REQUEST_VOLUNTEER_ASSIGNED });
             } else {

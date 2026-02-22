@@ -10,7 +10,7 @@ import { UpdateAssetRequestDTO } from '../../dtos/requests/updateAsset-request.d
 @injectable()
 export class AssetController implements IAssetController {
     constructor(
-        @inject('IAssetService') private readonly assetService: IAssetService
+        @inject('IAssetService') private readonly _assetService: IAssetService
     ) {
         this.addAsset = this.addAsset.bind(this);
         this.uploadAssetImage = this.uploadAssetImage.bind(this);
@@ -23,7 +23,7 @@ export class AssetController implements IAssetController {
         try {
             const dto = AddAssetRequestDTO.fromRequest(req.body.formData ?? req.body);
 
-            const createdAsset = await this.assetService.addAsset(dto);
+            const createdAsset = await this._assetService.addAsset(dto);
             res.status(HttpStatusCode.CREATED).json({
                 success: true,
                 createdAsset,
@@ -53,7 +53,7 @@ export class AssetController implements IAssetController {
                 size: file.size
             });
 
-            const imageUrl = await this.assetService.uploadAssetImage(file);
+            const imageUrl = await this._assetService.uploadAssetImage(file);
 
             res.status(HttpStatusCode.OK).json({ imageUrl });
         } catch (error) {
@@ -76,8 +76,8 @@ export class AssetController implements IAssetController {
         let skip = (page - 1) * limit;
 
         try {
-            const assets = await this.assetService.fetchAssets(search, skip, limit, sortBy, filterByAvailability);
-            const documentsCount = await this.assetService.countAssets(search);
+            const assets = await this._assetService.fetchAssets(search, skip, limit, sortBy, filterByAvailability);
+            const documentsCount = await this._assetService.countAssets(search);
             const totalPages = Math.ceil(documentsCount / limit);
 
             if (assets) {
@@ -97,7 +97,7 @@ export class AssetController implements IAssetController {
     async getAssetDetails(req: Request, res: Response): Promise<void> {
         const assetId = req.params.id;
         try {
-            const asset = await this.assetService.fetchAssetDetails(assetId);
+            const asset = await this._assetService.fetchAssetDetails(assetId);
             if (asset) {
                 res.status(HttpStatusCode.OK).json({ success: true, asset });
             } else {
@@ -117,7 +117,7 @@ export class AssetController implements IAssetController {
         try {
             const dto = UpdateAssetRequestDTO.fromRequest(req.body.submitData ?? req.body);
             
-            const asset = await this.assetService.updateAsset(assetId, dto);
+            const asset = await this._assetService.updateAsset(assetId, dto);
             if (asset) {
                 res.status(HttpStatusCode.OK).json({ success: true, asset });
             } else {

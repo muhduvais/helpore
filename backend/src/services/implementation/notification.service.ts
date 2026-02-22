@@ -8,7 +8,7 @@ import { toNotificationListDTO } from '../../mappers/notification.mapper';
 @injectable()
 export class NotificationService implements INotificationService {
     constructor(
-        @inject('INotificationRepository') private readonly notificationRepository: INotificationRepository,
+        @inject('INotificationRepository') private readonly _notificationRepository: INotificationRepository,
     ) { }
 
     async createNotification(
@@ -20,7 +20,7 @@ export class NotificationService implements INotificationService {
         sender?: string,
         senderType?: 'users' | 'volunteers'
     ): Promise<INotificationDocument> {
-        return await this.notificationRepository.createNotification({
+        return await this._notificationRepository.createNotification({
             user: userId,
             userType,
             type,
@@ -33,27 +33,27 @@ export class NotificationService implements INotificationService {
     }
 
     async getUserNotifications(userId: string): Promise<NotificationDTO[]> {
-        const notifications = await this.notificationRepository.getUserNotifications(userId);
+        const notifications = await this._notificationRepository.getUserNotifications(userId);
         return toNotificationListDTO(notifications);
     }
 
     async getUnreadCount(userId: string): Promise<number> {
-        return await this.notificationRepository.getUnreadCount(userId);
+        return await this._notificationRepository.getUnreadCount(userId);
     }
 
     async markAsRead(notificationId: string, userId: string): Promise<void> {
-        await this.notificationRepository.markAsRead(notificationId);
+        await this._notificationRepository.markAsRead(notificationId);
     }
 
     async markAllAsRead(userId: string): Promise<void> {
-        await this.notificationRepository.markAllAsRead(userId);
+        await this._notificationRepository.markAllAsRead(userId);
     }
 
     async deleteNotification(notificationId: string, userId: string): Promise<void> {
-        await this.notificationRepository.deleteNotification(notificationId);
+        await this._notificationRepository.deleteNotification(notificationId);
     }
 
     async deleteAllNotifications(userId: string): Promise<void> {
-        await this.notificationRepository.deleteAllUserNotifications(userId);
+        await this._notificationRepository.deleteAllUserNotifications(userId);
     }
 }

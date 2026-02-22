@@ -1,12 +1,12 @@
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 
 export class ZegoMeetingService {
-  private zegoUIKit: ZegoUIKitPrebuilt;
+  private _zegoUIKit?: ZegoUIKitPrebuilt;
 
   async initializeMeeting(
     container: HTMLDivElement, 
     roomID: string, 
-    userID: string, 
+    userID: string,
     userName: string,
     userToken: string
   ) {
@@ -19,10 +19,10 @@ export class ZegoMeetingService {
       userName
     );
 
-    this.zegoUIKit = await ZegoUIKitPrebuilt.create(kitToken);
+    this._zegoUIKit = await ZegoUIKitPrebuilt.create(kitToken);
 
     // Join the room with specific configuration
-    this.zegoUIKit.joinRoom({
+    this._zegoUIKit.joinRoom({
       container: container,
       sharedLinks: [
         {
@@ -31,22 +31,21 @@ export class ZegoMeetingService {
         }
       ],
       scenario: {
-        mode: ZegoUIKitPrebuilt.GroupCall, // or OneONoneCall, BroadcastCall
+        mode: ZegoUIKitPrebuilt.GroupCall,
       },
-      // Customize UI and features
       turnOnMicrophoneWhenJoining: true,
       turnOnCameraWhenJoining: true,
       showMyCameraToggleButton: true,
       showMyMicrophoneToggleButton: true,
-      showAudioInputDeviceButton: true,
+      showAudioVideoSettingsButton: true,
       showScreenSharingButton: true,
       showTextChat: true
     });
   }
 
   leaveMeeting() {
-    if (this.zegoUIKit) {
-      this.zegoUIKit.destroy();
+    if (this._zegoUIKit) {
+      this._zegoUIKit.destroy();
     }
   }
 }
