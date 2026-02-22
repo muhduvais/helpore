@@ -14,13 +14,13 @@ import { AddAssetRequestDTO } from '../../dtos/requests/addAsset-request.dto';
 @injectable()
 export class AssetService implements IAssetService {
     constructor(
-        @inject('IAssetRepository') private readonly assetRepository: IAssetRepository,
-        @inject('IAssetRequestRepository') private readonly assetRequestRepository: IAssetRequestRepository
+        @inject('IAssetRepository') private readonly _assetRepository: IAssetRepository,
+        @inject('IAssetRequestRepository') private readonly _assetRequestRepository: IAssetRequestRepository
     ) { }
 
     async addAsset(dto: AddAssetRequestDTO): Promise<AssetDTO | null> {
         try {
-            const addedAsset = await this.assetRepository.addAsset(dto);
+            const addedAsset = await this._assetRepository.addAsset(dto);
             return toAssetDTO(addedAsset);
         } catch (error: any) {
             console.error(ErrorMessages.ASSET_CREATE_FAILED, error);
@@ -89,7 +89,7 @@ export class AssetService implements IAssetService {
                 }
             }
 
-            const assets = await this.assetRepository.findAssets(query, skip, limit, sortQuery);
+            const assets = await this._assetRepository.findAssets(query, skip, limit, sortQuery);
             if (!assets) {
                 return null;
             }
@@ -102,7 +102,7 @@ export class AssetService implements IAssetService {
 
     async fetchAssetDetails(assetId: string): Promise<AssetDTO | null> {
         try {
-            const asset = await this.assetRepository.findAssetDetails(assetId);
+            const asset = await this._assetRepository.findAssetDetails(assetId);
             if (!asset) {
                 return null;
             }
@@ -115,7 +115,7 @@ export class AssetService implements IAssetService {
 
     async updateAsset(assetId: string, submitData: AddAssetRequestDTO): Promise<AssetDTO | null> {
         try {
-            const updatedAsset = await this.assetRepository.updateById(assetId, submitData);
+            const updatedAsset = await this._assetRepository.updateById(assetId, submitData);
             return toAssetDTO(updatedAsset);
         } catch (error) {
             console.error('Error updating the asset: ', error);
@@ -126,7 +126,7 @@ export class AssetService implements IAssetService {
     async countAssets(search: string): Promise<number> {
         try {
             const query = search ? { name: { $regex: search, $options: 'i' } } : {};
-            return await this.assetRepository.countAssets(query);
+            return await this._assetRepository.countAssets(query);
         } catch (error) {
             console.error('Error counting the users:', error);
             return 0;
@@ -135,7 +135,7 @@ export class AssetService implements IAssetService {
 
     async createRequest(assetId: string, userId: string, requestedDate: Date, quantity: number): Promise<any> {
         try {
-            await this.assetRequestRepository.createAssetRequest(assetId, userId, requestedDate, quantity);
+            await this._assetRequestRepository.createAssetRequest(assetId, userId, requestedDate, quantity);
             return true;
         } catch (error) {
             console.error('Error creating the request: ', error);
@@ -158,7 +158,7 @@ export class AssetService implements IAssetService {
                 query.status = status;
             }
 
-            return await this.assetRequestRepository.countRequests(query);
+            return await this._assetRequestRepository.countRequests(query);
         } catch (error) {
             console.error('Error counting the asset requests:', error);
             return 0;
@@ -174,7 +174,7 @@ export class AssetService implements IAssetService {
         status: string,
     ): Promise<AssetRequestDTO[] | null> {
         try {
-            const assetRequests = await this.assetRequestRepository.findRequests(search, skip, userId, limit, sort, status);
+            const assetRequests = await this._assetRequestRepository.findRequests(search, skip, userId, limit, sort, status);
             if (!assetRequests) {
                 return null;
             }
@@ -187,7 +187,7 @@ export class AssetService implements IAssetService {
 
     async fetchMyAssetRequests(search: string, filter: string, skip: number, limit: number, userId: string): Promise<AssetRequestDTO[] | null> {
         try {
-            const assetRequests = await this.assetRequestRepository.findMyRequests(search, filter, userId, skip, limit);
+            const assetRequests = await this._assetRequestRepository.findMyRequests(search, filter, userId, skip, limit);
             if (!assetRequests) {
                 return null;
             }
@@ -200,7 +200,7 @@ export class AssetService implements IAssetService {
 
     async checkIsRequestLimit(userId: string, quantity: number): Promise<boolean | null> {
         try {
-            const assetRequests = await this.assetRequestRepository.findMyAllRequests(userId);
+            const assetRequests = await this._assetRequestRepository.findMyAllRequests(userId);
             if (!assetRequests) return null;
             const count = assetRequests.reduce((accu, request) => {
                 const quantity = Number(request.quantity) || 0;
@@ -227,7 +227,7 @@ export class AssetService implements IAssetService {
 
             query.user = userId;
 
-            return await this.assetRequestRepository.countMyRequests(query);
+            return await this._assetRequestRepository.countMyRequests(query);
         } catch (error) {
             console.error('Error counting the asset requests:', error);
             return null;
@@ -236,7 +236,7 @@ export class AssetService implements IAssetService {
 
     async findRequestDetails(userId: string, assetId: string): Promise<AssetRequestDTO | null> {
         try {
-            const assetRequest = await this.assetRequestRepository.findRequestDetails(userId, assetId);
+            const assetRequest = await this._assetRequestRepository.findRequestDetails(userId, assetId);
             if (!assetRequest) {
                 return null;
             }
@@ -249,7 +249,7 @@ export class AssetService implements IAssetService {
 
     async updateStatus(requestId: string, status: string, comment: string) {
         try {
-            const updatedRequest = await this.assetRequestRepository.updateStatus(requestId, status, comment);
+            const updatedRequest = await this._assetRequestRepository.updateStatus(requestId, status, comment);
 
             return updatedRequest;
         } catch (error) {

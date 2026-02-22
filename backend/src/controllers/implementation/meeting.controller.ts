@@ -9,7 +9,7 @@ import { ErrorMessages } from '../../constants/errorMessages';
 @injectable()
 export class MeetingController implements IMeetingController {
     constructor(
-        @inject('IMeetingService') private readonly meetingService: IMeetingService,
+        @inject('IMeetingService') private readonly _meetingService: IMeetingService,
     ) {
         this.generateZegoToken = this.generateZegoToken.bind(this);
         this.createMeeting = this.createMeeting.bind(this);
@@ -25,7 +25,7 @@ export class MeetingController implements IMeetingController {
         try {
             const { adminId, title, participants, scheduledTime } = req.body;
 
-            const meeting = await this.meetingService.createMeeting(
+            const meeting = await this._meetingService.createMeeting(
                 adminId,
                 title,
                 participants,
@@ -45,14 +45,14 @@ export class MeetingController implements IMeetingController {
             const search = req.query.search as string;
             const filter = req.query.filter as string;
 
-            const meetings = await this.meetingService.getMeetings(
+            const meetings = await this._meetingService.getMeetings(
                 page,
                 5,
                 search,
                 filter
             );
 
-            const documentsCount = await this.meetingService.totalMeetingsCount(search, filter) || 0;
+            const documentsCount = await this._meetingService.totalMeetingsCount(search, filter) || 0;
 
             res.status(HttpStatusCode.OK).json({
                 meetings,
@@ -67,7 +67,7 @@ export class MeetingController implements IMeetingController {
 
     async getUpcomingMeetings(req: Request, res: Response): Promise<void> {
         try {
-            const upcomingMeetings = await this.meetingService.getUpcomingMeetings();
+            const upcomingMeetings = await this._meetingService.getUpcomingMeetings();
             res.status(HttpStatusCode.OK).json({ upcomingMeetings });
         } catch (error) {
             console.error(ErrorMessages.MEETING_FETCH_UPCOMING_FAILED, error);
@@ -78,7 +78,7 @@ export class MeetingController implements IMeetingController {
     async getMeetingById(req: Request, res: Response): Promise<void> {
         try {
             const { meetingId } = req.params;
-            const meeting = await this.meetingService.getMeetingById(meetingId);
+            const meeting = await this._meetingService.getMeetingById(meetingId);
 
             if (!meeting) {
                 res.status(HttpStatusCode.NOT_FOUND).json({ error: ErrorMessages.MEETING_NOT_FOUND });
@@ -104,7 +104,7 @@ export class MeetingController implements IMeetingController {
                 return;
             }
 
-            const meetings = await this.meetingService.getUserMeetings(
+            const meetings = await this._meetingService.getUserMeetings(
                 userId,
                 page,
                 5,
@@ -112,7 +112,7 @@ export class MeetingController implements IMeetingController {
                 filter
             );
 
-            const userMeetingsCount = await this.meetingService.totalUserMeetingsCount(userId, search, filter) || 0;
+            const userMeetingsCount = await this._meetingService.totalUserMeetingsCount(userId, search, filter) || 0;
 
             res.status(HttpStatusCode.OK).json({
                 meetings,
@@ -130,7 +130,7 @@ export class MeetingController implements IMeetingController {
             const { meetingId } = req.params;
             const { status } = req.body;
 
-            const updatedMeeting = await this.meetingService.updateMeetingStatus(
+            const updatedMeeting = await this._meetingService.updateMeetingStatus(
                 meetingId,
                 status
             );
@@ -151,7 +151,7 @@ export class MeetingController implements IMeetingController {
         try {
             const { userId, roomId, userName } = req.body;
 
-            const token = await this.meetingService.generateToken(
+            const token = await this._meetingService.generateToken(
                 userId,
                 roomId,
                 userName
@@ -167,7 +167,7 @@ export class MeetingController implements IMeetingController {
         try {
             const { meetingId } = req.params;
 
-            await this.meetingService.deleteMeeting(meetingId);
+            await this._meetingService.deleteMeeting(meetingId);
 
             res.status(HttpStatusCode.OK).json({ message: ErrorMessages.MEETING_DELETE_SUCCESS });
         } catch (error) {

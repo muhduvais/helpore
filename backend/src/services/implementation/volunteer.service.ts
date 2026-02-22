@@ -20,18 +20,18 @@ import { UpdateVolunteerRequestDTO } from "../../dtos/requests/updateVolunteer-r
 @injectable()
 export class VolunteerService implements IVolunteerService {
   constructor(
-    @inject("IUserRepository") private readonly userRepository: IUserRepository,
+    @inject("IUserRepository") private readonly _userRepository: IUserRepository,
     @inject("IAddressRepository")
-    private readonly addressRepository: IAddressRepository,
+    private readonly _addressRepository: IAddressRepository,
     @inject("IAssistanceRequestRepository")
-    private readonly assistanceRepository: IAssistanceRequestRepository
+    private readonly _assistanceRepository: IAssistanceRequestRepository
   ) {}
 
   async addVolunteer(
     dto: AddVolunteerRequestDTO
   ): Promise<string | boolean | null> {
     try {
-      const existingUser = await this.userRepository.findUserByEmail(dto.email);
+      const existingUser = await this._userRepository.findUserByEmail(dto.email);
       if (existingUser) {
         return false;
       }
@@ -40,12 +40,12 @@ export class VolunteerService implements IVolunteerService {
 
       volunteerEntity.password = await bcrypt.hash(dto.password, 10);
 
-      const volunteer = await this.userRepository.createUser(volunteerEntity);
+      const volunteer = await this._userRepository.createUser(volunteerEntity);
 
       const addressEntity = VolunteerMapper.toAddressEntity(dto);
       addressEntity.entity = volunteer._id as Types.ObjectId;
 
-      await this.addressRepository.addAddress(addressEntity);
+      await this._addressRepository.addAddress(addressEntity);
 
       return volunteer.email;
     } catch (error) {
@@ -62,10 +62,10 @@ export class VolunteerService implements IVolunteerService {
       const userData = VolunteerMapper.toUpdateVolunteerEntity(dto);
       const addressData = VolunteerMapper.toUpdateAddressEntity(dto);
 
-      const user = await this.userRepository.updateUser(volunteerId, userData);
+      const user = await this._userRepository.updateUser(volunteerId, userData);
       if (!user) return null;
 
-      await this.addressRepository.updateAddress(
+      await this._addressRepository.updateAddress(
         user._id as string,
         addressData
       );
@@ -90,7 +90,7 @@ export class VolunteerService implements IVolunteerService {
         query.isActive = isActive;
         query.tasks = { $lt: 5 };
       }
-      const volunteers = await this.userRepository.findUsers(
+      const volunteers = await this._userRepository.findUsers(
         query,
         skip,
         limit
@@ -107,7 +107,7 @@ export class VolunteerService implements IVolunteerService {
 
   async fetchVolunteerDetails(volunteerId: string): Promise<UserDTO | null> {
     try {
-      const volunteer = await this.userRepository.findUserDetails(volunteerId);
+      const volunteer = await this._userRepository.findUserDetails(volunteerId);
       if (!volunteer) {
         throw new Error(ErrorMessages.VOLUNTEER_NOT_FOUND);
       }
@@ -120,7 +120,7 @@ export class VolunteerService implements IVolunteerService {
 
   async fetchAddress(volunteerId: string): Promise<AddressDTO | null> {
     try {
-      const address = await this.addressRepository.findAddressByEntityId(
+      const address = await this._addressRepository.findAddressByEntityId(
         volunteerId
       );
       if (!address) {
@@ -138,7 +138,7 @@ export class VolunteerService implements IVolunteerService {
       const query = search
         ? { name: { $regex: search, $options: "i" }, role: "volunteer" }
         : { role: "volunteer" };
-      return await this.userRepository.countUsers(query);
+      return await this._userRepository.countUsers(query);
     } catch (error) {
       console.error(ErrorMessages.VOLUNTEER_COUNT_FAILED, error);
       throw error;
@@ -150,7 +150,7 @@ export class VolunteerService implements IVolunteerService {
     profilePicture: string
   ): Promise<boolean> {
     try {
-      await this.userRepository.updateProfilePicture(
+      await this._userRepository.updateProfilePicture(
         volunteerId,
         profilePicture
       );
@@ -166,7 +166,7 @@ export class VolunteerService implements IVolunteerService {
     currentPassword: string
   ): Promise<boolean | null | undefined> {
     try {
-      const password = await this.userRepository.findPassword(volunteerId);
+      const password = await this._userRepository.findPassword(volunteerId);
       if (!password) return;
       return bcrypt.compare(currentPassword, password);
     } catch (error) {
@@ -181,7 +181,7 @@ export class VolunteerService implements IVolunteerService {
   ): Promise<boolean> {
     try {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await this.userRepository.updatePassword(volunteerId, hashedPassword);
+      await this._userRepository.updatePassword(volunteerId, hashedPassword);
       return true;
     } catch (error) {
       console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
@@ -191,7 +191,7 @@ export class VolunteerService implements IVolunteerService {
 
   async toggleIsBlocked(action: boolean, userId: string): Promise<boolean> {
     try {
-      await this.userRepository.findByIdAndUpdate(userId, {
+      await this._userRepository.findByIdAndUpdate(userId, {
         isBlocked: action,
       });
       return true;
@@ -203,7 +203,7 @@ export class VolunteerService implements IVolunteerService {
 
   async checkTasksLimit(volunteerId: string): Promise<any> {
     try {
-      const checkTasksLimit = await this.assistanceRepository.checkTasksLimit(
+      const checkTasksLimit = await this._assistanceRepository.checkTasksLimit(
         volunteerId
       );
       return checkTasksLimit;

@@ -18,12 +18,12 @@ interface GeocodeResponse {
 }
 
 export class GeocodingService {
-    private apiKey: string;
-    private baseUrl: string;
+    private _apiKey: string;
+    private _baseUrl: string;
 
     constructor() {
-        this.apiKey = process.env.OPENCAGE_API_KEY as string;
-        this.baseUrl = 'https://api.opencagedata.com/geocode/v1/json';
+        this._apiKey = process.env.OPENCAGE_API_KEY as string;
+        this._baseUrl = 'https://api.opencagedata.com/geocode/v1/json';
     }
 
     async geocodeAddress(address: {
@@ -37,7 +37,7 @@ export class GeocodingService {
             const addressString = `${address.street}, ${address.city}, ${address.state}, ${address.country}, ${address.pincode}`;
 
             const response = await axios.get<GeocodeResponse>(
-                `${this.baseUrl}?q=${encodeURIComponent(addressString)}&key=${this.apiKey}&limit=1`
+                `${this._baseUrl}?q=${encodeURIComponent(addressString)}&key=${this._apiKey}&limit=1`
             );
 
             if (response.data.status.code !== 200) {
@@ -78,7 +78,7 @@ export class GeocodingService {
     async reverseGeocode(latitude: number, longitude: number) {
         try {
             const response = await axios.get<GeocodeResponse>(
-                `${this.baseUrl}?q=${latitude}+${longitude}&key=${this.apiKey}&limit=1`
+                `${this._baseUrl}?q=${latitude}+${longitude}&key=${this._apiKey}&limit=1`
             );
 
             if (response.data.status.code !== 200) {

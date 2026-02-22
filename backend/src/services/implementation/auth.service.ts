@@ -18,14 +18,14 @@ import { ErrorMessages } from '../../constants/errorMessages';
 export class AuthService implements IAuthService {
 
     constructor(
-        @inject('IAuthRepository') private readonly authRepository: IAuthRepository,
-        @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
-        @inject('IOtpRepository') private readonly otpRepository: IOtpRepository
+        @inject('IAuthRepository') private readonly _authRepository: IAuthRepository,
+        @inject('IAddressRepository') private readonly _addressRepository: IAddressRepository,
+        @inject('IOtpRepository') private readonly _otpRepository: IOtpRepository
     ) { }
 
     async registerUser(name: string, email: string, password: string): Promise<string | boolean | null> {
         try {
-            const existingUser = await this.authRepository.findUser(email);
+            const existingUser = await this._authRepository.findUser(email);
             if (existingUser) {
                 return false;
             }
@@ -88,7 +88,7 @@ export class AuthService implements IAuthService {
     async generateOtp(email: string): Promise<string | null> {
         try {
             const otp = generateOTP();
-            await this.otpRepository.storeOtp(email, otp);
+            await this._otpRepository.storeOtp(email, otp);
             return otp;
         } catch (error) {
             console.error(ErrorMessages.OTP_GENERATE_FAILED, error);
@@ -118,7 +118,7 @@ export class AuthService implements IAuthService {
                 googleId: null,
             };
 
-            const newUser = await this.authRepository.createUser(user);
+            const newUser = await this._authRepository.createUser(user);
             if (!newUser) {
                 return false;
             }
@@ -129,7 +129,7 @@ export class AuthService implements IAuthService {
                 fname: newUser.name.split(' ')[0],
                 lname: newUser.name.split(' ')[1],
             }
-            const addressResult = await this.addressRepository.addAddress(addressData);
+            const addressResult = await this._addressRepository.addAddress(addressData);
             console.log('addressResult: ', addressResult)
 
             await redisClient.del(`temp_registration:${email}`);
@@ -143,7 +143,7 @@ export class AuthService implements IAuthService {
 
     async verifyLogin(email: string, password: string): Promise<any> {
         try {
-            const user = await this.authRepository.findUser(email);
+            const user = await this._authRepository.findUser(email);
             if (user && await bcrypt.compare(password, user.password)) {
                 return user;
             }
@@ -184,7 +184,7 @@ export class AuthService implements IAuthService {
 
     async findIsBlocked(userId: string): Promise<boolean | null> {
         try {
-            return await this.authRepository.findIsBlocked(userId);
+            return await this._authRepository.findIsBlocked(userId);
         } catch (error) {
             console.error(ErrorMessages.AUTHENTICATE_USER_FAILED, error);
             return null;
@@ -194,7 +194,7 @@ export class AuthService implements IAuthService {
     async findOrCreateUser(profile: any): Promise<IUserDocument | null> {
         try {
             const email = profile.email;
-            const existingUser = await this.authRepository.findUser(email);
+            const existingUser = await this._authRepository.findUser(email);
 
             if (existingUser) {
                 if (existingUser?.isBlocked) return null;
@@ -210,7 +210,7 @@ export class AuthService implements IAuthService {
                 role: 'user',
             };
 
-            return await this.authRepository.createUser(newUser);
+            return await this._authRepository.createUser(newUser);
         } catch (error) {
             console.error(ErrorMessages.GOOGLE_LOGIN_FAILED, error);
             return null;
@@ -219,7 +219,7 @@ export class AuthService implements IAuthService {
 
     async findUserById(userId: string): Promise<IUser | null> {
         try {
-            return await this.authRepository.findUserById(userId);
+            return await this._authRepository.findUserById(userId);
         } catch (error) {
             console.error(ErrorMessages.USER_NOT_FOUND, error);
             return null;
@@ -228,7 +228,7 @@ export class AuthService implements IAuthService {
 
     async sendResetLink(email: string) {
         try {
-            const existingUser = await this.authRepository.findUser(email);
+            const existingUser = await this._authRepository.findUser(email);
             if (!existingUser) {
                 return false;
             }
@@ -238,7 +238,7 @@ export class AuthService implements IAuthService {
             const payload = { userId: existingUser._id, email };
             const resetToken = jwt.sign(payload, process.env.RESET_LINK_SECRET, { expiresIn: process.env.RESET_EXPIRES_IN });
             const tokenExpiry = new Date(Date.now() + 3600 * 1000);
-            await this.authRepository.storeResetToken(email, resetToken, tokenExpiry);
+            await this._authRepository.storeResetToken(email, resetToken, tokenExpiry);
 
             const CLIENT_URL = process.env.CLIENT_URL;
             const resetLink = `${CLIENT_URL}/user/resetPassword?token=${resetToken}`;
@@ -255,7 +255,7 @@ export class AuthService implements IAuthService {
     async resetPassword(email: string, password: string) {
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
-            await this.authRepository.resetPassword(email, hashedPassword);
+            await this._authRepository.resetPassword(email, hashedPassword);
         } catch (error) {
             console.error(ErrorMessages.PASSWORD_UPDATE_FAILED, error);
             throw new Error(ErrorMessages.PASSWORD_UPDATE_FAILED);

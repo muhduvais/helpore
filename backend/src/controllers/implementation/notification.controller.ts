@@ -8,7 +8,7 @@ import { ErrorMessages } from '../../constants/errorMessages';
 @injectable()
 export class NotificationController {
     constructor(
-        @inject('INotificationService') private readonly notificationService: INotificationService,
+        @inject('INotificationService') private readonly _notificationService: INotificationService,
     ) {
         this.getUserNotifications = this.getUserNotifications.bind(this);
         this.markAsRead = this.markAsRead.bind(this);
@@ -20,7 +20,7 @@ export class NotificationController {
     async getUserNotifications(req: Request, res: Response): Promise<void> {
         try {
             const { userId } = req.user as JwtPayload;
-            const notifications = await this.notificationService.getUserNotifications(userId);
+            const notifications = await this._notificationService.getUserNotifications(userId);
             res.status(HttpStatusCode.OK).json({ success: true, data: notifications });
         } catch (error) {
             console.error(ErrorMessages.NOTIFICATION_FETCH_FAILED, error);
@@ -36,7 +36,7 @@ export class NotificationController {
         try {
             const { notificationId } = req.params;
             const { userId } = req.user as JwtPayload;
-            await this.notificationService.markAsRead(notificationId, userId);
+            await this._notificationService.markAsRead(notificationId, userId);
             res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.NOTIFICATION_MARK_READ_SUCCESS });
         } catch (error) {
             console.error(ErrorMessages.NOTIFICATION_MARK_READ_FAILED, error);
@@ -51,7 +51,7 @@ export class NotificationController {
     async markAllAsRead(req: Request, res: Response): Promise<void> {
         try {
             const { userId } = req.user as JwtPayload;
-            await this.notificationService.markAllAsRead(userId);
+            await this._notificationService.markAllAsRead(userId);
             res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.NOTIFICATION_MARK_ALL_READ_SUCCESS });
         } catch (error) {
             console.error(ErrorMessages.NOTIFICATION_MARK_ALL_READ_FAILED, error);
@@ -67,7 +67,7 @@ export class NotificationController {
         try {
             const { notificationId } = req.params;
             const { userId } = req.user as JwtPayload;
-            await this.notificationService.deleteNotification(notificationId, userId);
+            await this._notificationService.deleteNotification(notificationId, userId);
             res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.NOTIFICATION_DELETE_SUCCESS });
         } catch (error) {
             console.error(ErrorMessages.NOTIFICATION_DELETE_FAILED, error);
@@ -82,7 +82,7 @@ export class NotificationController {
     async deleteAllNotifications(req: Request, res: Response): Promise<void> {
         try {
             const { userId } = req.user as JwtPayload;
-            await this.notificationService.deleteAllNotifications(userId);
+            await this._notificationService.deleteAllNotifications(userId);
             res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.NOTIFICATION_DELETE_ALL_SUCCESS });
         } catch (error) {
             console.error(ErrorMessages.NOTIFICATION_DELETE_ALL_FAILED, error);

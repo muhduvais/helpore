@@ -15,8 +15,8 @@ export type CloudinaryFile = { public_id: string; secure_url: string };
 @injectable()
 export class ChatService implements IChatService {
     constructor(
-        @inject('IChatRepository') private readonly chatRepository: IChatRepository,
-        @inject('INotificationRepository') private readonly notificationRepository: INotificationRepository,
+        @inject('IChatRepository') private readonly _chatRepository: IChatRepository,
+        @inject('INotificationRepository') private readonly _notificationRepository: INotificationRepository,
     ) { }
 
     async sendMessage(
@@ -29,7 +29,7 @@ export class ChatService implements IChatService {
         uploadedMediaUrls: string[]
     ): Promise<IMessageDocument> {
         try {
-            const message = await this.chatRepository.createMessage({
+            const message = await this._chatRepository.createMessage({
                 sender: senderId,
                 receiver: receiverId,
                 content,
@@ -40,7 +40,7 @@ export class ChatService implements IChatService {
                 media: uploadedMediaUrls,
             });
 
-            await this.chatRepository.createOrUpdateConversation({
+            await this._chatRepository.createOrUpdateConversation({
                 participants: [senderId, receiverId],
                 requestId,
                 lastMessage: content,
@@ -61,7 +61,7 @@ export class ChatService implements IChatService {
             });
 
             // Create a notification for the receiver
-            await this.notificationRepository.createNotification({
+            await this._notificationRepository.createNotification({
                 user: receiverId,
                 userType: receiverType,
                 type: 'message',
@@ -96,7 +96,7 @@ export class ChatService implements IChatService {
 
     async getConversationMessages(requestId: string): Promise<MessageDTO[]> {
         try {
-            const messages = await this.chatRepository.getMessagesByRequestId(requestId);
+            const messages = await this._chatRepository.getMessagesByRequestId(requestId);
             if (!messages) {
                 throw new Error(ErrorMessages.CHAT_FETCH_MESSAGES_FAILED);
             }
@@ -109,7 +109,7 @@ export class ChatService implements IChatService {
 
     async getUserConversations(userId: string): Promise<ConversationDTO[]> {
         try {
-            const conversations = await this.chatRepository.getUserConversations(userId);
+            const conversations = await this._chatRepository.getUserConversations(userId);
             if (!conversations) {
                 throw new Error(ErrorMessages.CHAT_FETCH_MESSAGES_FAILED);
             }
@@ -122,7 +122,7 @@ export class ChatService implements IChatService {
 
     async markConversationAsRead(conversationId: string, userId: string): Promise<void> {
         try {
-            await this.chatRepository.markMessagesAsRead(conversationId, userId);
+            await this._chatRepository.markMessagesAsRead(conversationId, userId);
         } catch (error) {
             console.error(ErrorMessages.CHAT_MARK_READ_FAILED, error);
             throw new Error(ErrorMessages.CHAT_MARK_READ_FAILED);

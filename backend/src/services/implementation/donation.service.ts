@@ -19,9 +19,9 @@ dotenv.config();
 @injectable()
 export class DonationService implements IDonationService {
   constructor(
-    @inject('IDonationRepository') private readonly donationRepository: IDonationRepository,
-    @inject('IUserRepository') private readonly userRepository: IUserRepository,
-    @inject('IAddressRepository') private readonly addressRepository: IAddressRepository,
+    @inject('IDonationRepository') private readonly _donationRepository: IDonationRepository,
+    @inject('IUserRepository') private readonly _userRepository: IUserRepository,
+    @inject('IAddressRepository') private readonly _addressRepository: IAddressRepository,
   ) { }
 
   async createCheckoutSession(donationData: any): Promise<any> {
@@ -91,7 +91,7 @@ export class DonationService implements IDonationService {
           return { error: ErrorMessages.DONATION_SESSION_OBJECT_MISSING };
         }
 
-        await this.donationRepository.createData({
+        await this._donationRepository.createData({
           stripeSessionId: session.id,
           stripePaymentId: session.payment_intent,
           amount: session.amount_total / 100,
@@ -117,7 +117,7 @@ export class DonationService implements IDonationService {
     }
 
     try {
-      const donations = await this.donationRepository.findByUserId(userId);
+      const donations = await this._donationRepository.findByUserId(userId);
       return toDonationListDTO(donations);
     } catch (error) {
       console.error(ErrorMessages.DONATION_HISTORY_FAILED, error);
@@ -138,7 +138,7 @@ export class DonationService implements IDonationService {
       if (campaign && campaign !== 'all') {
         query.campaign = campaign;
       }
-      const donations = await this.donationRepository.findAll(query, skip, limit);
+      const donations = await this._donationRepository.findAll(query, skip, limit);
       if (!donations) {
         return null;
       }
@@ -151,7 +151,7 @@ export class DonationService implements IDonationService {
 
   async getRecentDonations(): Promise<DonationDTO[] | null> {
     try {
-      const donations = await this.donationRepository.findRecentDonations();
+      const donations = await this._donationRepository.findRecentDonations();
       if (!donations) {
         return null;
       }
@@ -171,7 +171,7 @@ export class DonationService implements IDonationService {
       if (campaign && campaign !== 'all') {
         query.campaign = campaign;
       }
-      return await this.donationRepository.countDonations(query);
+      return await this._donationRepository.countDonations(query);
     } catch (error) {
       console.error(ErrorMessages.DONATION_COUNT_FAILED, error);
       throw new Error(ErrorMessages.DONATION_COUNT_FAILED);
@@ -189,9 +189,9 @@ export class DonationService implements IDonationService {
 
   async generateAndSendReceipt(donationId: string, userId?: string): Promise<Buffer> {
     try {
-      const donation = await this.donationRepository.findById(donationId);
-      const userDetails = userId ? await this.userRepository.findById(userId) : null;
-      const addressDetailsResponse = userId ? await this.addressRepository.findAddressesByEntityId(userId) : [];
+      const donation = await this._donationRepository.findById(donationId);
+      const userDetails = userId ? await this._userRepository.findById(userId) : null;
+      const addressDetailsResponse = userId ? await this._addressRepository.findAddressesByEntityId(userId) : [];
       const addressDetails = addressDetailsResponse[0];
       return new Promise((resolve, reject) => {
         const doc = new PDFDocument({

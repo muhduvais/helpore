@@ -11,7 +11,7 @@ import { ErrorMessages } from "../../constants/errorMessages";
 @injectable()
 export class AuthController implements IAuthController {
   constructor(
-    @inject("IAuthService") private readonly authService: IAuthService
+    @inject("IAuthService") private readonly _authService: IAuthService
   ) {
     this.registerUser = this.registerUser.bind(this);
     this.resendOtp = this.resendOtp.bind(this);
@@ -28,7 +28,7 @@ export class AuthController implements IAuthController {
   async registerUser(req: Request, res: Response): Promise<void> {
     try {
       const { name, email, password } = req.body;
-      const registeredMail = await this.authService.registerUser(
+      const registeredMail = await this._authService.registerUser(
         name,
         email,
         password
@@ -56,7 +56,7 @@ export class AuthController implements IAuthController {
     try {
       const { email } = req.body;
 
-      const otp = await this.authService.resendOtp(email);
+      const otp = await this._authService.resendOtp(email);
 
       if (otp) {
         console.log("New OTP:", otp);
@@ -81,7 +81,7 @@ export class AuthController implements IAuthController {
   async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
       const { email, otp } = req.body;
-      const verified = await this.authService.verifyOtp(email, otp);
+      const verified = await this._authService.verifyOtp(email, otp);
       if (!verified) {
         res
           .status(HttpStatusCode.BAD_REQUEST)
@@ -104,7 +104,7 @@ export class AuthController implements IAuthController {
       const { email, password } = req.body.data;
       const selectedRole = req.body.selectedRole;
 
-      const user = await this.authService.verifyLogin(email, password);
+      const user = await this._authService.verifyLogin(email, password);
 
       if (!user || user.role !== selectedRole) {
         res
@@ -120,11 +120,11 @@ export class AuthController implements IAuthController {
         return;
       }
 
-      const accessToken = await this.authService.generateAccessToken(
+      const accessToken = await this._authService.generateAccessToken(
         user._id,
         user.role
       );
-      const refreshToken = await this.authService.generateRefreshToken(
+      const refreshToken = await this._authService.generateRefreshToken(
         user._id,
         user.role
       );
@@ -182,7 +182,7 @@ export class AuthController implements IAuthController {
         return;
       }
 
-      const payload = await this.authService.verifyRefreshToken(refreshToken);
+      const payload = await this._authService.verifyRefreshToken(refreshToken);
       const userId = payload.userId;
       const role = payload.role;
       if (!userId) {
@@ -192,7 +192,7 @@ export class AuthController implements IAuthController {
         return;
       }
 
-      const newAccessToken = await this.authService.generateAccessToken(
+      const newAccessToken = await this._authService.generateAccessToken(
         userId,
         role
       );
@@ -211,7 +211,7 @@ export class AuthController implements IAuthController {
 
     try {
       const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
-      const user = await this.authService.findOrCreateUser(decodedToken);
+      const user = await this._authService.findOrCreateUser(decodedToken);
 
       if (!user) {
         res.status(HttpStatusCode.UNAUTHORIZED).json({
@@ -232,11 +232,11 @@ export class AuthController implements IAuthController {
         return;
       }
 
-      const accessToken = await this.authService.generateAccessToken(
+      const accessToken = await this._authService.generateAccessToken(
         userId,
         role
       );
-      const refreshToken = await this.authService.generateRefreshToken(
+      const refreshToken = await this._authService.generateRefreshToken(
         userId,
         role
       );
@@ -269,7 +269,7 @@ export class AuthController implements IAuthController {
   async forgotPassword(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.body;
-      const sendResetLink = await this.authService.sendResetLink(email);
+      const sendResetLink = await this._authService.sendResetLink(email);
       if (!sendResetLink) {
         res
           .status(HttpStatusCode.BAD_REQUEST)
@@ -296,7 +296,7 @@ export class AuthController implements IAuthController {
         process.env.RESET_LINK_SECRET!
       ) as JwtPayload;
       const { userId } = decoded;
-      const user = await this.authService.findUserById(userId);
+      const user = await this._authService.findUserById(userId);
       if (!user) {
         res
           .status(HttpStatusCode.BAD_REQUEST)
@@ -305,7 +305,7 @@ export class AuthController implements IAuthController {
       }
       const email = user.email;
 
-      await this.authService.resetPassword(email, newPassword);
+      await this._authService.resetPassword(email, newPassword);
       res
         .status(HttpStatusCode.OK)
         .json({ message: ErrorMessages.PASSWORD_RESET_SUCCESS });
@@ -320,7 +320,7 @@ export class AuthController implements IAuthController {
   async authenticateUser(req: Request, res: Response): Promise<void> {
     const userId = req.params.id;
     try {
-      const isBlocked = await this.authService.findIsBlocked(userId);
+      const isBlocked = await this._authService.findIsBlocked(userId);
       res
         .status(HttpStatusCode.OK)
         .json({ isBlocked, message: ErrorMessages.AUTHENTICATED_USER_SUCCESS });

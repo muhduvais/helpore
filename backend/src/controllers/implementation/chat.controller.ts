@@ -9,7 +9,7 @@ import { ErrorMessages } from '../../constants/errorMessages';
 @injectable()
 export class ChatController implements IChatController {
     constructor(
-        @inject('IChatService') private readonly chatService: IChatService,
+        @inject('IChatService') private readonly _chatService: IChatService,
     ) {
         this.sendMessage = this.sendMessage.bind(this);
         this.getConversationMessages = this.getConversationMessages.bind(this);
@@ -23,7 +23,7 @@ export class ChatController implements IChatController {
             const { receiverId, content, requestId, senderType, receiverType, uploadedMediaUrls } = req.body;
             const { userId: senderId } = req.user as JwtPayload;
 
-            const message = await this.chatService.sendMessage(senderId, receiverId, content, requestId, senderType, receiverType, uploadedMediaUrls);
+            const message = await this._chatService.sendMessage(senderId, receiverId, content, requestId, senderType, receiverType, uploadedMediaUrls);
             res.status(HttpStatusCode.CREATED).json({ success: true, data: message });
         } catch (error) {
             console.error(ErrorMessages.CHAT_SEND_FAILED, error);
@@ -40,7 +40,7 @@ export class ChatController implements IChatController {
             const { requestId } = req.params;
             const mediaFiles = req.files as Express.Multer.File[];
 
-            const mediaUrls = await this.chatService.uploadMedia(mediaFiles, requestId) as string[];
+            const mediaUrls = await this._chatService.uploadMedia(mediaFiles, requestId) as string[];
             res.status(HttpStatusCode.OK).json({ success: true, mediaUrls });
         } catch (error) {
             console.error(ErrorMessages.CHAT_UPLOAD_MEDIA_FAILED, error);
@@ -55,7 +55,7 @@ export class ChatController implements IChatController {
     async getConversationMessages(req: Request, res: Response): Promise<void> {
         try {
             const { requestId } = req.params;
-            const messages = await this.chatService.getConversationMessages(requestId);
+            const messages = await this._chatService.getConversationMessages(requestId);
             res.status(HttpStatusCode.OK).json({ success: true, messages });
         } catch (error) {
             console.error(ErrorMessages.CHAT_FETCH_MESSAGES_FAILED, error);
@@ -70,7 +70,7 @@ export class ChatController implements IChatController {
     async getUserConversations(req: Request, res: Response): Promise<void> {
         try {
             const { userId } = req.user as JwtPayload;
-            const conversations = await this.chatService.getUserConversations(userId);
+            const conversations = await this._chatService.getUserConversations(userId);
             res.status(HttpStatusCode.OK).json({ success: true, messages: conversations });
         } catch (error) {
             console.error(ErrorMessages.CHAT_FETCH_CONVERSATIONS_FAILED, error);
@@ -87,7 +87,7 @@ export class ChatController implements IChatController {
             const { conversationId } = req.params;
             const { userId } = req.user as JwtPayload;
 
-            await this.chatService.markConversationAsRead(conversationId, userId);
+            await this._chatService.markConversationAsRead(conversationId, userId);
             res.status(HttpStatusCode.OK).json({ success: true, message: ErrorMessages.CHAT_MARK_READ_SUCCESS });
         } catch (error) {
             console.error(ErrorMessages.CHAT_MARK_READ_FAILED, error);

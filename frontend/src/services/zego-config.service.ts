@@ -5,19 +5,19 @@ export interface IConfigService {
 }
 
 export class ConfigService implements IConfigService {
-  private zegoAppId: number;
-  private zegoAppSign: string;
+  private _zegoAppId: number;
+  private _zegoAppSign: string;
 
   constructor() {
-    this.zegoAppId = parseInt(import.meta.env.VITE_ZEGO_APP_ID || '0');
-    this.zegoAppSign = import.meta.env.VITE_ZEGO_APP_SIGN || '';
+    this._zegoAppId = parseInt(import.meta.env.VITE_ZEGO_APP_ID || '0');
+    this._zegoAppSign = import.meta.env.VITE_ZEGO_APP_SIGN || '';
   }
 
   getZegoAppId(): number {
-    return this.zegoAppId;
+    return this._zegoAppId;
   }
 
   getZegoAppSign(): string {
-    return this.zegoAppSign;
+    return this._zegoAppSign;
   }
 }

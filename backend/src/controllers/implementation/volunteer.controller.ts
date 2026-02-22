@@ -16,7 +16,7 @@ export class VolunteerController implements IVolunteerController {
   constructor(
     @inject("IVolunteerService")
     private readonly volunteerService: IVolunteerService,
-    @inject("IAdminService") private readonly adminService: IAdminService
+    @inject("IAdminService") private readonly _adminService: IAdminService
   ) {
     this.addVolunteer = this.addVolunteer.bind(this);
     this.getVolunteers = this.getVolunteers.bind(this);
@@ -31,7 +31,7 @@ export class VolunteerController implements IVolunteerController {
     try {
       const dto = AddUserRequestDTO.fromRequest(req.body.formData ?? req.body);
 
-      const registeredMail = await this.adminService.addVolunteer(dto);
+      const registeredMail = await this._adminService.addVolunteer(dto);
 
       if (registeredMail) {
         res
@@ -72,7 +72,7 @@ export class VolunteerController implements IVolunteerController {
         limit,
         isActive
       );
-      const documentsCount = await this.adminService.countVolunteers(search);
+      const documentsCount = await this._adminService.countVolunteers(search);
       const totalPages = Math.ceil(documentsCount / limit);
 
       if (volunteers) {
