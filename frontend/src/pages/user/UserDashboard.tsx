@@ -1,4 +1,30 @@
 import { useEffect, useState } from 'react';
+// Utility to format activity date as 'just now', 'minutes ago', 'today', etc.
+function formatActivityDate(dateString: string) {
+  if (!dateString) return '';
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+
+  // Check if same day
+  const isToday = now.toDateString() === date.toDateString();
+  // Check if yesterday
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = yesterday.toDateString() === date.toDateString();
+
+  if (diffSec < 60) return 'just now';
+  if (diffMin === 1) return '1 minute ago';
+  if (diffMin < 60) return `${diffMin} minutes ago`;
+  if (diffHr === 1) return '1 hour ago';
+  if (diffHr < 5) return `${diffHr} hours ago`;
+  if (isToday) return 'Today';
+  if (isYesterday) return 'Yesterday';
+  return date.toLocaleDateString('en-GB');
+}
 import axios from 'axios';
 import { IUser } from '../../interfaces/userInterface';
 import { userService } from '../../services/user.service';
@@ -13,6 +39,7 @@ import { useNotifications } from '@/context/notificationContext';
 import { IDonation } from '@/interfaces/donation.interface';
 import SummaryCardSkeleton from '@/components/Skeletons/SummaryCardSkeleton';
 import profile_pic from '../../assets/profile_pic.png';
+import { IAssistanceRequest } from '@/interfaces/adminInterface';
 
 const UserDashboard: React.FC = () => {
 
@@ -49,16 +76,18 @@ const UserDashboard: React.FC = () => {
   const [recentDonation, setRecentDonation] = useState<{ amount: number, date: string, campaign: string }>(
     {
       amount: 0,
-      date: new Date().toLocaleDateString(),
+      date: new Date().toISOString(),
       campaign: '',
     }
   );
   // const [assistanceRequests, setAssistanceRequests] = useState<{ assistanceRequests: IAssistanceRequest[] }>({
   //   assistanceRequests: [],
   // });
+  const [assistanceRequestsList, setAssistanceRequestsList] = useState<any[]>([]);
   const [user, setUser] = useState<IUser>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notificationCount, setNotificationCount] = useState<number>(0);
+  const [showMoreActivities, setShowMoreActivities] = useState<boolean>(false);
 
   const { unreadCount } = useNotifications();
 
@@ -68,12 +97,6 @@ const UserDashboard: React.FC = () => {
     if (typeof unreadCount === 'number') {
       setNotificationCount(unreadCount);
       fetchDashboardData(unreadCount);
-    }
-  }, [unreadCount]);
-
-  useEffect(() => {
-    if (typeof unreadCount === 'number' && unreadCount > 0) {
-      setNotificationCount(unreadCount);
     }
   }, [unreadCount]);
 
@@ -103,7 +126,7 @@ const UserDashboard: React.FC = () => {
       ] = await Promise.all([
         // meetingService.getUserMeetings(1, '', 'all'),
         donationService.fetchDonationHistory(),
-        userService.fetchMyAssistanceRequests(1, 0, '', 'all'),
+        userService.fetchMyAssistanceRequests(1, 20, '', 'all'),
       ]);
 
       // Meetings data
@@ -122,22 +145,36 @@ const UserDashboard: React.FC = () => {
       // };
       // setMeetings(transformMeetings(meetings));
 
-      const latestDonations = donationsResponse.data.donations || [];
+      const latestDonations = donationsResponse.data || [];
       // setDonations(latestDonations);
 
-      const { totalRequests: totalAssistanceRequests } = assistanceRequestsResponse.data || [];
+      const { totalRequests: totalAssistanceRequests, assistanceRequests = [] } = assistanceRequestsResponse.data || { totalRequests: 0, assistanceRequests: [] };
 
       // setAssistanceRequests({
       //   assistanceRequests: assistanceRequests.filter((req: any) => req.type === 'volunteer' || req.type === 'ambulance'),
       // });
 
+      // Sort assistance requests by date (newest first) before storing
+      const sortedAssistanceRequests = [...assistanceRequests].sort((a: IAssistanceRequest, b: IAssistanceRequest) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+      });
+
+      console.log('Sorted Assistance Requests: ', sortedAssistanceRequests);
+
+      setAssistanceRequestsList(sortedAssistanceRequests);
+
       // Calculates stats values
       const totalDonations = latestDonations.reduce((sum: number, donation: IDonation) => sum + donation.amount, 0);
-      setRecentDonation({
-        amount: latestDonations[0].amount,
-        date: new Date(latestDonations[0].date).toLocaleDateString(),
-        campaign: latestDonations[0].campaign,
-      });
+      
+      if (latestDonations.length > 0) {
+        setRecentDonation({
+          amount: latestDonations[0].amount,
+          date: latestDonations[0].date,
+          campaign: latestDonations[0].campaign,
+        });
+      }
 
       // Stats with the calculated values
       setSummaryCards([
@@ -190,24 +227,32 @@ const UserDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchUserDetails();
+  }, []);
 
+  useEffect(() => {
     if (user) {
       dispatch(blockToggle(user.isBlocked));
     }
-  }, []);
-
-  const formattedDate = new Date(recentDonation.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  }, [user, dispatch]);
 
   const recentActivities = [
-    { id: 1, description: 'Requested an asset on Jan 15, 2025', type: 'Asset Request', date: null },
-    // { id: 2, description: 'Assistance request submitted on Jan 12, 2025', type: 'Assistance Request' },
-    { id: 2, description: `Donated ₹${recentDonation.amount} on ${formattedDate} to ${recentDonation.campaign} campaign`, type: 'Donation', date: recentDonation.date },
-    { id: 3, description: 'Published a blog on Jan 10, 2025', type: 'Blog', date: null },
-  ];
+    ...(recentDonation.amount > 0 ? [{
+      id: 1,
+      description: `Donated ₹${recentDonation.amount} to ${recentDonation.campaign} campaign`,
+      type: 'Donation',
+      date: recentDonation.date
+    }] : []),
+    ...(assistanceRequestsList.length > 0 ? assistanceRequestsList.map((req: any, idx: number) => ({
+      id: idx + 100,
+      description: `Requested ${req.type || ''} assistance`,
+      type: 'Assistance Request',
+      date: req.createdAt || req.date
+    })) : []),
+  ]
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .map((activity, index) => ({ ...activity, id: index + 1 }));
+
+  console.log('assistanceRequestsList: ', assistanceRequestsList);
 
   return (
     <>
@@ -281,7 +326,7 @@ const UserDashboard: React.FC = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-lg font-semibold mb-2">{card.title}</h2>
-                  <p className={`${card.title === 'Published Blogs' ? 'text-sm text-gray-200 italic' : 'text-3xl font-bold'}`}>{card.value}</p>
+                  <p className={`${card.title === 'Published Blogs' ? 'text-sm text-gray-200 italic' : 'text-3xl font-bold'}`}>{card.value} {card.title === 'Notifications' ? <span className='text-sm items-center align-middle font-normal italic'>new notifications</span> : ''}</p>
                 </div>
                 {card.icon}
               </div>
@@ -293,13 +338,18 @@ const UserDashboard: React.FC = () => {
         <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-800">Recent Activities</h2>
-            <button className="text-[#688D48] hover:text-[#435D2C] font-medium">
-              View All
-            </button>
+            {recentActivities.length > 3 && (
+              <button 
+                onClick={() => setShowMoreActivities(!showMoreActivities)}
+                className="text-[#688D48] hover:text-[#435D2C] font-medium"
+              >
+                {showMoreActivities ? 'View Less' : 'View More'}
+              </button>
+            )}
           </div>
           {recentActivities.length > 0 ? (
             <div className="space-y-4">
-              {recentActivities.map((activity) => (
+              {recentActivities.slice(0, showMoreActivities ? 10 : 3).map((activity) => (
                 <div
                   key={activity.id}
                   className="p-4 bg-gray-50 rounded-xl border border-gray-100 transition-all duration-200 hover:shadow-md"
@@ -310,7 +360,7 @@ const UserDashboard: React.FC = () => {
                       <span className="text-sm text-gray-500">{activity.type}</span>
                     </div>
                     <span className="text-sm text-gray-500 whitespace-nowrap">
-                      {activity.date ? new Date(activity.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB')}</span>
+                      {activity.date ? formatActivityDate(activity.date) : ''}</span>
                   </div>
                 </div>
               ))}
