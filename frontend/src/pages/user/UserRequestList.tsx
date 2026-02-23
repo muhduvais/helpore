@@ -235,7 +235,14 @@ const UserRequests = () => {
           </div>
 
           {/* Info */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Calendar className="h-4 w-4" />
+              <div>
+                <p className="font-medium">Requested On</p>
+                <p>{request?.requestedDate ? format(new Date(request.createdAt), 'PPP') : ''}</p>
+              </div>
+            </div>
             <div className="flex items-center gap-2 text-gray-600">
               <Calendar className="h-4 w-4" />
               <div>
@@ -302,11 +309,18 @@ const UserRequests = () => {
             </Badge>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="flex items-center gap-2 text-gray-700">
+              <Calendar className="h-4 w-4" />
+              <div>
+                <p className="font-medium opacity-90 text-xs">Requested On</p>
+                <p>{request?.requestedDate ? format(new Date(request.createdAt), 'PPP') : ''}</p>
+              </div>
+            </div>
             <div className="flex items-center gap-2 text-gray-600">
               <Calendar className="h-4 w-4" />
               <div>
-                <p className="font-medium">Requested For</p>
+                <p className="font-medium opacity-90 text-xs">Requested For</p>
                 <p>{request?.requestedDate ? format(new Date(request.requestedDate), 'PPP') : ''}</p>
               </div>
             </div>
@@ -314,8 +328,8 @@ const UserRequests = () => {
               <div className="flex items-center gap-2 text-gray-600">
                 <User className="h-4 w-4" />
                 <div>
-                  <p className="font-medium">Assigned Volunteer</p>
-                  <p>{request?.volunteer?.name || 'volunteer name'}</p>
+                  <p className="font-medium opacity-90 text-xs">Assigned Volunteer</p>
+                  <p>{request?.volunteer?.name || <span className="text-gray-400 italic">Not assigned</span>}</p>
                 </div>
               </div>
             )}
