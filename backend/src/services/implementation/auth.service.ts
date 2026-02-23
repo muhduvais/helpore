@@ -8,7 +8,7 @@ import { IUser, IUserDocument } from '../../interfaces/user.interface';
 import { redisClient } from '../../utils';
 import { IAuthRepository } from '../../repositories/interfaces/IAuthRepository';
 import { IOtpRepository } from '../../repositories/interfaces/IOtpRepository';
-import { IAuthService } from '../interfaces/ServiceInterface';
+import { IAuthService } from '../interfaces/IAuthService';
 import { IUserCreationData } from '../../repositories/implementation/auth.repository';
 import { IAddressRepository } from '../../repositories/interfaces/IAddressRepository';
 import { Types } from 'mongoose';

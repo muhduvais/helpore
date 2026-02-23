@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
-import { IAuthService } from "../../services/interfaces/ServiceInterface";
+import { IAuthService } from "../../services/interfaces/IAuthService";
 import { IAuthController } from "../interfaces/IAuthController";
 import { firebaseAdmin } from "../../config";
 import { JwtPayload } from "jsonwebtoken";

@@ -1,10 +1,8 @@
 import { inject, injectable } from "tsyringe";
 import { Request, Response } from "express";
 import { IUserController } from "../interfaces/IUserController";
-import {
-  IAdminService,
-  IUserService,
-} from "../../services/interfaces/ServiceInterface";
+import { IUserService } from "../../services/interfaces/IUserService";
+import { IAdminService } from "../../services/interfaces/IAdminService";
 import { JwtPayload } from "jsonwebtoken";
 import { HttpStatusCode } from "../../constants/httpStatus";
 import { ErrorMessages } from "../../constants/errorMessages";

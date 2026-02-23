@@ -1,6 +1,6 @@
 import { injectable, inject } from 'tsyringe';
-import { IMessageDocument, IConversationDocument } from '../../interfaces/chat.interface';
-import { IChatService } from '../interfaces/ServiceInterface';
+import { IMessageDocument } from '../../interfaces/chat.interface';
+import { IChatService } from '../interfaces/IChatService';
 import { IChatRepository } from '../../repositories/interfaces/IChatRepository';
 import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
 import { io, uploadToCloudinary } from '../../utils';

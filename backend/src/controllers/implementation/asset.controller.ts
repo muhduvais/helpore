@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
-import { IAssetService } from '../../services/interfaces/ServiceInterface';
+import { IAssetService } from '../../services/interfaces/IAssetService';
 import { IAssetController } from '../interfaces/IAssetController';
 import { HttpStatusCode } from '../../constants/httpStatus';
 import { ErrorMessages } from '../../constants/errorMessages';

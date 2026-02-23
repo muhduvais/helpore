@@ -1,5 +1,5 @@
 import { injectable, inject } from 'tsyringe';
-import { IDonationService } from '../interfaces/ServiceInterface';
+import { IDonationService } from '../interfaces/IDonationService';
 import Stripe from 'stripe';
 import PDFDocument from 'pdfkit';
 

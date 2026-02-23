@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe';
-import { IMeetingService } from '../interfaces/ServiceInterface';
+import { IMeetingService } from '../interfaces/IMeetingService';
 import { IMeetingRepository } from '../../repositories/interfaces/IMeetingRepository';
 import { IMeeting } from '../../interfaces/meeting.interface';
 import { Types } from 'mongoose';

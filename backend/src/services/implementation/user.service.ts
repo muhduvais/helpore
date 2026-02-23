@@ -1,5 +1,5 @@
 import { injectable, inject } from "tsyringe";
-import { IUserService } from "../interfaces/ServiceInterface";
+import { IUserService } from "../interfaces/IUserService";
 import { IUser } from "../../interfaces/user.interface";
 import bcrypt from "bcryptjs";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";

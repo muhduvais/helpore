@@ -1,5 +1,5 @@
 import { injectable, inject } from 'tsyringe';
-import { IAssetService } from '../interfaces/ServiceInterface';
+import { IAssetService } from '../interfaces/IAssetService';
 import { IAsset } from '../../interfaces/asset.interface';
 import { IAssetRepository } from '../../repositories/interfaces/IAssetRepository';
 import { IAssetRequestRepository } from '../../repositories/interfaces/IAssetRequestRepository';
