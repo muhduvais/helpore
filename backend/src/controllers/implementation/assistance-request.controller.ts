@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from "tsyringe";
 import { IAssistanceRequestController } from '../interfaces/IAssistanceRequestController';
-import { IAssistanceRequestService } from '../../services/interfaces/ServiceInterface';
+import { IAssistanceRequestService } from '../../services/interfaces/IAssistanceRequestService';
 import { JwtPayload } from 'jsonwebtoken';
 import { HttpStatusCode } from '../../constants/httpStatus';
 import { ErrorMessages } from '../../constants/errorMessages';

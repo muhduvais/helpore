@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IChatController } from '../interfaces/IChatController';
-import { IChatService } from '../../services/interfaces/ServiceInterface';
+import { IChatService } from '../../services/interfaces/IChatService';
 import { JwtPayload } from 'jsonwebtoken';
 import { HttpStatusCode } from '../../constants/httpStatus';
 import { ErrorMessages } from '../../constants/errorMessages';

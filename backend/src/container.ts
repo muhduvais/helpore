@@ -13,16 +13,16 @@ import { IChatRepository } from "./repositories/interfaces/IChatRepository";
 import { INotificationRepository } from "./repositories/interfaces/INotificationRepository";
 
 // Services - Interfaces
-import { IAdminService } from './services/interfaces/ServiceInterface';
-import { IUserService } from "./services/interfaces/ServiceInterface";
-import { IVolunteerService } from "./services/interfaces/ServiceInterface";
-import { IAssetService } from "./services/interfaces/ServiceInterface";
-import { IAssistanceRequestService } from "./services/interfaces/ServiceInterface";
-import { IAuthService } from "./services/interfaces/ServiceInterface";
-import { IDonationService } from "./services/interfaces/ServiceInterface";
-import { IChatService } from "./services/interfaces/ServiceInterface";
-import { INotificationService } from "./services/interfaces/ServiceInterface";
-import { IMeetingService } from "./services/interfaces/ServiceInterface";
+import { IAdminService } from './services/interfaces/IAdminService';
+import { IUserService } from "./services/interfaces/IUserService";
+import { IVolunteerService } from "./services/interfaces/IVolunteerService";
+import { IAssetService } from "./services/interfaces/IAssetService";
+import { IAssistanceRequestService } from "./services/interfaces/IAssistanceRequestService";
+import { IAuthService } from "./services/interfaces/IAuthService";
+import { IDonationService } from "./services/interfaces/IDonationService";
+import { IChatService } from "./services/interfaces/IChatService";
+import { INotificationService } from "./services/interfaces/INotificationService";
+import { IMeetingService } from "./services/interfaces/IMeetingService";
 
 // Controllers - Interfaces
 import { IAuthController } from './controllers/interfaces/IAuthController';

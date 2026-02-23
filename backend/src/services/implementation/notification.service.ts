@@ -1,5 +1,5 @@
 import { injectable, inject } from 'tsyringe';
-import { INotificationService } from '../interfaces/ServiceInterface';
+import { INotificationService } from '../interfaces/INotificationService';
 import { INotificationRepository } from '../../repositories/interfaces/INotificationRepository';
 import { INotificationDocument } from '../../models/notification.model';
 import { NotificationDTO } from '../../dtos/notification.dto';

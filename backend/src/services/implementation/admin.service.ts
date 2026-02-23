@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IAdminService } from "../interfaces/ServiceInterface";
+import { IAdminService } from "../interfaces/IAdminService";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { IUser } from "../../interfaces/user.interface";
 import { IAddress, IAddressDocument } from "../../interfaces/address.interface";

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
-import { IMeetingService } from '../../services/interfaces/ServiceInterface';
+import { IMeetingService } from '../../services/interfaces/IMeetingService';
 import { IMeetingController } from '../interfaces/IMeetingController';
 import { JwtPayload } from 'jsonwebtoken';
 import { HttpStatusCode } from '../../constants/httpStatus';

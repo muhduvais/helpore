@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IDonationController } from '../interfaces/IDonationController';
-import { IDonationService } from '../../services/interfaces/ServiceInterface';
+import { IDonationService } from '../../services/interfaces/IDonationService';
 import { createObjectCsvStringifier } from 'csv-writer';
 import { HttpStatusCode } from '../../constants/httpStatus';
 import { ErrorMessages } from '../../constants/errorMessages';

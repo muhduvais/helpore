@@ -1,8 +1,5 @@
 import { injectable, inject } from "tsyringe";
-import { IVolunteerService } from "../interfaces/ServiceInterface";
-import { IAddress, IAddressDocument } from "../../interfaces/address.interface";
-import { IUser } from "../../interfaces/user.interface";
-import { IAddUserForm } from "../../interfaces/admin.interface";
+import { IVolunteerService } from "../interfaces/IVolunteerService";
 import bcrypt from "bcryptjs";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { IAddressRepository } from "../../repositories/interfaces/IAddressRepository";

@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
-import {
-  IAdminService,
-  IVolunteerService,
-} from "../../services/interfaces/ServiceInterface";
+import { IAdminService } from "../../services/interfaces/IAdminService";
+import { IVolunteerService } from "../../services/interfaces/IVolunteerService";
 import { IVolunteerController } from "../interfaces/IVolunteerController";
 import { JwtPayload } from "jsonwebtoken";
 import { HttpStatusCode } from "../../constants/httpStatus";

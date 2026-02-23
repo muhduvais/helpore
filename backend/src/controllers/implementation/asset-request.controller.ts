@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { IAssetRequestController } from '../interfaces/IAssetRequestController';
-import { IAssetService, IUserService } from '../../services/interfaces/ServiceInterface';
+import { IAssetService } from '../../services/interfaces/IAssetService';
+import { IUserService } from '../../services/interfaces/IUserService';
 import { JwtPayload } from 'jsonwebtoken';
 import { HttpStatusCode } from '../../constants/httpStatus';
 

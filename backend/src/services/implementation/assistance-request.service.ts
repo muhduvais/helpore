@@ -1,5 +1,5 @@
 import { injectable, inject } from "tsyringe";
-import { IAssistanceRequestService } from "../interfaces/ServiceInterface";
+import { IAssistanceRequestService } from "../interfaces/IAssistanceRequestService";
 import { IAssistanceRequest, IAssistanceRequestResponse } from "../../interfaces/user.interface";
 import { Types } from "mongoose";
 import { IAddressRepository } from "../../repositories/interfaces/IAddressRepository";
